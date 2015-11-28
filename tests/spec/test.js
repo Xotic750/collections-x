@@ -3,8 +3,8 @@
 /*jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
-  es3:true, esnext:true, plusplus:true, maxparams:3, maxdepth:1,
-  maxstatements:34, maxcomplexity:3 */
+  es3:true, esnext:true, plusplus:true, maxparams:3, maxdepth:2,
+  maxstatements:38, maxcomplexity:7 */
 
 /*global expect, module, require, describe, it, xit, jasmine, returnExports */
 
@@ -16,12 +16,28 @@
     MapObject, SetObject, symIt;
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
-    MapObject = require('../../index.js').Map;
-    SetObject = require('../../index.js').Set;
+    require('es5-shim');
+    if (Map) {
+      MapObject = Map;
+    } else {
+      MapObject = require('../../index.js').Map;    }
+    if (Set) {
+      SetObject = Set;
+    } else {
+      SetObject = require('../../index.js').Set;
+    }
     symIt = require('../../index.js').symIt;
   } else {
-    MapObject = returnExports.Map;
+    if (Map) {
+      MapObject = Map;
+    } else {
     SetObject = returnExports.Set;
+    }
+    if (Set) {
+      SetObject = Set;
+    } else {
+    SetObject = returnExports.Set;
+    }
     symIt = returnExports.symIt;
   }
 
