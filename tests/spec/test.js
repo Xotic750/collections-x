@@ -4,21 +4,23 @@
   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
   es3:true, esnext:true, plusplus:true, maxparams:3, maxdepth:1,
-  maxstatements:28, maxcomplexity:3 */
+  maxstatements:34, maxcomplexity:3 */
 
 /*global expect, module, require, describe, it,jasmine, returnExports */
 
 (function () {
   'use strict';
 
-  var MapObject, SetObject;
+  var MapObject, SetObject, symIt;
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
     MapObject = require('../../index.js').Map;
     SetObject = require('../../index.js').Set;
+    symIt = require('../../index.js').symIt;
   } else {
     MapObject = returnExports.Map;
     SetObject = returnExports.Set;
+    symIt = returnExports.symIt;
   }
 
   describe('Basic tests', function () {
@@ -26,6 +28,47 @@
 
     it('MapObject existence', function () {
       expect(typeof MapObject).toBe('function');
+    });
+
+    it('should have the correct arity', function () {
+      expect(Object.prototype.hasOwnProperty.call(MapObject, 'length'))
+        .toBe(true);
+      expect(MapObject.length).toBe(0);
+    });
+
+    it('should has valid getter and setter calls', function () {
+      var map = new MapObject(),
+        props = [
+          'has',
+          'set',
+          'clear',
+          'delete',
+          'forEach',
+          'values',
+          'entries',
+          'keys',
+          'size',
+          symIt
+        ];
+      props.forEach(function (method) {
+        if (method === 'size') {
+          expect(typeof map[method] === 'number').toBe(true, method);
+        } else {
+          expect(typeof map[method] === 'function').toBe(true, method);
+        }
+      });
+    });
+
+    it('should not be callable without "new"', function () {
+      var threw = false;
+      /*jshint newcap:false */
+      try {
+        SetObject();
+      } catch (e) {
+        expect(e).toEqual(jasmine.any(TypeError));
+        threw = true;
+      }
+      expect(threw).toBe(true);
     });
 
     it('MapObject constructor behavior', function () {
@@ -248,8 +291,63 @@
       expect(!o.size).toBe(true);
     });
 
+    it('treats positive and negative zero the same', function () {
+      var value1 = {},
+        value2 = {},
+        map = new MapObject();
+      map.set(+0, value1);
+      expect(map.size).toBe(1);
+      expect(map.has(-0)).toBe(true);
+      expect(map.get(-0)).toBe(value1);
+      expect(map.set(-0, value2)).toBe(map);
+      expect(map.size).toBe(1);
+      expect(map.get(-0)).toBe(value2);
+      expect(map.get(+0)).toBe(value2);
+    });
+
     it('SetObject existence', function () {
       expect(typeof SetObject).toBe('function');
+    });
+
+    it('should have the correct arity', function () {
+      expect(Object.prototype.hasOwnProperty.call(SetObject, 'length'))
+        .toBe(true);
+      expect(SetObject.length).toBe(0);
+    });
+
+    it('should has valid getter and setter calls', function () {
+      var set = new SetObject(),
+        props = [
+          'has',
+          'add',
+          'clear',
+          'delete',
+          'forEach',
+          'values',
+          'entries',
+          'keys',
+          'size',
+          symIt
+        ];
+      props.forEach(function (method) {
+        if (method === 'size') {
+          expect(typeof set[method] === 'number').toBe(true, method);
+        } else {
+          expect(typeof set[method] === 'function').toBe(true, method);
+        }
+      });
+    });
+
+    it('should not be callable without "new"', function () {
+      var threw = false;
+      /*jshint newcap:false */
+      try {
+        SetObject();
+      } catch (e) {
+        expect(e).toEqual(jasmine.any(TypeError));
+        threw = true;
+      }
+      expect(threw).toBe(true);
     });
 
     it('SetObject constructor behavior', function () {
@@ -389,6 +487,16 @@
       o.add(2);
       o.clear();
       expect(!o.size).toBe(true);
+    });
+
+    it('treats positive and negative zero the same', function () {
+      var set = new SetObject();
+      set.add(+0);
+      expect(set.has(-0)).toBe(true);
+      expect(set.size).toBe(1);
+      expect(set.add(-0)).toBe(set);
+      expect(set.has(+0)).toBe(true);
+      expect(set.size).toBe(1);
     });
 
     it('Set#add, Map#set are chainable now', function () {

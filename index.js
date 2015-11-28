@@ -109,9 +109,7 @@
     var symbolIterator = getSymbolIterator(iterable),
       iterator, indexof, next, key, char1, char2;
     if (kind === 'map') {
-      defProps(context, {
-        '[[value]]': []
-      });
+      defProp(context, '[[value]]', []);
     }
     defProps(context, {
       '[[key]]': [],
@@ -213,9 +211,7 @@
         next += 1;
       }
     }
-    defProps(context, {
-      size: context['[[key]]'].length
-    });
+    defProp(context, 'size', context['[[key]]'].length);
   }
 
   /**
@@ -338,8 +334,10 @@
       key,
       'SameValueZero'
     );
-    if (kind === 'map' && index > -1) {
-      context['[[value]]'][index] = value;
+    if (index > -1) {
+      if (kind === 'map') {
+        context['[[value]]'][index] = value;
+      }
     } else {
       if (kind === 'map') {
         context['[[value]]'].push(value);
@@ -479,11 +477,11 @@
    * console.log(uneval([...mySet])); // Will show you exactly the same Array
    *                                  // as myArray
    */
-  module.exports.Set = Set = function (iterable) {
+  module.exports.Set = Set = function () {
     if (!(this instanceof Set)) {
       throw new TypeError('Constructor Set requires \'new\'');
     }
-    parseIterable('set', this, iterable);
+    parseIterable('set', this, arguments[0]);
   };
   defProps(Set.prototype, /** @lends module:collections-x.Set.prototype */ {
     /**
@@ -792,11 +790,11 @@
    *
    * myMap.get("key1"); // returns "value1"
    */
-  module.exports.Map = Map = function (iterable) {
+  module.exports.Map = Map = function () {
     if (!(this instanceof Map)) {
       throw new TypeError('Constructor Map requires \'new\'');
     }
-    parseIterable('map', this, iterable);
+    parseIterable('map', this, arguments[0]);
   };
   defProps(Map.prototype, /** @lends module:collections-x.Map.prototype */ {
     /**
