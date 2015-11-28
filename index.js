@@ -61,7 +61,11 @@
       '@@iterator',
     Set, Map;
 
-  /** type {Symbol|string} */
+  /**
+   * The iterator identifier that is in use.
+   *
+   * type {Symbol|string}
+   */
   module.exports.symIt = symIt;
 
   /**

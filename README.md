@@ -596,6 +596,8 @@ console.log(mapIter.next().value); // [Object, "baz"]
 ```
 <a name="module_collections-x.symIt"></a>
 ### `collections-x.symIt`
+The iterator identifier that is in use.
+
 type {Symbol|string}
 
 **Kind**: static property of <code>[collections-x](#module_collections-x)</code>  
