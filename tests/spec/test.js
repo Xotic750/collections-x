@@ -49,6 +49,17 @@
       }
     });
 
+    it('MapObject constructor behavior, string should throw', function () {
+      var threw = false;
+      try {
+        new MapObject('123');
+      } catch (e) {
+        expect(e).toEqual(jasmine.any(TypeError));
+        threw = true;
+      }
+      expect(threw).toBe(true);
+    });
+
     it('MapObject#size - Mozilla only', function () {
       var o = new MapObject();
       if ('size' in o) {
@@ -241,6 +252,14 @@
           .toBe(true);
         expect(new SetObject()[proto]).toBe(SetObject.prototype);
       }
+    });
+
+    it('SetObject constructor behavior, string should iterate', function () {
+      var s = new SetObject('123');
+      expect(s.has('1')).toBe(true);
+      expect(s.has('2')).toBe(true);
+      expect(s.has('3')).toBe(true);
+      expect(s.size).toBe(3);
     });
 
     it('SetObject#size - Mozilla only', function () {

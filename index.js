@@ -33,8 +33,8 @@
 /*jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
-  es3:true, esnext:true, plusplus:true, maxparams:4, maxdepth:4,
-  maxstatements:47, maxcomplexity:19 */
+  es3:true, esnext:true, plusplus:true, maxparams:4, maxdepth:5,
+  maxstatements:49, maxcomplexity:19 */
 
 /*global require, module */
 
@@ -106,8 +106,7 @@
    * @param {*} iterable Value to parsed.
    */
   function parseIterable(kind, context, iterable) {
-    var symbolIterator = getSymbolIterator(iterable),
-      iterator, indexof, next, key, char1, char2;
+    var symbolIterator, iterator, indexof, next, key, char1, char2;
     if (kind === 'map') {
       defProps(context, {
         '[[value]]': []
@@ -119,29 +118,7 @@
       '[[id]]': new IdGenerator(),
       '[[changed]]': false
     });
-    if (symbolIterator && typeof iterable[symbolIterator] === 'function') {
-      iterator = iterable[symbolIterator]();
-      next = iterator.next();
-      while (!next.done) {
-        key = kind === 'map' ? next.value[0] : next.value;
-        indexof = indexOf(
-          assertIsObject(context)['[[key]]'],
-          key,
-          'SameValueZero'
-        );
-        if (indexof < 0) {
-          if (kind === 'map') {
-            context['[[value]]'].push(next.value[1]);
-          }
-          context['[[key]]'].push(key);
-          context['[[order]]'].push(context['[[id]]'].get());
-          context['[[id]]'].next();
-        } else if (kind === 'map') {
-          context['[[value]]'][indexof] = next.value[1];
-        }
-        next = iterator.next();
-      }
-    } else if (isString(iterable)) {
+    if (isString(iterable)) {
       if (kind === 'map') {
         throw new TypeError(
           'Iterator value ' + iterable + ' is not an entry object'
@@ -172,7 +149,7 @@
     } else if (isArrayLike(iterable)) {
       next = 0;
       while (next < iterable.length) {
-        key = kind === 'map' ? next : iterable[next];
+        key = kind === 'map' ? iterable[next][0] : iterable[next];
         indexof = indexOf(
           assertIsObject(context)['[[key]]'],
           key,
@@ -180,15 +157,40 @@
         );
         if (indexof < 0) {
           if (kind === 'map') {
-            context['[[value]]'].push(iterable[next]);
+            context['[[value]]'].push(iterable[next][1]);
           }
           context['[[key]]'].push(key);
           context['[[order]]'].push(context['[[id]]'].get());
           context['[[id]]'].next();
         } else if (kind === 'map') {
-          context['[[value]]'][indexof] = iterable[next];
+          context['[[value]]'][indexof] = iterable[next][1];
         }
         next += 1;
+      }
+    } else {
+      symbolIterator = getSymbolIterator(iterable);
+      if (symbolIterator && typeof iterable[symbolIterator] === 'function') {
+        iterator = iterable[symbolIterator]();
+        next = iterator.next();
+        while (!next.done) {
+          key = kind === 'map' ? next.value[0] : next.value;
+          indexof = indexOf(
+            assertIsObject(context)['[[key]]'],
+            key,
+            'SameValueZero'
+          );
+          if (indexof < 0) {
+            if (kind === 'map') {
+              context['[[value]]'].push(next.value[1]);
+            }
+            context['[[key]]'].push(key);
+            context['[[order]]'].push(context['[[id]]'].get());
+            context['[[id]]'].next();
+          } else if (kind === 'map') {
+            context['[[value]]'][indexof] = next.value[1];
+          }
+          next = iterator.next();
+        }
       }
     }
     defProps(context, {

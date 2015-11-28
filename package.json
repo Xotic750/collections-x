@@ -36,7 +36,7 @@
       "is-array-like-x": "^1.0.2",
       "is-surrogate-pair-x": "^1.0.1",
       "noop-x": "^1.0.4",
-      "index-of-x": "^1.0.0",
+      "index-of-x": "^1.0.3",
       "assert-is-callable-x": "^1.0.1",
       "assert-is-object-x": "^1.0.1",
       "big-counter-x": "^1.0.0"
