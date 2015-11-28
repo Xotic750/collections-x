@@ -481,6 +481,22 @@
     if (!(this instanceof Set)) {
       throw new TypeError('Constructor Set requires \'new\'');
     }
+    /**
+     * The value of size is an integer representing how many entries the Set
+     * object has.
+     *
+     * @name size
+     * @memberof module:collections-x.Set
+     * @instance
+     * @type {number}
+     * @example
+     * var mySet = new Set();
+     * mySet.add(1);
+     * mySet.add(5);
+     * mySet.add("some text");
+     *
+     * mySet.size; // 3
+     */
     parseIterable('set', this, arguments[0]);
   };
   defProps(Set.prototype, /** @lends module:collections-x.Set.prototype */ {
@@ -794,6 +810,22 @@
     if (!(this instanceof Map)) {
       throw new TypeError('Constructor Map requires \'new\'');
     }
+    /**
+     * The value of size is an integer representing how many entries the Map
+     * object has.
+     *
+     * @name size
+     * @memberof module:collections-x.Map
+     * @instance
+     * @type {number}
+     * @example
+     * var myMap = new Map();
+     * myMap.set(1, true);
+     * myMap.set(5, false);
+     * myMap.set("some text", 1);
+     *
+     * myMap.size; // 3
+     */
     parseIterable('map', this, arguments[0]);
   };
   defProps(Map.prototype, /** @lends module:collections-x.Map.prototype */ {

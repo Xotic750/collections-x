@@ -30,6 +30,7 @@ ES6 collections library: Map and Set.
 * [collections-x](#module_collections-x)
   * [.Set](#module_collections-x.Set)
     * [`new module.exports.Set([iterable])`](#new_module_collections-x.Set_new)
+    * [`.size`](#module_collections-x.Set+size) : <code>number</code>
     * [`.has(value)`](#module_collections-x.Set+has) ⇒ <code>boolean</code>
     * [`.add(value)`](#module_collections-x.Set+add) ⇒ <code>Object</code>
     * [`.clear()`](#module_collections-x.Set+clear) ⇒ <code>Object</code>
@@ -41,6 +42,7 @@ ES6 collections library: Map and Set.
     * [`.symIt()`](#module_collections-x.Set+symIt) ⇒ <code>Object</code>
   * [.Map](#module_collections-x.Map)
     * [`new module.exports.Map([iterable])`](#new_module_collections-x.Map_new)
+    * [`.size`](#module_collections-x.Map+size) : <code>number</code>
     * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
     * [`.set(key, value)`](#module_collections-x.Map+set) ⇒ <code>Object</code>
     * [`.clear()`](#module_collections-x.Map+clear) ⇒ <code>Object</code>
@@ -59,6 +61,7 @@ ES6 collections library: Map and Set.
 
 * [.Set](#module_collections-x.Set)
   * [`new module.exports.Set([iterable])`](#new_module_collections-x.Set_new)
+  * [`.size`](#module_collections-x.Set+size) : <code>number</code>
   * [`.has(value)`](#module_collections-x.Set+has) ⇒ <code>boolean</code>
   * [`.add(value)`](#module_collections-x.Set+add) ⇒ <code>Object</code>
   * [`.clear()`](#module_collections-x.Set+clear) ⇒ <code>Object</code>
@@ -115,6 +118,21 @@ mySet.has("value1"); // returns true
 // Use the spread operator to transform a set into an Array.
 console.log(uneval([...mySet])); // Will show you exactly the same Array
                                  // as myArray
+```
+<a name="module_collections-x.Set+size"></a>
+#### `set.size` : <code>number</code>
+The value of size is an integer representing how many entries the Set
+object has.
+
+**Kind**: instance property of <code>[Set](#module_collections-x.Set)</code>  
+**Example**  
+```js
+var mySet = new Set();
+mySet.add(1);
+mySet.add(5);
+mySet.add("some text");
+
+mySet.size; // 3
 ```
 <a name="module_collections-x.Set+has"></a>
 #### `set.has(value)` ⇒ <code>boolean</code>
@@ -320,6 +338,7 @@ console.log(setIter.next().value); // Object
 
 * [.Map](#module_collections-x.Map)
   * [`new module.exports.Map([iterable])`](#new_module_collections-x.Map_new)
+  * [`.size`](#module_collections-x.Map+size) : <code>number</code>
   * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
   * [`.set(key, value)`](#module_collections-x.Map+set) ⇒ <code>Object</code>
   * [`.clear()`](#module_collections-x.Map+clear) ⇒ <code>Object</code>
@@ -383,6 +402,21 @@ var kvArray = [["key1", "value1"], ["key2", "value2"]];
 var myMap = new Map(kvArray);
 
 myMap.get("key1"); // returns "value1"
+```
+<a name="module_collections-x.Map+size"></a>
+#### `map.size` : <code>number</code>
+The value of size is an integer representing how many entries the Map
+object has.
+
+**Kind**: instance property of <code>[Map](#module_collections-x.Map)</code>  
+**Example**  
+```js
+var myMap = new Map();
+myMap.set(1, true);
+myMap.set(5, false);
+myMap.set("some text", 1);
+
+myMap.size; // 3
 ```
 <a name="module_collections-x.Map+has"></a>
 #### `map.has(key)` ⇒ <code>boolean</code>
