@@ -6,12 +6,14 @@
   es3:true, esnext:true, plusplus:true, maxparams:3, maxdepth:1,
   maxstatements:34, maxcomplexity:3 */
 
-/*global expect, module, require, describe, it,jasmine, returnExports */
+/*global expect, module, require, describe, it, xit, jasmine, returnExports */
 
 (function () {
   'use strict';
 
-  var MapObject, SetObject, symIt;
+  var functionsHaveNames = (function foo() {}).name === 'foo',
+    ifFunctionsHaveNamesIt = functionsHaveNames ? it : xit,
+    MapObject, SetObject, symIt;
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
     MapObject = require('../../index.js').Map;
@@ -56,6 +58,22 @@
         } else {
           expect(typeof map[method] === 'function').toBe(true, method);
         }
+      });
+    });
+
+    ifFunctionsHaveNamesIt('should have correct names', function () {
+      var map = new MapObject(),
+        props = [
+          'has',
+          'set',
+          'clear',
+          'forEach',
+          'values',
+          'entries',
+          'keys'
+        ];
+      props.forEach(function (method) {
+        expect(map[method].name).toBe(method);
       });
     });
 
@@ -335,6 +353,21 @@
         } else {
           expect(typeof set[method] === 'function').toBe(true, method);
         }
+      });
+    });
+
+    ifFunctionsHaveNamesIt('should have correct names', function () {
+      var set = new SetObject(),
+        props = [
+          'has',
+          'add',
+          'clear',
+          'forEach',
+          'values',
+          'entries'
+        ];
+      props.forEach(function (method) {
+        expect(set[method].name).toBe(method);
       });
     });
 

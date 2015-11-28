@@ -572,7 +572,7 @@
      * mySet.has("foo");    // Returns false. The "foo" element is no
      *                      //longer present.
      */
-    'delete': function remove(value) {
+    'delete': function de1ete(value) {
       return baseDelete('set', this, value);
     },
     /**
@@ -923,7 +923,7 @@
      * myMap.has("bar");    // Returns false.
      *                      // The "bar" element is no longer present.
      */
-    'delete': function remove(key) {
+    'delete': function de1ete(key) {
       return baseDelete('map', this, key);
     },
     /**
