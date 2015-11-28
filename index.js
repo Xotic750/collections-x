@@ -59,7 +59,7 @@
     symIt = hasRealSymbolIterator || hasFakeSymbolIterator ?
       Symbol.iterator :
       '@@iterator',
-    Set, Map;
+    SetObject, MapObject, baseHas, setValuesIterator, mapEntries;
 
   /**
    * The iterator identifier that is in use.
@@ -265,10 +265,10 @@
    * @return {boolean} Returns true if an element with the specified key/value
    *  exists in the Map/Set object; otherwise false.
    */
-  function baseHas(key) {
+  baseHas = function has(key) {
     /*jshint validthis:true */
     return indexOf(assertIsObject(this)['[[key]]'], key, 'SameValueZero') > -1;
-  }
+  };
 
   /**
    * The base clear method removes all elements from a Map/Set object.
@@ -380,7 +380,7 @@
      * @private
      * @return {Object} Returns an object with two properties: done and value.
      */
-    next: function () {
+    next: function next() {
       var context = assertIsObject(this['[[Set]]']),
         index = this['[[SetNextIndex]]'],
         iteratorKind = this['[[SetIterationKind]]'],
@@ -417,7 +417,7 @@
    * @memberof SetIterator.prototype
    * @return {Object} This Iterator object.
    */
-  defProp(SetIterator.prototype, symIt, function () {
+  defProp(SetIterator.prototype, symIt, function iterator() {
     return this;
   });
 
@@ -429,10 +429,10 @@
    * @this Set
    * @return {Object} A new Iterator object.
    */
-  function createSetIterator() {
+  setValuesIterator = function values() {
     /*jshint validthis:true */
     return new SetIterator(this);
-  }
+  };
 
   /**
    * The Set object lets you store unique values of any type, whether primitive
@@ -477,7 +477,7 @@
    * console.log(uneval([...mySet])); // Will show you exactly the same Array
    *                                  // as myArray
    */
-  module.exports.Set = Set = function () {
+  module.exports.Set = SetObject = function Set() {
     if (!(this instanceof Set)) {
       throw new TypeError('Constructor Set requires \'new\'');
     }
@@ -499,7 +499,7 @@
      */
     parseIterable('set', this, arguments[0]);
   };
-  defProps(Set.prototype, /** @lends module:collections-x.Set.prototype */ {
+  defProps(SetObject.prototype, /** @lends module:collections-x.Set.prototype */ {
     /**
      * The has() method returns a boolean indicating whether an element with the
      * specified value exists in a Set object or not.
@@ -532,7 +532,7 @@
      * console.log(mySet);
      * // Set [1, 5, "some text"]
      */
-    add: function (value) {
+    add: function add(value) {
       return baseAddSet('set', this, value);
     },
     /**
@@ -552,7 +552,7 @@
      * mySet.size;       // 0
      * mySet.has("bar")  // false
      */
-    clear: function () {
+    clear: function clear() {
       return baseClear('set', this);
     },
     /**
@@ -572,7 +572,7 @@
      * mySet.has("foo");    // Returns false. The "foo" element is no
      *                      //longer present.
      */
-    'delete': function (value) {
+    'delete': function remove(value) {
       return baseDelete('set', this, value);
     },
     /**
@@ -594,7 +594,7 @@
      * // "s[bar] = bar"
      * // "s[undefined] = undefined"
      */
-    forEach: function (callback, thisArg) {
+    forEach: function forEach(callback, thisArg) {
       return baseForEach('set', this, callback, thisArg);
     },
     /**
@@ -615,7 +615,7 @@
      * console.log(setIter.next().value); // "bar"
      * console.log(setIter.next().value); // "baz"
      */
-    values: createSetIterator,
+    values: setValuesIterator,
     /**
      * The keys() method is an alias for the `values` method (for similarity
      * with Map objects); it behaves exactly the same and returns values of
@@ -635,7 +635,7 @@
      * console.log(setIter.next().value); // "bar"
      * console.log(setIter.next().value); // "baz"
      */
-    keys: createSetIterator,
+    keys: setValuesIterator,
     /**
      * The entries() method returns a new Iterator object that contains an
      * array of [value, value] for each element in the Set object, in
@@ -658,7 +658,7 @@
      * console.log(setIter.next().value); // [1, 1]
      * console.log(setIter.next().value); // ["baz", "baz"]
      */
-    entries: function () {
+    entries: function entries() {
       return new SetIterator(this, 'key+value');
     }
   });
@@ -681,9 +681,7 @@
    * console.log(setIter.next().value); // 1
    * console.log(setIter.next().value); // Object
    */
-  defProp(Set.prototype, symIt, function () {
-    return this.values();
-  });
+  defProp(SetObject.prototype, symIt, setValuesIterator);
 
   /**
    * An object is an iterator when it knows how to access items from a
@@ -714,7 +712,7 @@
      * @private
      * @return {Object} Returns an object with two properties: done and value.
      */
-    next: function () {
+    next: function next() {
       var context = assertIsObject(this['[[Map]]']),
         index = this['[[MapNextIndex]]'],
         iteratorKind = this['[[MapIterationKind]]'],
@@ -752,9 +750,13 @@
    * @memberof MapIterator.prototype
    * @return {Object} This Iterator object.
    */
-  defProp(MapIterator.prototype, symIt, function () {
+  defProp(MapIterator.prototype, symIt, function iterator() {
     return this;
   });
+
+  mapEntries = function entries() {
+    return new MapIterator(this, 'key+value');
+  };
 
   /**
    * The Map object is a simple key/value map. Any value (both objects and
@@ -806,7 +808,7 @@
    *
    * myMap.get("key1"); // returns "value1"
    */
-  module.exports.Map = Map = function () {
+  module.exports.Map = MapObject = function Map() {
     if (!(this instanceof Map)) {
       throw new TypeError('Constructor Map requires \'new\'');
     }
@@ -828,7 +830,7 @@
      */
     parseIterable('map', this, arguments[0]);
   };
-  defProps(Map.prototype, /** @lends module:collections-x.Map.prototype */ {
+  defProps(MapObject.prototype, /** @lends module:collections-x.Map.prototype */ {
     /**
      * The has() method returns a boolean indicating whether an element with
      * the specified key exists or not.
@@ -863,7 +865,7 @@
      * // Update an element in the map
      * myMap.set("bar", "fuuu");
      */
-    set: function (key, value) {
+    set: function set(key, value) {
       return baseAddSet('map', this, key, value);
     },
     /**
@@ -883,7 +885,7 @@
      * myMap.size;       // 0
      * myMap.has("bar")  // false
      */
-    clear: function () {
+    clear: function clear() {
       return baseClear('map', this);
     },
     /**
@@ -899,7 +901,7 @@
      * myMap.get("bar");  // Returns "foo".
      * myMap.get("baz");  // Returns undefined.
      */
-    get: function (key) {
+    get: function get(key) {
       var index = indexOf(
         assertIsObject(this)['[[key]]'],
         key,
@@ -921,7 +923,7 @@
      * myMap.has("bar");    // Returns false.
      *                      // The "bar" element is no longer present.
      */
-    'delete': function (key) {
+    'delete': function remove(key) {
       return baseDelete('map', this, key);
     },
     /**
@@ -941,7 +943,7 @@
      * // "m[bar] = [object Object]"
      * // "m[baz] = undefined"
      */
-    forEach: function (callback, thisArg) {
+    forEach: function forEach(callback, thisArg) {
       return baseForEach('map', this, callback, thisArg);
     },
     /**
@@ -961,7 +963,7 @@
      * console.log(mapIter.next().value); // "bar"
      * console.log(mapIter.next().value); // "baz"
      */
-    values: function () {
+    values: function values() {
       return new MapIterator(this, 'value');
     },
     /**
@@ -981,7 +983,7 @@
      * console.log(mapIter.next().value); // 1
      * console.log(mapIter.next().value); // Object
      */
-    keys: function () {
+    keys: function keys() {
       return new MapIterator(this, 'key');
     },
     /**
@@ -1001,9 +1003,7 @@
      * console.log(mapIter.next().value); // [1, "bar"]
      * console.log(mapIter.next().value); // [Object, "baz"]
      */
-    entries: function () {
-      return new MapIterator(this, 'key+value');
-    }
+    entries: mapEntries
   });
   /**
    * The initial value of the @@iterator property is the same function object
@@ -1024,7 +1024,5 @@
    * console.log(mapIter.next().value); // [1, "bar"]
    * console.log(mapIter.next().value); // [Object, "baz"]
    */
-  defProp(Map.prototype, symIt, function () {
-    return this.entries();
-  });
+  defProp(MapObject.prototype, symIt, mapEntries);
 }());

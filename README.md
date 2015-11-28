@@ -43,6 +43,7 @@ ES6 collections library: Map and Set.
   * [.Map](#module_collections-x.Map)
     * [`new module.exports.Map([iterable])`](#new_module_collections-x.Map_new)
     * [`.size`](#module_collections-x.Map+size) : <code>number</code>
+    * [`.entries`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
     * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
     * [`.set(key, value)`](#module_collections-x.Map+set) ⇒ <code>Object</code>
     * [`.clear()`](#module_collections-x.Map+clear) ⇒ <code>Object</code>
@@ -51,7 +52,6 @@ ES6 collections library: Map and Set.
     * [`.forEach(callback, [thisArg])`](#module_collections-x.Map+forEach) ⇒ <code>Object</code>
     * [`.values()`](#module_collections-x.Map+values) ⇒ <code>Object</code>
     * [`.keys()`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
-    * [`.entries()`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
     * [`.symIt()`](#module_collections-x.Map+symIt) ⇒ <code>Object</code>
   * [`.symIt`](#module_collections-x.symIt)
 
@@ -339,6 +339,7 @@ console.log(setIter.next().value); // Object
 * [.Map](#module_collections-x.Map)
   * [`new module.exports.Map([iterable])`](#new_module_collections-x.Map_new)
   * [`.size`](#module_collections-x.Map+size) : <code>number</code>
+  * [`.entries`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
   * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
   * [`.set(key, value)`](#module_collections-x.Map+set) ⇒ <code>Object</code>
   * [`.clear()`](#module_collections-x.Map+clear) ⇒ <code>Object</code>
@@ -347,7 +348,6 @@ console.log(setIter.next().value); // Object
   * [`.forEach(callback, [thisArg])`](#module_collections-x.Map+forEach) ⇒ <code>Object</code>
   * [`.values()`](#module_collections-x.Map+values) ⇒ <code>Object</code>
   * [`.keys()`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
-  * [`.entries()`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
   * [`.symIt()`](#module_collections-x.Map+symIt) ⇒ <code>Object</code>
 
 <a name="new_module_collections-x.Map_new"></a>
@@ -417,6 +417,26 @@ myMap.set(5, false);
 myMap.set("some text", 1);
 
 myMap.size; // 3
+```
+<a name="module_collections-x.Map+entries"></a>
+#### `map.entries` ⇒ <code>Object</code>
+The entries() method returns a new Iterator object that contains the
+[key, value] pairs for each element in the Map object in insertion order.
+
+**Kind**: instance property of <code>[Map](#module_collections-x.Map)</code>  
+**Returns**: <code>Object</code> - A new Iterator object.  
+**Example**  
+```js
+var myMap = new Map();
+myMap.set("0", "foo");
+myMap.set(1, "bar");
+myMap.set({}, "baz");
+
+var mapIter = myMap.entries();
+
+console.log(mapIter.next().value); // ["0", "foo"]
+console.log(mapIter.next().value); // [1, "bar"]
+console.log(mapIter.next().value); // [Object, "baz"]
 ```
 <a name="module_collections-x.Map+has"></a>
 #### `map.has(key)` ⇒ <code>boolean</code>
@@ -587,26 +607,6 @@ var mapIter = myMap.keys();
 console.log(mapIter.next().value); // "0"
 console.log(mapIter.next().value); // 1
 console.log(mapIter.next().value); // Object
-```
-<a name="module_collections-x.Map+entries"></a>
-#### `map.entries()` ⇒ <code>Object</code>
-The entries() method returns a new Iterator object that contains the
-[key, value] pairs for each element in the Map object in insertion order.
-
-**Kind**: instance method of <code>[Map](#module_collections-x.Map)</code>  
-**Returns**: <code>Object</code> - A new Iterator object.  
-**Example**  
-```js
-var myMap = new Map();
-myMap.set("0", "foo");
-myMap.set(1, "bar");
-myMap.set({}, "baz");
-
-var mapIter = myMap.entries();
-
-console.log(mapIter.next().value); // ["0", "foo"]
-console.log(mapIter.next().value); // [1, "bar"]
-console.log(mapIter.next().value); // [Object, "baz"]
 ```
 <a name="module_collections-x.Map+symIt"></a>
 #### `map.symIt()` ⇒ <code>Object</code>
