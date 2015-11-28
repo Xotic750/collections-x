@@ -60,6 +60,17 @@
       expect(threw).toBe(true);
     });
 
+    it('MapObject constructor behavior, not entry object should throw', function () {
+      var threw = false;
+      try {
+        new MapObject([1, 2, 3]);
+      } catch (e) {
+        expect(e).toEqual(jasmine.any(TypeError));
+        threw = true;
+      }
+      expect(threw).toBe(true);
+    });
+
     it('MapObject#size - Mozilla only', function () {
       var o = new MapObject();
       if ('size' in o) {
