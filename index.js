@@ -47,6 +47,7 @@
     defProp = require('define-property-x'),
     isString = require('is-string'),
     isArrayLike = require('is-array-like-x'),
+    isPrimitive = require('is-primitive'),
     isSurrogatePair = require('is-surrogate-pair-x'),
     indexOf = require('index-of-x'),
     assertIsCallable = require('assert-is-callable-x'),
@@ -180,7 +181,7 @@
       next = 0;
       while (next < iterable.length) {
         if (kind === 'map') {
-          if (!isArrayLike(iterable[next]) || iterable[next].length < 2) {
+          if (isPrimitive(iterable[next])) {
             throw new TypeError(
               'Iterator value ' +
               isArrayLike(next.value) +

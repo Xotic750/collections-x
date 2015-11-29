@@ -110,7 +110,7 @@
         b = {},
         c = new MapObject(),
         m = new MapObject([
-          [1, 1],
+          [a, 1],
           [b, 2],
           [c, 3]
         ]);
@@ -124,6 +124,22 @@
           .toBe(true);
         expect(new MapObject()[proto]).toBe(MapObject.prototype);
       }
+    });
+
+    it('constructor behavior using another Map', function () {
+      var a = 1,
+        b = {},
+        c = new MapObject(),
+        m = new MapObject([
+          [a, 1],
+          [b, 2],
+          [c, 3]
+        ]),
+        d = new MapObject(m);
+      expect(d.has(a)).toBe(true);
+      expect(d.has(b)).toBe(true);
+      expect(d.has(c)).toBe(true);
+      expect(d.size).toBe(3);
     });
 
     it('constructor behavior, string should throw', function () {
@@ -141,6 +157,21 @@
       var threw = false;
       try {
         new MapObject([1, 2, 3]);
+      } catch (e) {
+        expect(e).toEqual(jasmine.any(TypeError));
+        threw = true;
+      }
+      expect(threw).toBe(true);
+    });
+
+    it('constructor behavior using a Set should throw', function () {
+      var a = 1,
+        b = {},
+        c = new MapObject(),
+        s = new SetObject([a, b, c]),
+        threw = false;
+      try {
+        new MapObject(s);
       } catch (e) {
         expect(e).toEqual(jasmine.any(TypeError));
         threw = true;
