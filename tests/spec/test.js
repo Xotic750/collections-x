@@ -12,6 +12,7 @@
   'use strict';
 
   var compatibility = true,
+    hasOwn = Object.prototype.hasOwnProperty,
     functionsHaveNames = (function foo() {}).name === 'foo',
     ifFunctionsHaveNamesIt = functionsHaveNames ? it : xit,
     MapObject, SetObject, symIt;
@@ -51,7 +52,7 @@
     });
 
     it('should have the correct arity', function () {
-      expect('length' in MapObject).toBe(true);
+      expect(hasOwn.call(MapObject, 'length')).toBe(true);
       expect(MapObject.length).toBe(0);
     });
 
@@ -379,7 +380,7 @@
     });
 
     it('should have the correct arity', function () {
-      expect('length' in SetObject).toBe(true);
+      expect(hasOwn.call(SetObject, 'length')).toBe(true);
       expect(SetObject.length).toBe(0);
     });
 
