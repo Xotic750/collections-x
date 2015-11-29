@@ -11,7 +11,7 @@
 (function () {
   'use strict';
 
-  var compatibility = true,
+  var compatibility = false,
     hasOwn = Object.prototype.hasOwnProperty,
     functionsHaveNames = (function foo() {}).name === 'foo',
     ifFunctionsHaveNamesIt = functionsHaveNames ? it : xit,
@@ -19,24 +19,24 @@
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
     require('es6-shim');
-    if (!compatibility && typeof Map === 'function') {
+    if (!compatibility && typeof Map !== 'undefined') {
       MapObject = Map;
     } else {
       MapObject = require('../../index.js').Map;
     }
-    if (!compatibility && typeof Set === 'function') {
+    if (!compatibility && typeof Set !== 'undefined') {
       SetObject = Set;
     } else {
       SetObject = require('../../index.js').Set;
     }
     symIt = require('../../index.js').symIt;
   } else {
-    if (!compatibility && typeof Map === 'function') {
+    if (!compatibility && typeof Map !== 'undefined') {
       MapObject = Map;
     } else {
       MapObject = returnExports.Map;
     }
-    if (!compatibility && typeof Set === 'function') {
+    if (!compatibility && typeof Set !== 'undefined') {
       SetObject = Set;
     } else {
       SetObject = returnExports.Set;
