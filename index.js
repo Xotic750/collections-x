@@ -34,7 +34,7 @@
   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
   es3:true, esnext:true, plusplus:true, maxparams:4, maxdepth:5,
-  maxstatements:56, maxcomplexity:25 */
+  maxstatements:56, maxcomplexity:30 */
 
 /*global require, module */
 
@@ -1025,4 +1025,179 @@
    * console.log(mapIter.next().value); // [Object, "baz"]
    */
   defProp(MapObject.prototype, symIt, mapEntries);
+
+  var useCompatability = (function () {
+    function valueOrFalseIfThrows(func) {
+      try {
+        return func();
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function supportsSubclassing(C, f) {
+      /* skip test on IE < 11 */
+      if (!Object.setPrototypeOf) {
+        return false;
+      }
+      // Simple shim for Object.create on ES3 browsers
+      // (unlike real shim, no attempt to support `prototype === null`)
+      var create = Object.create || function (prototype, properties) {
+        var Prototype = function Prototype() {};
+        Prototype.prototype = prototype;
+        var object = new Prototype();
+        if (typeof properties !== 'undefined') {
+          Object.keys(properties).forEach(function (key) {
+            defProp(object, key, properties[key], true);
+          });
+        }
+        return object;
+      };
+      return valueOrFalseIfThrows(function () {
+        var Sub = function Subclass(arg) {
+          var o = new C(arg);
+          Object.setPrototypeOf(o, Subclass.prototype);
+          return o;
+        };
+        Object.setPrototypeOf(Sub, C);
+        Sub.prototype = create(C.prototype, {
+          constructor: { value: Sub }
+        });
+        return f(Sub);
+      });
+    }
+
+    if (typeof Map !== 'undefined' || typeof Set !== 'undefined') {
+      // Safari 8, for example, doesn't accept an iterable.
+      if (!valueOrFalseIfThrows(function () {
+        return new Map([[1, 2]]).get(1) === 2;
+      })) {
+        return true;
+      }
+      if (!(function () {
+        // Chrome 38-42, node 0.11/0.12, iojs 1/2 also have a bug when
+        // the Map has a size > 4
+        var m = new Map([[1, 0], [2, 0], [3, 0], [4, 0]]);
+        m.set(-0, m);
+        return m.get(0) === m && m.get(-0) === m && m.has(0) && m.has(-0);
+      }())) {
+        return true;
+      }
+      var testMap = new Map();
+      if (testMap.set(1, 2) !== testMap) {
+        return true;
+      }
+      var testSet = new Set();
+      if (!(function (s) {
+        s['delete'](0);
+        s.add(-0);
+        return !s.has(0);
+      }(testSet))) {
+        return true;
+      }
+      if (testSet.add(1) !== testSet) {
+        return true;
+      }
+      var mapSupportsSubclassing = supportsSubclassing(Map, function (M) {
+        var m = new M([]);
+        // Firefox 32 is ok with the instantiating the subclass but will
+        // throw when the map is used.
+        m.set(42, 42);
+        return m instanceof M;
+      });
+      // without Object.setPrototypeOf, subclassing is not possible
+      var mapFailsToSupportSubclassing = Object.setPrototypeOf &&
+        !mapSupportsSubclassing;
+      var mapRequiresNew = (function () {
+        try {
+          /*jshint newcap:false */
+          return !(Map() instanceof Map);
+        } catch (e) {
+          return e instanceof TypeError;
+        }
+      }());
+      if (Map.length !== 0 || mapFailsToSupportSubclassing || !mapRequiresNew) {
+        return true;
+      }
+      var setSupportsSubclassing = supportsSubclassing(Set, function (S) {
+        var s = new S([]);
+        s.add(42, 42);
+        return s instanceof S;
+      });
+      // without Object.setPrototypeOf, subclassing is not possible
+      var setFailsToSupportSubclassing = Object.setPrototypeOf &&
+        !setSupportsSubclassing;
+      var setRequiresNew = (function () {
+        try {
+          /*jshint newcap:false */
+          return !(Set() instanceof Set);
+        } catch (e) {
+          return e instanceof TypeError;
+        }
+      }());
+      if (Set.length !== 0 || setFailsToSupportSubclassing || !setRequiresNew) {
+        return true;
+      }
+      var not = function notThunker(func) {
+        return function notThunk() {
+          return !func.apply(this, arguments);
+        };
+      };
+      var throwsError = function (func) {
+        try {
+          func();
+          return false;
+        } catch (e) {
+          return true;
+        }
+      };
+      var isCallableWithoutNew = not(throwsError);
+      var mapIterationThrowsStopIterator = !valueOrFalseIfThrows(function () {
+        return (new Map()).keys().next().done;
+      });
+      /*
+        - In Firefox < 23, Map#size is a function.
+        - In all current Firefox,
+            Set#entries/keys/values & Map#clear do not exist
+        - https://bugzilla.mozilla.org/show_bug.cgi?id=869996
+        - In Firefox 24, Map and Set do not implement forEach
+        - In Firefox 25 at least, Map and Set are callable without "new"
+      */
+      if (
+        typeof Map.prototype.clear !== 'function' ||
+        new Set().size !== 0 ||
+        new Map().size !== 0 ||
+        typeof Map.prototype.keys !== 'function' ||
+        typeof Set.prototype.keys !== 'function' ||
+        typeof Map.prototype.forEach !== 'function' ||
+        typeof Set.prototype.forEach !== 'function' ||
+        isCallableWithoutNew(Map) ||
+        isCallableWithoutNew(Set) ||
+        typeof new Map().keys().next !== 'function' || // Safari 8
+        mapIterationThrowsStopIterator || // Firefox 25
+        !mapSupportsSubclassing
+      ) {
+        return true;
+      }
+
+      if (Set.prototype.keys !== Set.prototype.values) {
+        // Fixed in WebKit with https://bugs.webkit.org/show_bug.cgi?id=144190
+        return true;
+      }
+
+      // Incomplete iterator implementations.
+      if (typeof (new Map()).keys()[symIt] === 'undefined') {
+        return true;
+      }
+      if (typeof (new Set()).keys()[symIt] === 'undefined') {
+        return true;
+      }
+
+      if ((function foo() {}).name === 'foo' &&
+          Set.prototype.has.name !== 'has') {
+        // Microsoft Edge v0.11.10074.0 is missing a name on Set#has
+        return true;
+      }
+    }
+  }());
 }());

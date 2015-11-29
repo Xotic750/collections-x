@@ -11,36 +11,19 @@
 (function () {
   'use strict';
 
-  var compatibility = false,
-    hasOwn = Object.prototype.hasOwnProperty,
+  var  hasOwn = Object.prototype.hasOwnProperty,
     functionsHaveNames = (function foo() {}).name === 'foo',
     ifFunctionsHaveNamesIt = functionsHaveNames ? it : xit,
     MapObject, SetObject, symIt;
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
-    require('es6-shim');
-    if (!compatibility && typeof Map !== 'undefined') {
-      MapObject = Map;
-    } else {
-      MapObject = require('../../index.js').Map;
-    }
-    if (!compatibility && typeof Set !== 'undefined') {
-      SetObject = Set;
-    } else {
-      SetObject = require('../../index.js').Set;
-    }
+    //require('es6-shim');
+    MapObject = require('../../index.js').Map;
+    SetObject = require('../../index.js').Set;
     symIt = require('../../index.js').symIt;
   } else {
-    if (!compatibility && typeof Map !== 'undefined') {
-      MapObject = Map;
-    } else {
-      MapObject = returnExports.Map;
-    }
-    if (!compatibility && typeof Set !== 'undefined') {
-      SetObject = Set;
-    } else {
-      SetObject = returnExports.Set;
-    }
+    MapObject = returnExports.Map;
+    SetObject = returnExports.Set;
     symIt = returnExports.symIt;
   }
 
@@ -370,6 +353,89 @@
       expect(map.size).toBe(1);
       expect(map.get(-0)).toBe(value2);
       expect(map.get(0)).toBe(value2);
+    });
+
+    it('should be subclassable', function () {
+      // skip test if on IE < 11
+      if (!Object.setPrototypeOf) {
+        return;
+      }
+      var supportsDescriptors = Object.defineProperty && (function () {
+          try {
+              var obj = {};
+              Object.defineProperty(obj, 'x', {
+                enumerable: false,
+                value: obj
+              });
+              return !Object.keys(obj).length && obj.x === obj;
+          } catch (ignore) {}
+          return false;
+      }());
+      function defineByDescriptor(object, property, descriptor) {
+        if (supportsDescriptors) {
+          Object.defineProperty(object, property, descriptor);
+        } else if ('value' in descriptor) {
+          object[property] = descriptor.value;
+        }
+      }
+      // Simple shim for Object.create on ES3 browsers
+      // (unlike real shim, no attempt to support `prototype === null`)
+      var create = Object.create || function (prototype, properties) {
+        var Prototype = function Prototype() {};
+        Prototype.prototype = prototype;
+        var object = new Prototype();
+        if (typeof properties !== 'undefined') {
+          Object.keys(properties).forEach(function (key) {
+            defineByDescriptor(object, key, properties[key]);
+          });
+        }
+        return object;
+      };
+      var MyMap = function MyMap() {
+        var testMap = new MapObject([['a', 'b']]);
+        Object.setPrototypeOf(testMap, MyMap.prototype);
+        return testMap;
+      };
+      Object.setPrototypeOf(MyMap, MapObject);
+      MyMap.prototype = create(MapObject.prototype, {
+        constructor: { value: MyMap }
+      });
+
+      var myMap = new MyMap();
+      expect(myMap.has('c')).toBe(false);
+      expect(myMap.get('c')).toBe(undefined);
+      expect(myMap.set('c', 'd')).toBe(myMap);
+      expect(myMap.get('c')).toBe('d');
+      expect(myMap.has('c')).toBe(true);
+      expect(myMap.size).toBe(2);
+      var arr = [];
+      myMap.forEach(function (value, key) {
+        arr.push([key, value]);
+      });
+      expect(arr).toEqual([['a', 'b'], ['c', 'd']]);
+    });
+
+    it('uses SameValueZero even on a Map of size > 4', function () {
+      // Chrome 38-42, node 0.11/0.12, iojs 1/2 have a bug when the Map
+      // has a size > 4
+      var firstFour = [[1, 0], [2, 0], [3, 0], [4, 0]];
+      var fourMap = new MapObject(firstFour);
+      expect(fourMap.size).toBe(4);
+      expect(fourMap.has(-0)).toBe(false);
+      expect(fourMap.has(0)).toBe(false);
+
+      fourMap.set(-0, fourMap);
+
+      expect(fourMap.has(0)).toBe(true);
+      expect(fourMap.has(-0)).toBe(true);
+    });
+
+    it('should allow common ecmascript idioms', function () {
+      expect(new MapObject()).toEqual(jasmine.any(MapObject));
+      expect(typeof MapObject.prototype.get).toBe('function');
+      expect(typeof MapObject.prototype.set).toBe('function');
+      expect(typeof MapObject.prototype.has).toBe('function');
+      expect(typeof MapObject.prototype['delete']).toBe('function');
     });
   });
 
