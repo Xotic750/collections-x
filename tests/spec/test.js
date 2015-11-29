@@ -17,24 +17,24 @@
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
     require('es6-shim');
-    if (Map) {
+    if (typeof Map === 'function') {
       MapObject = Map;
     } else {
       MapObject = require('../../index.js').Map;
     }
-    if (Set) {
+    if (typeof Set === 'function') {
       SetObject = Set;
     } else {
       SetObject = require('../../index.js').Set;
     }
     symIt = require('../../index.js').symIt;
   } else {
-    if (Map) {
+    if (typeof Map === 'function') {
       MapObject = Map;
     } else {
       SetObject = returnExports.Set;
     }
-    if (Set) {
+    if (typeof Set === 'function') {
       SetObject = Set;
     } else {
       SetObject = returnExports.Set;
