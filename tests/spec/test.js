@@ -32,7 +32,7 @@
     if (typeof Map === 'function') {
       MapObject = Map;
     } else {
-      SetObject = returnExports.Set;
+      MapObject = returnExports.Map;
     }
     if (typeof Set === 'function') {
       SetObject = Set;
