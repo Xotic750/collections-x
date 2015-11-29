@@ -11,30 +11,31 @@
 (function () {
   'use strict';
 
-  var functionsHaveNames = (function foo() {}).name === 'foo',
+  var compatibility = true,
+    functionsHaveNames = (function foo() {}).name === 'foo',
     ifFunctionsHaveNamesIt = functionsHaveNames ? it : xit,
     MapObject, SetObject, symIt;
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
     require('es6-shim');
-    if (typeof Map === 'function') {
+    if (!compatibility && typeof Map === 'function') {
       MapObject = Map;
     } else {
       MapObject = require('../../index.js').Map;
     }
-    if (typeof Set === 'function') {
+    if (!compatibility && typeof Set === 'function') {
       SetObject = Set;
     } else {
       SetObject = require('../../index.js').Set;
     }
     symIt = require('../../index.js').symIt;
   } else {
-    if (typeof Map === 'function') {
+    if (!compatibility && typeof Map === 'function') {
       MapObject = Map;
     } else {
       MapObject = returnExports.Map;
     }
-    if (typeof Set === 'function') {
+    if (!compatibility && typeof Set === 'function') {
       SetObject = Set;
     } else {
       SetObject = returnExports.Set;
