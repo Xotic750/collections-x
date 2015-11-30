@@ -20,7 +20,12 @@ alt="devDependency status" height="18"/>
 alt="npm version" height="18">
 </a>
 
-ES6 collections library: Map and Set.
+ES6 collections fallback library: Map and Set.
+This library will work on ES3 environments provide that you have loaded
+es5-shim. For even better performance you should also load es6-shim which
+patches faulty ES6 implimentations but its shims do not work in the
+older ES3 environments, and that's where this fallback library comes into
+play.
 
 **Version**: 1.0.0  
 **Author:** Xotic750 <Xotic750@gmail.com>  
@@ -28,8 +33,8 @@ ES6 collections library: Map and Set.
 **Copyright**: Xotic750  
 
 * [collections-x](#module_collections-x)
-  * [.Set](#module_collections-x.Set)
-    * [`new module.exports.Set([iterable])`](#new_module_collections-x.Set_new)
+  * [`.symIt`](#module_collections-x.symIt)
+  * [`.Set`](#module_collections-x.Set)
     * [`.size`](#module_collections-x.Set+size) : <code>number</code>
     * [`.has(value)`](#module_collections-x.Set+has) ⇒ <code>boolean</code>
     * [`.add(value)`](#module_collections-x.Set+add) ⇒ <code>Object</code>
@@ -40,8 +45,7 @@ ES6 collections library: Map and Set.
     * [`.keys()`](#module_collections-x.Set+keys) ⇒ <code>Object</code>
     * [`.entries()`](#module_collections-x.Set+entries) ⇒ <code>Object</code>
     * [`.symIt()`](#module_collections-x.Set+symIt) ⇒ <code>Object</code>
-  * [.Map](#module_collections-x.Map)
-    * [`new module.exports.Map([iterable])`](#new_module_collections-x.Map_new)
+  * [`.Map`](#module_collections-x.Map)
     * [`.entries`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
     * [`.size`](#module_collections-x.Map+size) : <code>number</code>
     * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
@@ -53,14 +57,19 @@ ES6 collections library: Map and Set.
     * [`.values()`](#module_collections-x.Map+values) ⇒ <code>Object</code>
     * [`.keys()`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
     * [`.symIt()`](#module_collections-x.Map+symIt) ⇒ <code>Object</code>
-  * [`.symIt`](#module_collections-x.symIt)
 
+<a name="module_collections-x.symIt"></a>
+### `collections-x.symIt`
+The iterator identifier that is in use.
+
+type {Symbol|string}
+
+**Kind**: static property of <code>[collections-x](#module_collections-x)</code>  
 <a name="module_collections-x.Set"></a>
-### collections-x.Set
-**Kind**: static class of <code>[collections-x](#module_collections-x)</code>  
+### `collections-x.Set`
+**Kind**: static property of <code>[collections-x](#module_collections-x)</code>  
 
-* [.Set](#module_collections-x.Set)
-  * [`new module.exports.Set([iterable])`](#new_module_collections-x.Set_new)
+* [`.Set`](#module_collections-x.Set)
   * [`.size`](#module_collections-x.Set+size) : <code>number</code>
   * [`.has(value)`](#module_collections-x.Set+has) ⇒ <code>boolean</code>
   * [`.add(value)`](#module_collections-x.Set+add) ⇒ <code>Object</code>
@@ -72,53 +81,6 @@ ES6 collections library: Map and Set.
   * [`.entries()`](#module_collections-x.Set+entries) ⇒ <code>Object</code>
   * [`.symIt()`](#module_collections-x.Set+symIt) ⇒ <code>Object</code>
 
-<a name="new_module_collections-x.Set_new"></a>
-#### `new module.exports.Set([iterable])`
-The Set object lets you store unique values of any type, whether primitive
-values or object references.
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [iterable] | <code>\*</code> | If an iterable object is passed, all of its elements will be added to the new Set. null is treated as undefined. |
-
-**Example**  
-```js
-var mySet = new Set();
-
-mySet.add(1);
-mySet.add(5);
-mySet.add("some text");
-var o = {a: 1, b: 2};
-mySet.add(o);
-
-mySet.has(1); // true
-mySet.has(3); // false, 3 has not been added to the set
-mySet.has(5);              // true
-mySet.has(Math.sqrt(25));  // true
-mySet.has("Some Text".toLowerCase()); // true
-mySet.has(o); // true
-
-mySet.size; // 4
-
-mySet.delete(5); // removes 5 from the set
-mySet.has(5);    // false, 5 has been removed
-
-mySet.size; // 3, we just removed one value
-
-// Relation with Array objects
-
-var myArray = ["value1", "value2", "value3"];
-
-// Use the regular Set constructor to transform an Array into a Set
-var mySet = new Set(myArray);
-
-mySet.has("value1"); // returns true
-
-// Use the spread operator to transform a set into an Array.
-console.log(uneval([...mySet])); // Will show you exactly the same Array
-                                 // as myArray
-```
 <a name="module_collections-x.Set+size"></a>
 #### `set.size` : <code>number</code>
 The value of size is an integer representing how many entries the Set
@@ -127,6 +89,7 @@ object has.
 **Kind**: instance property of <code>[Set](#module_collections-x.Set)</code>  
 **Example**  
 ```js
+var Set = require('collections-x').Set
 var mySet = new Set();
 mySet.add(1);
 mySet.add(5);
@@ -149,6 +112,7 @@ specified value exists in a Set object or not.
 
 **Example**  
 ```js
+var Set = require('collections-x').Set;
 var mySet = new Set();
 mySet.add("foo");
 
@@ -169,6 +133,7 @@ of a Set object.
 
 **Example**  
 ```js
+var Set = require('collections-x').Set
 var mySet = new Set();
 
 mySet.add(1);
@@ -185,6 +150,7 @@ The clear() method removes all elements from a Set object.
 **Returns**: <code>Object</code> - The Set object.  
 **Example**  
 ```js
+var Set = require('collections-x').Set
 var mySet = new Set();
 mySet.add(1);
 mySet.add("foo");
@@ -211,6 +177,7 @@ The delete() method removes the specified element from a Set object.
 
 **Example**  
 ```js
+var Set = require('collections-x').Set
 var mySet = new Set();
 mySet.add("foo");
 
@@ -256,6 +223,7 @@ values for each element in the Set object in insertion order.
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
+var Set = require('collections-x').Set
 var mySet = new Set();
 mySet.add("foo");
 mySet.add("bar");
@@ -277,6 +245,7 @@ Set elements.
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
+var Set = require('collections-x').Set
 var mySet = new Set();
 mySet.add("foo");
 mySet.add("bar");
@@ -301,6 +270,7 @@ is returned.
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
+var Set = require('collections-x').Set
 var mySet = new Set();
 mySet.add("foobar");
 mySet.add(1);
@@ -321,23 +291,24 @@ as the initial value of the values property.
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
+var Set = require('collections-x').Set,
+var symIt = var Set = require('collections-x').symIt;
 var mySet = new Set();
 mySet.add("0");
 mySet.add(1);
 mySet.add({});
 
-var setIter = mySet[Symbol.iterator]();
+var setIter = mySet[symIt]();
 
 console.log(setIter.next().value); // "0"
 console.log(setIter.next().value); // 1
 console.log(setIter.next().value); // Object
 ```
 <a name="module_collections-x.Map"></a>
-### collections-x.Map
-**Kind**: static class of <code>[collections-x](#module_collections-x)</code>  
+### `collections-x.Map`
+**Kind**: static property of <code>[collections-x](#module_collections-x)</code>  
 
-* [.Map](#module_collections-x.Map)
-  * [`new module.exports.Map([iterable])`](#new_module_collections-x.Map_new)
+* [`.Map`](#module_collections-x.Map)
   * [`.entries`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
   * [`.size`](#module_collections-x.Map+size) : <code>number</code>
   * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
@@ -350,59 +321,6 @@ console.log(setIter.next().value); // Object
   * [`.keys()`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
   * [`.symIt()`](#module_collections-x.Map+symIt) ⇒ <code>Object</code>
 
-<a name="new_module_collections-x.Map_new"></a>
-#### `new module.exports.Map([iterable])`
-The Map object is a simple key/value map. Any value (both objects and
-primitive values) may be used as either a key or a value.
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [iterable] | <code>\*</code> | Iterable is an Array or other iterable object whose  elements are key-value pairs (2-element Arrays). Each key-value pair is  added to the new Map. null is treated as undefined. |
-
-**Example**  
-```js
-var myMap = new Map();
-
-var keyString = "a string",
-    keyObj = {},
-    keyFunc = function () {};
-
-// setting the values
-myMap.set(keyString, "value associated with 'a string'");
-myMap.set(keyObj, "value associated with keyObj");
-myMap.set(keyFunc, "value associated with keyFunc");
-
-myMap.size; // 3
-
-// getting the values
-myMap.get(keyString);    // "value associated with 'a string'"
-myMap.get(keyObj);       // "value associated with keyObj"
-myMap.get(keyFunc);      // "value associated with keyFunc"
-
-myMap.get("a string");   // "value associated with 'a string'"
-                         // because keyString === 'a string'
-myMap.get({});           // undefined, because keyObj !== {}
-myMap.get(function() {}) // undefined, because keyFunc !== function () {}
-
-// Using NaN as Map keys
-var myMap = new Map();
-myMap.set(NaN, "not a number");
-
-myMap.get(NaN); // "not a number"
-
-var otherNaN = Number("foo");
-myMap.get(otherNaN); // "not a number"
-
-// Relation with Array objects
-var kvArray = [["key1", "value1"], ["key2", "value2"]];
-
-// Use the regular Map constructor to transform a
-// 2D key-value Array into a map
-var myMap = new Map(kvArray);
-
-myMap.get("key1"); // returns "value1"
-```
 <a name="module_collections-x.Map+entries"></a>
 #### `map.entries` ⇒ <code>Object</code>
 The entries() method returns a new Iterator object that contains the
@@ -412,6 +330,7 @@ The entries() method returns a new Iterator object that contains the
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
+var Map = require('collections-x').Map;
 var myMap = new Map();
 myMap.set("0", "foo");
 myMap.set(1, "bar");
@@ -431,6 +350,7 @@ object has.
 **Kind**: instance property of <code>[Map](#module_collections-x.Map)</code>  
 **Example**  
 ```js
+var Map = require('collections-x').Map;
 var myMap = new Map();
 myMap.set(1, true);
 myMap.set(5, false);
@@ -453,6 +373,7 @@ the specified key exists or not.
 
 **Example**  
 ```js
+var Map = require('collections-x').Map;
 var myMap = new Map();
 myMap.set("bar", "foo");
 
@@ -474,6 +395,7 @@ a Map object.
 
 **Example**  
 ```js
+var Map = require('collections-x').Map;
 var myMap = new Map();
 
 // Add new elements to the map
@@ -491,6 +413,7 @@ The clear() method removes all elements from a Map object.
 **Returns**: <code>Object</code> - The Map object.  
 **Example**  
 ```js
+var Map = require('collections-x').Map;
 var myMap = new Map();
 myMap.set("bar", "baz");
 myMap.set(1, "foo");
@@ -517,6 +440,7 @@ The get() method returns a specified element from a Map object.
 
 **Example**  
 ```js
+var Map = require('collections-x').Map;
 var myMap = new Map();
 myMap.set("bar", "foo");
 
@@ -537,6 +461,7 @@ The delete() method removes the specified element from a Map object.
 
 **Example**  
 ```js
+var Map = require('collections-x').Map;
 var myMap = new Map();
 myMap.set("bar", "foo");
 
@@ -559,10 +484,12 @@ key/value pair in the Map object, in insertion order.
 
 **Example**  
 ```js
+var Map = require('collections-x').Map;
 function logElements(value, key, map) {
      console.log("m[" + key + "] = " + value);
 }
-Map([["foo", 3], ["bar", {}], ["baz", undefined]]).forEach(logElements);
+var myMap = new Map([["foo", 3], ["bar", {}], ["baz", undefined]]);
+myMap.forEach(logElements);
 // logs:
 // "m[foo] = 3"
 // "m[bar] = [object Object]"
@@ -577,6 +504,7 @@ values for each element in the Map object in insertion order.
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
+var Map = require('collections-x').Map;
 var myMap = new Map();
 myMap.set("0", "foo");
 myMap.set(1, "bar");
@@ -597,6 +525,7 @@ for each element in the Map object in insertion order.
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
+var Map = require('collections-x').Map;
 var myMap = new Map();
 myMap.set("0", "foo");
 myMap.set(1, "bar");
@@ -617,21 +546,16 @@ as the initial value of the entries property.
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
+var Map = require('collections-x').Map;
+var symIt = require('collections-x').symIt;
 var myMap = new Map();
 myMap.set("0", "foo");
 myMap.set(1, "bar");
 myMap.set({}, "baz");
 
-var mapIter = myMap[iterator]();
+var mapIter = myMap[symIt]();
 
 console.log(mapIter.next().value); // ["0", "foo"]
 console.log(mapIter.next().value); // [1, "bar"]
 console.log(mapIter.next().value); // [Object, "baz"]
 ```
-<a name="module_collections-x.symIt"></a>
-### `collections-x.symIt`
-The iterator identifier that is in use.
-
-type {Symbol|string}
-
-**Kind**: static property of <code>[collections-x](#module_collections-x)</code>  

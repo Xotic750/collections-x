@@ -20,7 +20,12 @@
  * alt="npm version" height="18">
  * </a>
  *
- * ES6 collections library: Map and Set.
+ * ES6 collections fallback library: Map and Set.
+ * This library will work on ES3 environments provide that you have loaded
+ * es5-shim. For even better performance you should also load es6-shim which
+ * patches faulty ES6 implimentations but its shims do not work in the
+ * older ES3 environments, and that's where this fallback library comes into
+ * play.
  * @version 1.0.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
@@ -57,7 +62,10 @@
       typeof Symbol.iterator === 'symbol',
     hasFakeSymbolIterator = typeof Symbol === 'object' &&
       typeof Symbol.iterator === 'string',
-    SetObject, MapObject, baseHas, setValuesIterator, mapEntries, symIt;
+    NativeMap = typeof Map !== 'undefined' && Map,
+    NativeSet = typeof Set !== 'undefined' && Set,
+    SetObject, MapObject, baseHas, setValuesIterator,
+    mapEntries, symIt, useCompatability;
 
   if (hasRealSymbolIterator || hasFakeSymbolIterator) {
     symIt = Symbol.iterator;
@@ -73,6 +81,183 @@
    * type {Symbol|string}
    */
   module.exports.symIt = symIt;
+
+  useCompatability = (function () {
+    function valueOrFalseIfThrows(func) {
+      try {
+        return func();
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function supportsSubclassing(C, f) {
+      /* skip test on IE < 11 */
+      if (!Object.setPrototypeOf) {
+        return false;
+      }
+      // Simple shim for Object.create on ES3 browsers
+      // (unlike real shim, no attempt to support `prototype === null`)
+      var create = Object.create || function (prototype, properties) {
+        var Prototype = function Prototype() {};
+        Prototype.prototype = prototype;
+        var object = new Prototype();
+        if (typeof properties !== 'undefined') {
+          Object.keys(properties).forEach(function (key) {
+            defProp(object, key, properties[key], true);
+          });
+        }
+        return object;
+      };
+      return valueOrFalseIfThrows(function () {
+        var Sub = function Subclass(arg) {
+          var o = new C(arg);
+          Object.setPrototypeOf(o, Subclass.prototype);
+          return o;
+        };
+        Object.setPrototypeOf(Sub, C);
+        Sub.prototype = create(C.prototype, {
+          constructor: { value: Sub }
+        });
+        return f(Sub);
+      });
+    }
+
+    if (NativeMap || NativeSet) {
+      // Safari 8, for example, doesn't accept an iterable.
+      if (!valueOrFalseIfThrows(function () {
+        return new NativeMap([[1, 2]]).get(1) === 2;
+      })) {
+        return true;
+      }
+      if (!(function () {
+        // Chrome 38-42, node 0.11/0.12, iojs 1/2 also have a bug when
+        // the Map has a size > 4
+        var m = new NativeMap([[1, 0], [2, 0], [3, 0], [4, 0]]);
+        m.set(-0, m);
+        return m.get(0) === m && m.get(-0) === m && m.has(0) && m.has(-0);
+      }())) {
+        return true;
+      }
+      var testMap = new NativeMap();
+      if (testMap.set(1, 2) !== testMap) {
+        return true;
+      }
+      var testSet = new NativeSet();
+      if ((function (s) {
+        s['delete'](0);
+        s.add(-0);
+        return !s.has(0);
+      }(testSet))) {
+        return true;
+      }
+      if (testSet.add(1) !== testSet) {
+        return true;
+      }
+      var mapSupportsSubclassing = supportsSubclassing(NativeMap, function (M) {
+        var m = new M([]);
+        // Firefox 32 is ok with the instantiating the subclass but will
+        // throw when the map is used.
+        m.set(42, 42);
+        return m instanceof M;
+      });
+      // without Object.setPrototypeOf, subclassing is not possible
+      var mapFailsToSupportSubclassing = Object.setPrototypeOf &&
+        !mapSupportsSubclassing;
+      var mapRequiresNew = (function () {
+        try {
+          /*jshint newcap:false */
+          return !(NativeMap() instanceof NativeMap);
+        } catch (e) {
+          return e instanceof TypeError;
+        }
+      }());
+      if (NativeMap.length !== 0 || mapFailsToSupportSubclassing || !mapRequiresNew) {
+        return true;
+      }
+      var setSupportsSubclassing = supportsSubclassing(NativeSet, function (S) {
+        var s = new S([]);
+        s.add(42, 42);
+        return s instanceof S;
+      });
+      // without Object.setPrototypeOf, subclassing is not possible
+      var setFailsToSupportSubclassing = Object.setPrototypeOf &&
+        !setSupportsSubclassing;
+      var setRequiresNew = (function () {
+        try {
+          /*jshint newcap:false */
+          return !(NativeSet() instanceof NativeSet);
+        } catch (e) {
+          return e instanceof TypeError;
+        }
+      }());
+      if (NativeSet.length !== 0 || setFailsToSupportSubclassing || !setRequiresNew) {
+        return true;
+      }
+      var not = function notThunker(func) {
+        return function notThunk() {
+          return !func.apply(this, arguments);
+        };
+      };
+      var throwsError = function (func) {
+        try {
+          func();
+          return false;
+        } catch (e) {
+          return true;
+        }
+      };
+      var isCallableWithoutNew = not(throwsError);
+      var mapIterationThrowsStopIterator = !valueOrFalseIfThrows(function () {
+        return (new Map()).keys().next().done;
+      });
+      /*
+        - In Firefox < 23, Map#size is a function.
+        - In all current Firefox,
+            Set#entries/keys/values & Map#clear do not exist
+        - https://bugzilla.mozilla.org/show_bug.cgi?id=869996
+        - In Firefox 24, Map and Set do not implement forEach
+        - In Firefox 25 at least, Map and Set are callable without "new"
+      */
+      if (
+        typeof NativeMap.prototype.clear !== 'function' ||
+        new NativeSet().size !== 0 ||
+        new NativeMap().size !== 0 ||
+        typeof NativeMap.prototype.keys !== 'function' ||
+        typeof NativeSet.prototype.keys !== 'function' ||
+        typeof NativeMap.prototype.forEach !== 'function' ||
+        typeof NativeSet.prototype.forEach !== 'function' ||
+        isCallableWithoutNew(NativeMap) ||
+        isCallableWithoutNew(NativeSet) ||
+        typeof new NativeMap().keys().next !== 'function' || // Safari 8
+        mapIterationThrowsStopIterator || // Firefox 25
+        !mapSupportsSubclassing
+      ) {
+        return true;
+      }
+
+      if (NativeSet.prototype.keys !== NativeSet.prototype.values) {
+        // Fixed in WebKit with https://bugs.webkit.org/show_bug.cgi?id=144190
+        return true;
+      }
+
+      // Incomplete iterator implementations.
+      if (typeof (new NativeMap()).keys()[symIt] === 'undefined') {
+        return true;
+      }
+      if (typeof (new NativeSet()).keys()[symIt] === 'undefined') {
+        return true;
+      }
+
+      if ((function foo() {}).name === 'foo' &&
+          NativeSet.prototype.has.name !== 'has') {
+        // Microsoft Edge v0.11.10074.0 is missing a name on Set#has
+        return true;
+      }
+    } else {
+      return true;
+    }
+  }());
 
   /**
    * Detect an interator function.
@@ -437,7 +622,8 @@
    * The Set object lets you store unique values of any type, whether primitive
    * values or object references.
    *
-   * @constructor
+   * @constructor Set
+   * @private
    * @param {*} [iterable] If an iterable object is passed, all of its elements
    * will be added to the new Set. null is treated as undefined.
    * @example
@@ -476,12 +662,14 @@
    * console.log(uneval([...mySet])); // Will show you exactly the same Array
    *                                  // as myArray
    */
-  module.exports.Set = SetObject = function Set() {
+  SetObject = function Set() {
     if (!(this instanceof SetObject)) {
       throw new TypeError('Constructor Set requires \'new\'');
     }
     parseIterable('set', this, arguments[0]);
   };
+  /** @borrows Set as Set */
+  module.exports.Set = useCompatability ? SetObject : NativeSet;
   defProps(SetObject.prototype, /** @lends module:collections-x.Set.prototype */ {
     /**
      * The has() method returns a boolean indicating whether an element with the
@@ -492,6 +680,7 @@
      * @return {boolean} Returns true if an element with the specified value
      *  exists in the Set object; otherwise false.
      * @example
+     * var Set = require('collections-x').Set;
      * var mySet = new Set();
      * mySet.add("foo");
      *
@@ -507,6 +696,7 @@
      *  object.
      * @return {Object} The Set object.
      * @example
+     * var Set = require('collections-x').Set
      * var mySet = new Set();
      *
      * mySet.add(1);
@@ -523,6 +713,7 @@
      *
      * @return {Object} The Set object.
      * @example
+     * var Set = require('collections-x').Set
      * var mySet = new Set();
      * mySet.add(1);
      * mySet.add("foo");
@@ -545,6 +736,7 @@
      * @return {boolean} Returns true if an element in the Set object has been
      *  removed successfully; otherwise false.
      * @example
+     * var Set = require('collections-x').Set
      * var mySet = new Set();
      * mySet.add("foo");
      *
@@ -587,6 +779,7 @@
      * @function
      * @return {Object} A new Iterator object.
      * @example
+     * var Set = require('collections-x').Set
      * var mySet = new Set();
      * mySet.add("foo");
      * mySet.add("bar");
@@ -607,6 +800,7 @@
      * @function
      * @return {Object} A new Iterator object.
      * @example
+     * var Set = require('collections-x').Set
      * var mySet = new Set();
      * mySet.add("foo");
      * mySet.add("bar");
@@ -630,6 +824,7 @@
      * @function
      * @return {Object} A new Iterator object.
      * @example
+     * var Set = require('collections-x').Set
      * var mySet = new Set();
      * mySet.add("foobar");
      * mySet.add(1);
@@ -653,6 +848,7 @@
      * @instance
      * @type {number}
      * @example
+     * var Set = require('collections-x').Set
      * var mySet = new Set();
      * mySet.add(1);
      * mySet.add(5);
@@ -670,12 +866,14 @@
    * @memberof module:collections-x.Set.prototype
    * @return {Object} A new Iterator object.
    * @example
+   * var Set = require('collections-x').Set,
+   * var symIt = var Set = require('collections-x').symIt;
    * var mySet = new Set();
    * mySet.add("0");
    * mySet.add(1);
    * mySet.add({});
    *
-   * var setIter = mySet[Symbol.iterator]();
+   * var setIter = mySet[symIt]();
    *
    * console.log(setIter.next().value); // "0"
    * console.log(setIter.next().value); // 1
@@ -761,11 +959,13 @@
    * The Map object is a simple key/value map. Any value (both objects and
    * primitive values) may be used as either a key or a value.
    *
-   * @constructor
+   * @constructor Map
+   * @private
    * @param {*} [iterable] Iterable is an Array or other iterable object whose
    *  elements are key-value pairs (2-element Arrays). Each key-value pair is
    *  added to the new Map. null is treated as undefined.
    * @example
+   * var Map = require('collections-x').Map;
    * var myMap = new Map();
    *
    * var keyString = "a string",
@@ -807,12 +1007,14 @@
    *
    * myMap.get("key1"); // returns "value1"
    */
-  module.exports.Map = MapObject = function Map() {
+  MapObject = function Map() {
     if (!(this instanceof MapObject)) {
       throw new TypeError('Constructor Map requires \'new\'');
     }
     parseIterable('map', this, arguments[0]);
   };
+  /** @borrows Map as Map */
+  module.exports.Map = useCompatability ? MapObject : NativeMap;
   defProps(MapObject.prototype, /** @lends module:collections-x.Map.prototype */ {
     /**
      * The has() method returns a boolean indicating whether an element with
@@ -824,6 +1026,7 @@
      * @return {boolean} Returns true if an element with the specified key
      *  exists in the Map object; otherwise false.
      * @example
+     * var Map = require('collections-x').Map;
      * var myMap = new Map();
      * myMap.set("bar", "foo");
      *
@@ -839,6 +1042,7 @@
      * @param {*} value The value of the element to add to the Map object.
      * @return {Object} The Map object.
      * @example
+     * var Map = require('collections-x').Map;
      * var myMap = new Map();
      *
      * // Add new elements to the map
@@ -856,6 +1060,7 @@
      *
      * @return {Object} The Map object.
      * @example
+     * var Map = require('collections-x').Map;
      * var myMap = new Map();
      * myMap.set("bar", "baz");
      * myMap.set(1, "foo");
@@ -878,6 +1083,7 @@
      * @return {*} Returns the element associated with the specified key or
      *  undefined if the key can't be found in the Map object.
      * @example
+     * var Map = require('collections-x').Map;
      * var myMap = new Map();
      * myMap.set("bar", "foo");
      *
@@ -899,6 +1105,7 @@
      * @return {boolean} Returns true if an element in the Map object has been
      *  removed successfully.
      * @example
+     * var Map = require('collections-x').Map;
      * var myMap = new Map();
      * myMap.set("bar", "foo");
      *
@@ -917,10 +1124,12 @@
      * @param {*} [thisArg] Value to use as this when executing callback.
      * @return {Object} The Map object.
      * @example
+     * var Map = require('collections-x').Map;
      * function logElements(value, key, map) {
      *      console.log("m[" + key + "] = " + value);
      * }
-     * Map([["foo", 3], ["bar", {}], ["baz", undefined]]).forEach(logElements);
+     * var myMap = new Map([["foo", 3], ["bar", {}], ["baz", undefined]]);
+     * myMap.forEach(logElements);
      * // logs:
      * // "m[foo] = 3"
      * // "m[bar] = [object Object]"
@@ -935,6 +1144,7 @@
      *
      * @return {Object} A new Iterator object.
      * @example
+     * var Map = require('collections-x').Map;
      * var myMap = new Map();
      * myMap.set("0", "foo");
      * myMap.set(1, "bar");
@@ -955,6 +1165,7 @@
      *
      * @return {Object} A new Iterator object.
      * @example
+     * var Map = require('collections-x').Map;
      * var myMap = new Map();
      * myMap.set("0", "foo");
      * myMap.set(1, "bar");
@@ -975,6 +1186,7 @@
      *
      * @return {Object} A new Iterator object.
      * @example
+     * var Map = require('collections-x').Map;
      * var myMap = new Map();
      * myMap.set("0", "foo");
      * myMap.set(1, "bar");
@@ -996,6 +1208,7 @@
      * @instance
      * @type {number}
      * @example
+     * var Map = require('collections-x').Map;
      * var myMap = new Map();
      * myMap.set(1, true);
      * myMap.set(5, false);
@@ -1013,191 +1226,18 @@
    * @memberof module:collections-x.Map.prototype
    * @return {Object} A new Iterator object.
    * @example
+   * var Map = require('collections-x').Map;
+   * var symIt = require('collections-x').symIt;
    * var myMap = new Map();
    * myMap.set("0", "foo");
    * myMap.set(1, "bar");
    * myMap.set({}, "baz");
    *
-   * var mapIter = myMap[iterator]();
+   * var mapIter = myMap[symIt]();
    *
    * console.log(mapIter.next().value); // ["0", "foo"]
    * console.log(mapIter.next().value); // [1, "bar"]
    * console.log(mapIter.next().value); // [Object, "baz"]
    */
   defProp(MapObject.prototype, symIt, mapEntries);
-
-  var useCompatability = (function () {
-    function valueOrFalseIfThrows(func) {
-      try {
-        return func();
-      } catch (e) {
-        return false;
-      }
-    }
-
-    function supportsSubclassing(C, f) {
-      /* skip test on IE < 11 */
-      if (!Object.setPrototypeOf) {
-        return false;
-      }
-      // Simple shim for Object.create on ES3 browsers
-      // (unlike real shim, no attempt to support `prototype === null`)
-      var create = Object.create || function (prototype, properties) {
-        var Prototype = function Prototype() {};
-        Prototype.prototype = prototype;
-        var object = new Prototype();
-        if (typeof properties !== 'undefined') {
-          Object.keys(properties).forEach(function (key) {
-            defProp(object, key, properties[key], true);
-          });
-        }
-        return object;
-      };
-      return valueOrFalseIfThrows(function () {
-        var Sub = function Subclass(arg) {
-          var o = new C(arg);
-          Object.setPrototypeOf(o, Subclass.prototype);
-          return o;
-        };
-        Object.setPrototypeOf(Sub, C);
-        Sub.prototype = create(C.prototype, {
-          constructor: { value: Sub }
-        });
-        return f(Sub);
-      });
-    }
-
-    if (typeof Map !== 'undefined' || typeof Set !== 'undefined') {
-      // Safari 8, for example, doesn't accept an iterable.
-      if (!valueOrFalseIfThrows(function () {
-        return new Map([[1, 2]]).get(1) === 2;
-      })) {
-        return true;
-      }
-      if (!(function () {
-        // Chrome 38-42, node 0.11/0.12, iojs 1/2 also have a bug when
-        // the Map has a size > 4
-        var m = new Map([[1, 0], [2, 0], [3, 0], [4, 0]]);
-        m.set(-0, m);
-        return m.get(0) === m && m.get(-0) === m && m.has(0) && m.has(-0);
-      }())) {
-        return true;
-      }
-      var testMap = new Map();
-      if (testMap.set(1, 2) !== testMap) {
-        return true;
-      }
-      var testSet = new Set();
-      if (!(function (s) {
-        s['delete'](0);
-        s.add(-0);
-        return !s.has(0);
-      }(testSet))) {
-        return true;
-      }
-      if (testSet.add(1) !== testSet) {
-        return true;
-      }
-      var mapSupportsSubclassing = supportsSubclassing(Map, function (M) {
-        var m = new M([]);
-        // Firefox 32 is ok with the instantiating the subclass but will
-        // throw when the map is used.
-        m.set(42, 42);
-        return m instanceof M;
-      });
-      // without Object.setPrototypeOf, subclassing is not possible
-      var mapFailsToSupportSubclassing = Object.setPrototypeOf &&
-        !mapSupportsSubclassing;
-      var mapRequiresNew = (function () {
-        try {
-          /*jshint newcap:false */
-          return !(Map() instanceof Map);
-        } catch (e) {
-          return e instanceof TypeError;
-        }
-      }());
-      if (Map.length !== 0 || mapFailsToSupportSubclassing || !mapRequiresNew) {
-        return true;
-      }
-      var setSupportsSubclassing = supportsSubclassing(Set, function (S) {
-        var s = new S([]);
-        s.add(42, 42);
-        return s instanceof S;
-      });
-      // without Object.setPrototypeOf, subclassing is not possible
-      var setFailsToSupportSubclassing = Object.setPrototypeOf &&
-        !setSupportsSubclassing;
-      var setRequiresNew = (function () {
-        try {
-          /*jshint newcap:false */
-          return !(Set() instanceof Set);
-        } catch (e) {
-          return e instanceof TypeError;
-        }
-      }());
-      if (Set.length !== 0 || setFailsToSupportSubclassing || !setRequiresNew) {
-        return true;
-      }
-      var not = function notThunker(func) {
-        return function notThunk() {
-          return !func.apply(this, arguments);
-        };
-      };
-      var throwsError = function (func) {
-        try {
-          func();
-          return false;
-        } catch (e) {
-          return true;
-        }
-      };
-      var isCallableWithoutNew = not(throwsError);
-      var mapIterationThrowsStopIterator = !valueOrFalseIfThrows(function () {
-        return (new Map()).keys().next().done;
-      });
-      /*
-        - In Firefox < 23, Map#size is a function.
-        - In all current Firefox,
-            Set#entries/keys/values & Map#clear do not exist
-        - https://bugzilla.mozilla.org/show_bug.cgi?id=869996
-        - In Firefox 24, Map and Set do not implement forEach
-        - In Firefox 25 at least, Map and Set are callable without "new"
-      */
-      if (
-        typeof Map.prototype.clear !== 'function' ||
-        new Set().size !== 0 ||
-        new Map().size !== 0 ||
-        typeof Map.prototype.keys !== 'function' ||
-        typeof Set.prototype.keys !== 'function' ||
-        typeof Map.prototype.forEach !== 'function' ||
-        typeof Set.prototype.forEach !== 'function' ||
-        isCallableWithoutNew(Map) ||
-        isCallableWithoutNew(Set) ||
-        typeof new Map().keys().next !== 'function' || // Safari 8
-        mapIterationThrowsStopIterator || // Firefox 25
-        !mapSupportsSubclassing
-      ) {
-        return true;
-      }
-
-      if (Set.prototype.keys !== Set.prototype.values) {
-        // Fixed in WebKit with https://bugs.webkit.org/show_bug.cgi?id=144190
-        return true;
-      }
-
-      // Incomplete iterator implementations.
-      if (typeof (new Map()).keys()[symIt] === 'undefined') {
-        return true;
-      }
-      if (typeof (new Set()).keys()[symIt] === 'undefined') {
-        return true;
-      }
-
-      if ((function foo() {}).name === 'foo' &&
-          Set.prototype.has.name !== 'has') {
-        // Microsoft Edge v0.11.10074.0 is missing a name on Set#has
-        return true;
-      }
-    }
-  }());
 }());

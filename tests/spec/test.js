@@ -17,7 +17,6 @@
     MapObject, SetObject, symIt;
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
-    //require('es6-shim');
     MapObject = require('../../index.js').Map;
     SetObject = require('../../index.js').Set;
     symIt = require('../../index.js').symIt;
