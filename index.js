@@ -26,7 +26,7 @@
  * patches faulty ES6 implimentations but its shims do not work in the
  * older ES3 environments, and that's where this fallback library comes into
  * play.
- * @version 1.0.0
+ * @version 1.0.1
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -47,6 +47,11 @@
   'use strict';
 
   var hasOwn = Object.prototype.hasOwnProperty,
+    pCharAt = String.prototype.charAt,
+    pPush = Array.prototype.push,
+    pSome = Array.prototype.some,
+    pSplice = Array.prototype.splice,
+    ES = require('es-abstract'),
     noop = require('noop-x'),
     defProps = require('define-properties'),
     defProp = require('define-property-x'),
@@ -323,10 +328,10 @@
         );
         if (indexof < 0) {
           if (kind === 'map') {
-            context['[[value]]'].push(next.value[1]);
+            ES.Call(pPush, context['[[value]]'], [next.value[1]]);
           }
-          context['[[key]]'].push(key);
-          context['[[order]]'].push(context['[[id]]'].get());
+          ES.Call(pPush, context['[[key]]'], [key]);
+          ES.Call(pPush, context['[[order]]'], [context['[[id]]'].get()]);
           context['[[id]]'].next();
         } else if (kind === 'map') {
           context['[[value]]'][indexof] = next.value[1];
@@ -342,8 +347,8 @@
       }
       next = 0;
       while (next < iterable.length) {
-        char1 = iterable.charAt(next);
-        char2 = iterable.charAt(next + 1);
+        char1 = ES.Call(pCharAt, iterable, [next]);
+        char2 = ES.Call(pCharAt, iterable, [next + 1]);
         if (isSurrogatePair(char1, char2)) {
           key = char1 + char2;
           next += 1;
@@ -356,8 +361,8 @@
           'SameValueZero'
         );
         if (indexof < 0) {
-          context['[[key]]'].push(key);
-          context['[[order]]'].push(context['[[id]]'].get());
+          ES.Call(pPush, context['[[key]]'], [key]);
+          ES.Call(pPush, context['[[order]]'], [context['[[id]]'].get()]);
           context['[[id]]'].next();
         }
         next += 1;
@@ -385,10 +390,10 @@
         );
         if (indexof < 0) {
           if (kind === 'map') {
-            context['[[value]]'].push(iterable[next][1]);
+            ES.Call(pPush, context['[[value]]'], [iterable[next][1]]);
           }
-          context['[[key]]'].push(key);
-          context['[[order]]'].push(context['[[id]]'].get());
+          ES.Call(pPush, context['[[key]]'], [key]);
+          ES.Call(pPush, context['[[order]]'], [context['[[id]]'].get()]);
           context['[[id]]'].next();
         } else if (kind === 'map') {
           context['[[value]]'][indexof] = iterable[next][1];
@@ -421,17 +426,17 @@
     context['[[change]]'] = false;
     length = context['[[key]]'].length;
     while (pointers.index < length) {
-      if (hasOwn.call(context['[[key]]'], pointers.index)) {
+      if (ES.Call(hasOwn, context['[[key]]'], [pointers.index])) {
         key = context['[[key]]'][pointers.index];
         value = kind === 'map' ?  context['[[value]]'][pointers.index] :  key;
-        callback.call(thisArg, value, key, context);
+        ES.Call(callback, thisArg, [value, key, context]);
       }
       if (context['[[change]]']) {
         length = context['[[key]]'].length;
-        context['[[order]]'].some(function (id, count) {
+        ES.Call(pSome, context['[[order]]'], [function (id, count) {
           pointers.index = count;
           return id > pointers.order;
-        });
+        }]);
         context['[[change]]'] = false;
       } else {
         pointers.index += 1;
@@ -489,13 +494,15 @@
         key,
         'SameValueZero'
       ),
-      result = false;
+      result = false,
+      args;
     if (indexof > -1) {
+      args = [indexof, 1];
       if (kind === 'map') {
-        context['[[value]]'].splice(indexof, 1);
+        ES.Call(pSplice, context['[[value]]'], args);
       }
-      context['[[key]]'].splice(indexof, 1);
-      context['[[order]]'].splice(indexof, 1);
+      ES.Call(pSplice, context['[[key]]'], args);
+      ES.Call(pSplice, context['[[order]]'], args);
       context['[[change]]'] = true;
       context.size = context['[[key]]'].length;
       result = true;
@@ -525,10 +532,10 @@
       }
     } else {
       if (kind === 'map') {
-        context['[[value]]'].push(value);
+        ES.Call(pPush, context['[[value]]'], [value]);
       }
-      context['[[key]]'].push(key);
-      context['[[order]]'].push(context['[[id]]'].get());
+      ES.Call(pPush, context['[[key]]'], [key]);
+      ES.Call(pPush, context['[[order]]'], [context['[[id]]'].get()]);
       context['[[id]]'].next();
       context['[[change]]'] = true;
       context.size = context['[[key]]'].length;
