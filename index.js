@@ -26,7 +26,7 @@
  * patches faulty ES6 implimentations but its shims do not work in the
  * older ES3 environments, and that's where this fallback library comes into
  * play.
- * @version 1.0.1
+ * @version 1.0.2
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
