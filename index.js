@@ -21,12 +21,25 @@
  * </a>
  *
  * ES6 collections fallback library: Map and Set.
- * This library will work on ES3 environments provide that you have loaded
- * es5-shim. For even better performance you should also load es6-shim which
- * patches faulty ES6 implimentations but its shims do not work in the
- * older ES3 environments, and that's where this fallback library comes into
- * play.
- * @version 1.0.2
+ *
+ * <h2>ECMAScript compatibility shims for legacy JavaScript engines</h2>
+ * `es5-shim.js` monkey-patches a JavaScript context to contain all EcmaScript 5
+ * methods that can be faithfully emulated with a legacy JavaScript engine.
+ *
+ * `es5-sham.js` monkey-patches other ES5 methods as closely as possible.
+ * For these methods, as closely as possible to ES5 is not very close.
+ * Many of these shams are intended only to allow code to be written to ES5
+ * without causing run-time errors in older engines. In many cases,
+ * this means that these shams cause many ES5 methods to silently fail.
+ * Decide carefully whether this is what you want. Note: es5-sham.js requires
+ * es5-shim.js to be able to work properly.
+ *
+ * `json3.js` monkey-patches the EcmaScript 5 JSON implimentation faithfully.
+ *
+ * `es6.shim.js` provides compatibility shims so that legacy JavaScript engines
+ * behave as closely as possible to ECMAScript 6 (Harmony).
+ *
+ * @version 1.0.3
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -51,6 +64,7 @@
     pPush = Array.prototype.push,
     pSome = Array.prototype.some,
     pSplice = Array.prototype.splice,
+    pSlice = Array.prototype.slice,
     ES = require('es-abstract'),
     noop = require('noop-x'),
     defProps = require('define-properties'),
@@ -63,7 +77,9 @@
     assertIsCallable = require('assert-is-callable-x'),
     assertIsObject = require('assert-is-object-x'),
     IdGenerator = require('big-counter-x'),
-    hasRealSymbolIterator = typeof Symbol === 'function' &&
+    isNil = require('is-nil-x'),
+    isUndefined = require('validate.io-undefined'),
+    hasRealSymbolIterator = require('has-symbol-support-x') &&
       typeof Symbol.iterator === 'symbol',
     hasFakeSymbolIterator = typeof Symbol === 'object' &&
       typeof Symbol.iterator === 'string',
@@ -74,7 +90,7 @@
 
   if (hasRealSymbolIterator || hasFakeSymbolIterator) {
     symIt = Symbol.iterator;
-  } else if (typeof Array.prototype['_es6-shim iterator_'] === 'function') {
+  } else if (ES.IsCallable(Array.prototype['_es6-shim iterator_'])) {
     symIt = '_es6-shim iterator_';
   } else {
     symIt = '@@iterator';
@@ -101,19 +117,6 @@
       if (!Object.setPrototypeOf) {
         return false;
       }
-      // Simple shim for Object.create on ES3 browsers
-      // (unlike real shim, no attempt to support `prototype === null`)
-      var create = Object.create || function (prototype, properties) {
-        var Prototype = function Prototype() {};
-        Prototype.prototype = prototype;
-        var object = new Prototype();
-        if (typeof properties !== 'undefined') {
-          Object.keys(properties).forEach(function (key) {
-            defProp(object, key, properties[key], true);
-          });
-        }
-        return object;
-      };
       return valueOrFalseIfThrows(function () {
         var Sub = function Subclass(arg) {
           var o = new C(arg);
@@ -121,7 +124,7 @@
           return o;
         };
         Object.setPrototypeOf(Sub, C);
-        Sub.prototype = create(C.prototype, {
+        Sub.prototype = Object.create(C.prototype, {
           constructor: { value: Sub }
         });
         return f(Sub);
@@ -201,7 +204,7 @@
       }
       var not = function notThunker(func) {
         return function notThunk() {
-          return !func.apply(this, arguments);
+          return !func.apply(this, ES.Call(pSlice, arguments));
         };
       };
       var throwsError = function (func) {
@@ -225,16 +228,16 @@
         - In Firefox 25 at least, Map and Set are callable without "new"
       */
       if (
-        typeof NativeMap.prototype.clear !== 'function' ||
+        !ES.IsCallable(NativeMap.prototype.clear) ||
         new NativeSet().size !== 0 ||
         new NativeMap().size !== 0 ||
-        typeof NativeMap.prototype.keys !== 'function' ||
-        typeof NativeSet.prototype.keys !== 'function' ||
-        typeof NativeMap.prototype.forEach !== 'function' ||
-        typeof NativeSet.prototype.forEach !== 'function' ||
+        !ES.IsCallable(NativeMap.prototype.keys) ||
+        !ES.IsCallable(NativeSet.prototype.keys) ||
+        !ES.IsCallable(NativeMap.prototype.forEach) ||
+        !ES.IsCallable(NativeSet.prototype.forEach) ||
         isCallableWithoutNew(NativeMap) ||
         isCallableWithoutNew(NativeSet) ||
-        typeof new NativeMap().keys().next !== 'function' || // Safari 8
+        ES.IsCallable(new NativeMap().keys().next) || // Safari 8
         mapIterationThrowsStopIterator || // Firefox 25
         !mapSupportsSubclassing
       ) {
@@ -247,10 +250,10 @@
       }
 
       // Incomplete iterator implementations.
-      if (typeof (new NativeMap()).keys()[symIt] === 'undefined') {
+      if (isUndefined((new NativeMap()).keys()[symIt])) {
         return true;
       }
-      if (typeof (new NativeSet()).keys()[symIt] === 'undefined') {
+      if (isUndefined((new NativeSet()).keys()[symIt])) {
         return true;
       }
 
@@ -272,8 +275,7 @@
    * @return {Symbol|string|undefined} The iterator property identifier.
    */
   function getSymbolIterator(iterable) {
-    /*jshint eqnull:true */
-    if (iterable != null) {
+    if (!isNil(iterable)) {
       if ((hasRealSymbolIterator || hasFakeSymbolIterator) && iterable[symIt]) {
         return symIt;
       }
@@ -307,7 +309,7 @@
       '[[id]]': new IdGenerator(),
       '[[changed]]': false
     });
-    if (symbolIterator && typeof iterable[symbolIterator] === 'function') {
+    if (iterable && ES.IsCallable(iterable[symbolIterator])) {
       iterator = iterable[symbolIterator]();
       next = iterator.next();
       if (kind === 'map') {
@@ -670,10 +672,10 @@
    *                                  // as myArray
    */
   SetObject = function Set() {
-    if (!(this instanceof SetObject)) {
+    if (!this || !(this instanceof SetObject)) {
       throw new TypeError('Constructor Set requires \'new\'');
     }
-    parseIterable('set', this, arguments[0]);
+    parseIterable('set', this, arguments.length ? arguments[0] : noop());
   };
   /** @borrows Set as Set */
   module.exports.Set = useCompatability ? SetObject : NativeSet;
@@ -1015,10 +1017,10 @@
    * myMap.get("key1"); // returns "value1"
    */
   MapObject = function Map() {
-    if (!(this instanceof MapObject)) {
+    if (!this || !(this instanceof MapObject)) {
       throw new TypeError('Constructor Map requires \'new\'');
     }
-    parseIterable('map', this, arguments[0]);
+    parseIterable('map', this, arguments.length ? arguments[0] : noop());
   };
   /** @borrows Map as Map */
   module.exports.Map = useCompatability ? MapObject : NativeMap;

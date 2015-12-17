@@ -21,42 +21,54 @@ alt="npm version" height="18">
 </a>
 
 ES6 collections fallback library: Map and Set.
-This library will work on ES3 environments provide that you have loaded
-es5-shim. For even better performance you should also load es6-shim which
-patches faulty ES6 implimentations but its shims do not work in the
-older ES3 environments, and that's where this fallback library comes into
-play.
 
-**Version**: 1.0.2  
+<h2>ECMAScript compatibility shims for legacy JavaScript engines</h2>
+`es5-shim.js` monkey-patches a JavaScript context to contain all EcmaScript 5
+methods that can be faithfully emulated with a legacy JavaScript engine.
+
+`es5-sham.js` monkey-patches other ES5 methods as closely as possible.
+For these methods, as closely as possible to ES5 is not very close.
+Many of these shams are intended only to allow code to be written to ES5
+without causing run-time errors in older engines. In many cases,
+this means that these shams cause many ES5 methods to silently fail.
+Decide carefully whether this is what you want. Note: es5-sham.js requires
+es5-shim.js to be able to work properly.
+
+`json3.js` monkey-patches the EcmaScript 5 JSON implimentation faithfully.
+
+`es6.shim.js` provides compatibility shims so that legacy JavaScript engines
+behave as closely as possible to ECMAScript 6 (Harmony).
+
+**Version**: 1.0.3  
 **Author:** Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  
 
 * [collections-x](#module_collections-x)
-  * [`.symIt`](#module_collections-x.symIt)
-  * [`.Set`](#module_collections-x.Set)
-    * [`.size`](#module_collections-x.Set+size) : <code>number</code>
-    * [`.has(value)`](#module_collections-x.Set+has) ⇒ <code>boolean</code>
-    * [`.add(value)`](#module_collections-x.Set+add) ⇒ <code>Object</code>
-    * [`.clear()`](#module_collections-x.Set+clear) ⇒ <code>Object</code>
-    * [`.delete(value)`](#module_collections-x.Set+delete) ⇒ <code>boolean</code>
-    * [`.forEach(callback, [thisArg])`](#module_collections-x.Set+forEach) ⇒ <code>Object</code>
-    * [`.values()`](#module_collections-x.Set+values) ⇒ <code>Object</code>
-    * [`.keys()`](#module_collections-x.Set+keys) ⇒ <code>Object</code>
-    * [`.entries()`](#module_collections-x.Set+entries) ⇒ <code>Object</code>
-    * [`.symIt()`](#module_collections-x.Set+symIt) ⇒ <code>Object</code>
-  * [`.Map`](#module_collections-x.Map)
-    * [`.entries`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
-    * [`.size`](#module_collections-x.Map+size) : <code>number</code>
-    * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
-    * [`.set(key, value)`](#module_collections-x.Map+set) ⇒ <code>Object</code>
-    * [`.clear()`](#module_collections-x.Map+clear) ⇒ <code>Object</code>
-    * [`.get(key)`](#module_collections-x.Map+get) ⇒ <code>\*</code>
-    * [`.delete(key)`](#module_collections-x.Map+delete) ⇒ <code>boolean</code>
-    * [`.forEach(callback, [thisArg])`](#module_collections-x.Map+forEach) ⇒ <code>Object</code>
-    * [`.values()`](#module_collections-x.Map+values) ⇒ <code>Object</code>
-    * [`.keys()`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
-    * [`.symIt()`](#module_collections-x.Map+symIt) ⇒ <code>Object</code>
+    * [`.symIt`](#module_collections-x.symIt)
+    * [`.Set`](#module_collections-x.Set)
+        * [`.size`](#module_collections-x.Set+size) : <code>number</code>
+        * [`.has(value)`](#module_collections-x.Set+has) ⇒ <code>boolean</code>
+        * [`.add(value)`](#module_collections-x.Set+add) ⇒ <code>Object</code>
+        * [`.clear()`](#module_collections-x.Set+clear) ⇒ <code>Object</code>
+        * [`.delete(value)`](#module_collections-x.Set+delete) ⇒ <code>boolean</code>
+        * [`.forEach(callback, [thisArg])`](#module_collections-x.Set+forEach) ⇒ <code>Object</code>
+        * [`.values()`](#module_collections-x.Set+values) ⇒ <code>Object</code>
+        * [`.keys()`](#module_collections-x.Set+keys) ⇒ <code>Object</code>
+        * [`.entries()`](#module_collections-x.Set+entries) ⇒ <code>Object</code>
+        * [`.symIt()`](#module_collections-x.Set+symIt) ⇒ <code>Object</code>
+    * [`.Map`](#module_collections-x.Map)
+        * [`.entries`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
+        * [`.size`](#module_collections-x.Map+size) : <code>number</code>
+        * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
+        * [`.set(key, value)`](#module_collections-x.Map+set) ⇒ <code>Object</code>
+        * [`.clear()`](#module_collections-x.Map+clear) ⇒ <code>Object</code>
+        * [`.get(key)`](#module_collections-x.Map+get) ⇒ <code>\*</code>
+        * [`.delete(key)`](#module_collections-x.Map+delete) ⇒ <code>boolean</code>
+        * [`.forEach(callback, [thisArg])`](#module_collections-x.Map+forEach) ⇒ <code>Object</code>
+        * [`.values()`](#module_collections-x.Map+values) ⇒ <code>Object</code>
+        * [`.keys()`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
+        * [`.symIt()`](#module_collections-x.Map+symIt) ⇒ <code>Object</code>
 
 <a name="module_collections-x.symIt"></a>
 ### `collections-x.symIt`
@@ -70,16 +82,16 @@ type {Symbol|string}
 **Kind**: static property of <code>[collections-x](#module_collections-x)</code>  
 
 * [`.Set`](#module_collections-x.Set)
-  * [`.size`](#module_collections-x.Set+size) : <code>number</code>
-  * [`.has(value)`](#module_collections-x.Set+has) ⇒ <code>boolean</code>
-  * [`.add(value)`](#module_collections-x.Set+add) ⇒ <code>Object</code>
-  * [`.clear()`](#module_collections-x.Set+clear) ⇒ <code>Object</code>
-  * [`.delete(value)`](#module_collections-x.Set+delete) ⇒ <code>boolean</code>
-  * [`.forEach(callback, [thisArg])`](#module_collections-x.Set+forEach) ⇒ <code>Object</code>
-  * [`.values()`](#module_collections-x.Set+values) ⇒ <code>Object</code>
-  * [`.keys()`](#module_collections-x.Set+keys) ⇒ <code>Object</code>
-  * [`.entries()`](#module_collections-x.Set+entries) ⇒ <code>Object</code>
-  * [`.symIt()`](#module_collections-x.Set+symIt) ⇒ <code>Object</code>
+    * [`.size`](#module_collections-x.Set+size) : <code>number</code>
+    * [`.has(value)`](#module_collections-x.Set+has) ⇒ <code>boolean</code>
+    * [`.add(value)`](#module_collections-x.Set+add) ⇒ <code>Object</code>
+    * [`.clear()`](#module_collections-x.Set+clear) ⇒ <code>Object</code>
+    * [`.delete(value)`](#module_collections-x.Set+delete) ⇒ <code>boolean</code>
+    * [`.forEach(callback, [thisArg])`](#module_collections-x.Set+forEach) ⇒ <code>Object</code>
+    * [`.values()`](#module_collections-x.Set+values) ⇒ <code>Object</code>
+    * [`.keys()`](#module_collections-x.Set+keys) ⇒ <code>Object</code>
+    * [`.entries()`](#module_collections-x.Set+entries) ⇒ <code>Object</code>
+    * [`.symIt()`](#module_collections-x.Set+symIt) ⇒ <code>Object</code>
 
 <a name="module_collections-x.Set+size"></a>
 #### `set.size` : <code>number</code>
@@ -309,17 +321,17 @@ console.log(setIter.next().value); // Object
 **Kind**: static property of <code>[collections-x](#module_collections-x)</code>  
 
 * [`.Map`](#module_collections-x.Map)
-  * [`.entries`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
-  * [`.size`](#module_collections-x.Map+size) : <code>number</code>
-  * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
-  * [`.set(key, value)`](#module_collections-x.Map+set) ⇒ <code>Object</code>
-  * [`.clear()`](#module_collections-x.Map+clear) ⇒ <code>Object</code>
-  * [`.get(key)`](#module_collections-x.Map+get) ⇒ <code>\*</code>
-  * [`.delete(key)`](#module_collections-x.Map+delete) ⇒ <code>boolean</code>
-  * [`.forEach(callback, [thisArg])`](#module_collections-x.Map+forEach) ⇒ <code>Object</code>
-  * [`.values()`](#module_collections-x.Map+values) ⇒ <code>Object</code>
-  * [`.keys()`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
-  * [`.symIt()`](#module_collections-x.Map+symIt) ⇒ <code>Object</code>
+    * [`.entries`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
+    * [`.size`](#module_collections-x.Map+size) : <code>number</code>
+    * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
+    * [`.set(key, value)`](#module_collections-x.Map+set) ⇒ <code>Object</code>
+    * [`.clear()`](#module_collections-x.Map+clear) ⇒ <code>Object</code>
+    * [`.get(key)`](#module_collections-x.Map+get) ⇒ <code>\*</code>
+    * [`.delete(key)`](#module_collections-x.Map+delete) ⇒ <code>boolean</code>
+    * [`.forEach(callback, [thisArg])`](#module_collections-x.Map+forEach) ⇒ <code>Object</code>
+    * [`.values()`](#module_collections-x.Map+values) ⇒ <code>Object</code>
+    * [`.keys()`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
+    * [`.symIt()`](#module_collections-x.Map+symIt) ⇒ <code>Object</code>
 
 <a name="module_collections-x.Map+entries"></a>
 #### `map.entries` ⇒ <code>Object</code>

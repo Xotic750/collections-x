@@ -6,7 +6,8 @@
   es3:true, esnext:true, plusplus:true, maxparams:3, maxdepth:2,
   maxstatements:38, maxcomplexity:7 */
 
-/*global expect, module, require, describe, it, xit, jasmine, returnExports */
+/*global JSON:true, expect, module, require, describe, it, xit, jasmine,
+  returnExports */
 
 (function () {
   'use strict';
@@ -17,6 +18,12 @@
     MapObject, SetObject, symIt;
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
+    require('es5-shim/es5-sham');
+    if (typeof JSON === 'undefined') {
+      JSON = {};
+    }
+    require('json3').runInContext(null, JSON);
+    require('es6-shim');
     MapObject = require('../../index.js').Map;
     SetObject = require('../../index.js').Set;
     symIt = require('../../index.js').symIt;
