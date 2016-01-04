@@ -35,7 +35,7 @@
     "define-property-x": "^1.0.4",
     "is-string": "^1.0.4",
     "is-array-like-x": "^1.0.4",
-    "is-surrogate-pair-x": "^1.0.3",
+    "is-surrogate-pair-x": "^1.0.4",
     "is-primitive": "^2.0.0",
     "noop-x": "^1.0.6",
     "index-of-x": "^1.0.5",
