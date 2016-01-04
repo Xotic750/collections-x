@@ -39,7 +39,7 @@
     "is-primitive": "^2.0.0",
     "noop-x": "^1.0.6",
     "index-of-x": "^1.0.5",
-    "assert-is-callable-x": "^1.0.6",
+    "assert-is-callable-x": "^1.0.7",
     "assert-is-object-x": "^1.0.5",
     "big-counter-x": "^1.0.2",
     "has-symbol-support-x": "^1.0.2",
