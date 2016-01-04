@@ -41,7 +41,7 @@
     "index-of-x": "^1.0.5",
     "assert-is-callable-x": "^1.0.6",
     "assert-is-object-x": "^1.0.5",
-    "big-counter-x": "^1.0.2",
+    "big-counter-x": "^1.0.3",
     "has-symbol-support-x": "^1.0.2",
     "is-nil-x": "^1.0.1",
     "validate.io-undefined": "^1.0.3"
