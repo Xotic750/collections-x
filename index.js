@@ -39,7 +39,7 @@
  * `es6.shim.js` provides compatibility shims so that legacy JavaScript engines
  * behave as closely as possible to ECMAScript 6 (Harmony).
  *
- * @version 1.0.5
+ * @version 1.0.6
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -66,7 +66,6 @@
     pSplice = Array.prototype.splice,
     pSlice = Array.prototype.slice,
     ES = require('es-abstract'),
-    noop = require('noop-x'),
     defProps = require('define-properties'),
     defProp = require('define-property-x'),
     isString = require('is-string'),
@@ -597,7 +596,7 @@
       this['[[IteratorHasMore]]'] = false;
       object =  {
         done: true,
-        value: noop()
+        value: void 0
       };
     }
     return object;
@@ -675,7 +674,7 @@
     if (!this || !(this instanceof SetObject)) {
       throw new TypeError('Constructor Set requires \'new\'');
     }
-    parseIterable('set', this, arguments.length ? arguments[0] : noop());
+    parseIterable('set', this, arguments.length ? arguments[0] : void 0);
   };
   /** @borrows Set as Set */
   module.exports.Set = useCompatability ? SetObject : NativeSet;
@@ -943,7 +942,7 @@
       this['[[IteratorHasMore]]'] = false;
       object = {
         done: true,
-        value: noop()
+        value: void 0
       };
     }
     return object;
@@ -1020,7 +1019,7 @@
     if (!this || !(this instanceof MapObject)) {
       throw new TypeError('Constructor Map requires \'new\'');
     }
-    parseIterable('map', this, arguments.length ? arguments[0] : noop());
+    parseIterable('map', this, arguments.length ? arguments[0] : void 0);
   };
   /** @borrows Map as Map */
   module.exports.Map = useCompatability ? MapObject : NativeMap;
@@ -1105,7 +1104,7 @@
         key,
         'SameValueZero'
       );
-      return index > -1 ? this['[[value]]'][index] : noop();
+      return index > -1 ? this['[[value]]'][index] : void 0;
     },
     /**
      * The delete() method removes the specified element from a Map object.
