@@ -39,7 +39,7 @@
  * `es6.shim.js` provides compatibility shims so that legacy JavaScript engines
  * behave as closely as possible to ECMAScript 6 (Harmony).
  *
- * @version 1.0.6
+ * @version 1.0.7
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -51,45 +51,39 @@
 /*jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
-  es3:true, esnext:true, plusplus:true, maxparams:4, maxdepth:5,
-  maxstatements:56, maxcomplexity:30 */
+  es3:false, esnext:true, plusplus:true, maxparams:4, maxdepth:4,
+  maxstatements:57, maxcomplexity:24 */
 
 /*global require, module */
 
 ;(function () {
   'use strict';
 
-  var hasOwn = Object.prototype.hasOwnProperty,
-    pCharAt = String.prototype.charAt,
-    pPush = Array.prototype.push,
-    pSome = Array.prototype.some,
-    pSplice = Array.prototype.splice,
-    pSlice = Array.prototype.slice,
-    ES = require('es-abstract'),
-    defProps = require('define-properties'),
-    defProp = require('define-property-x'),
-    isString = require('is-string'),
-    isArrayLike = require('is-array-like-x'),
-    isPrimitive = require('is-primitive'),
-    isSurrogatePair = require('is-surrogate-pair-x'),
-    indexOf = require('index-of-x'),
-    assertIsCallable = require('assert-is-callable-x'),
-    assertIsObject = require('assert-is-object-x'),
-    IdGenerator = require('big-counter-x'),
-    isNil = require('is-nil-x'),
-    isUndefined = require('validate.io-undefined'),
-    hasRealSymbolIterator = require('has-symbol-support-x') &&
-      typeof Symbol.iterator === 'symbol',
-    hasFakeSymbolIterator = typeof Symbol === 'object' &&
-      typeof Symbol.iterator === 'string',
-    NativeMap = typeof Map !== 'undefined' && Map,
-    NativeSet = typeof Set !== 'undefined' && Set,
-    SetObject, MapObject, baseHas, setValuesIterator,
-    mapEntries, symIt, useCompatability;
+  var hasOwnProperty = require('has-own-property-x');
+  var pCharAt = String.prototype.charAt;
+  var pPush = Array.prototype.push;
+  var pSome = Array.prototype.some;
+  var pSplice = Array.prototype.splice;
+  var isCallable = require('is-callable');
+  var define = require('define-properties-x');
+  var isString = require('is-string');
+  var isArrayLike = require('is-array-like-x');
+  var isPrimitive = require('is-primitive');
+  var isSurrogatePair = require('is-surrogate-pair-x');
+  var indexOf = require('index-of-x');
+  var assertIsCallable = require('assert-is-callable-x');
+  var assertIsObject = require('assert-is-object-x');
+  var IdGenerator = require('big-counter-x');
+  var isNil = require('is-nil-x');
+  var hasRealSymbolIterator = require('has-symbol-support-x') &&
+    typeof Symbol.iterator === 'symbol';
+  var hasFakeSymbolIterator = typeof Symbol === 'object' &&
+    typeof Symbol.iterator === 'string';
+  var symIt;
 
   if (hasRealSymbolIterator || hasFakeSymbolIterator) {
     symIt = Symbol.iterator;
-  } else if (ES.IsCallable(Array.prototype['_es6-shim iterator_'])) {
+  } else if (isCallable(Array.prototype['_es6-shim iterator_'])) {
     symIt = '_es6-shim iterator_';
   } else {
     symIt = '@@iterator';
@@ -101,170 +95,6 @@
    * type {Symbol|string}
    */
   module.exports.symIt = symIt;
-
-  useCompatability = (function () {
-    function valueOrFalseIfThrows(func) {
-      try {
-        return func();
-      } catch (e) {
-        return false;
-      }
-    }
-
-    function supportsSubclassing(C, f) {
-      /* skip test on IE < 11 */
-      if (!Object.setPrototypeOf) {
-        return false;
-      }
-      return valueOrFalseIfThrows(function () {
-        var Sub = function Subclass(arg) {
-          var o = new C(arg);
-          Object.setPrototypeOf(o, Subclass.prototype);
-          return o;
-        };
-        Object.setPrototypeOf(Sub, C);
-        Sub.prototype = Object.create(C.prototype, {
-          constructor: { value: Sub }
-        });
-        return f(Sub);
-      });
-    }
-
-    if (NativeMap || NativeSet) {
-      // Safari 8, for example, doesn't accept an iterable.
-      if (!valueOrFalseIfThrows(function () {
-        return new NativeMap([[1, 2]]).get(1) === 2;
-      })) {
-        return true;
-      }
-      if (!(function () {
-        // Chrome 38-42, node 0.11/0.12, iojs 1/2 also have a bug when
-        // the Map has a size > 4
-        var m = new NativeMap([[1, 0], [2, 0], [3, 0], [4, 0]]);
-        m.set(-0, m);
-        return m.get(0) === m && m.get(-0) === m && m.has(0) && m.has(-0);
-      }())) {
-        return true;
-      }
-      var testMap = new NativeMap();
-      if (testMap.set(1, 2) !== testMap) {
-        return true;
-      }
-      var testSet = new NativeSet();
-      if ((function (s) {
-        s['delete'](0);
-        s.add(-0);
-        return !s.has(0);
-      }(testSet))) {
-        return true;
-      }
-      if (testSet.add(1) !== testSet) {
-        return true;
-      }
-      var mapSupportsSubclassing = supportsSubclassing(NativeMap, function (M) {
-        var m = new M([]);
-        // Firefox 32 is ok with the instantiating the subclass but will
-        // throw when the map is used.
-        m.set(42, 42);
-        return m instanceof M;
-      });
-      // without Object.setPrototypeOf, subclassing is not possible
-      var mapFailsToSupportSubclassing = Object.setPrototypeOf &&
-        !mapSupportsSubclassing;
-      var mapRequiresNew = (function () {
-        try {
-          /*jshint newcap:false */
-          return !(NativeMap() instanceof NativeMap);
-        } catch (e) {
-          return e instanceof TypeError;
-        }
-      }());
-      if (NativeMap.length !== 0 || mapFailsToSupportSubclassing || !mapRequiresNew) {
-        return true;
-      }
-      var setSupportsSubclassing = supportsSubclassing(NativeSet, function (S) {
-        var s = new S([]);
-        s.add(42, 42);
-        return s instanceof S;
-      });
-      // without Object.setPrototypeOf, subclassing is not possible
-      var setFailsToSupportSubclassing = Object.setPrototypeOf &&
-        !setSupportsSubclassing;
-      var setRequiresNew = (function () {
-        try {
-          /*jshint newcap:false */
-          return !(NativeSet() instanceof NativeSet);
-        } catch (e) {
-          return e instanceof TypeError;
-        }
-      }());
-      if (NativeSet.length !== 0 || setFailsToSupportSubclassing || !setRequiresNew) {
-        return true;
-      }
-      var not = function notThunker(func) {
-        return function notThunk() {
-          return !func.apply(this, ES.Call(pSlice, arguments));
-        };
-      };
-      var throwsError = function (func) {
-        try {
-          func();
-          return false;
-        } catch (e) {
-          return true;
-        }
-      };
-      var isCallableWithoutNew = not(throwsError);
-      var mapIterationThrowsStopIterator = !valueOrFalseIfThrows(function () {
-        return (new Map()).keys().next().done;
-      });
-      /*
-        - In Firefox < 23, Map#size is a function.
-        - In all current Firefox,
-            Set#entries/keys/values & Map#clear do not exist
-        - https://bugzilla.mozilla.org/show_bug.cgi?id=869996
-        - In Firefox 24, Map and Set do not implement forEach
-        - In Firefox 25 at least, Map and Set are callable without "new"
-      */
-      if (
-        !ES.IsCallable(NativeMap.prototype.clear) ||
-        new NativeSet().size !== 0 ||
-        new NativeMap().size !== 0 ||
-        !ES.IsCallable(NativeMap.prototype.keys) ||
-        !ES.IsCallable(NativeSet.prototype.keys) ||
-        !ES.IsCallable(NativeMap.prototype.forEach) ||
-        !ES.IsCallable(NativeSet.prototype.forEach) ||
-        isCallableWithoutNew(NativeMap) ||
-        isCallableWithoutNew(NativeSet) ||
-        ES.IsCallable(new NativeMap().keys().next) || // Safari 8
-        mapIterationThrowsStopIterator || // Firefox 25
-        !mapSupportsSubclassing
-      ) {
-        return true;
-      }
-
-      if (NativeSet.prototype.keys !== NativeSet.prototype.values) {
-        // Fixed in WebKit with https://bugs.webkit.org/show_bug.cgi?id=144190
-        return true;
-      }
-
-      // Incomplete iterator implementations.
-      if (isUndefined((new NativeMap()).keys()[symIt])) {
-        return true;
-      }
-      if (isUndefined((new NativeSet()).keys()[symIt])) {
-        return true;
-      }
-
-      if ((function foo() {}).name === 'foo' &&
-          NativeSet.prototype.has.name !== 'has') {
-        // Microsoft Edge v0.11.10074.0 is missing a name on Set#has
-        return true;
-      }
-    } else {
-      return true;
-    }
-  }());
 
   /**
    * Detect an interator function.
@@ -297,19 +127,19 @@
    * @param {*} iterable Value to parsed.
    */
   function parseIterable(kind, context, iterable) {
-    var symbolIterator = getSymbolIterator(iterable),
-      iterator, indexof, next, key, char1, char2;
+    var symbolIterator = getSymbolIterator(iterable);
     if (kind === 'map') {
-      defProp(context, '[[value]]', []);
+      define.defineProperty(context, '[[value]]', []);
     }
-    defProps(context, {
+    define.defineProperties(context, {
       '[[key]]': [],
       '[[order]]': [],
       '[[id]]': new IdGenerator(),
       '[[changed]]': false
     });
-    if (iterable && ES.IsCallable(iterable[symbolIterator])) {
-      iterator = iterable[symbolIterator]();
+    var next, key, indexof;
+    if (iterable && isCallable(iterable[symbolIterator])) {
+      var iterator = iterable[symbolIterator]();
       next = iterator.next();
       if (kind === 'map') {
         if (!isArrayLike(next.value) || next.value.length < 2) {
@@ -329,10 +159,10 @@
         );
         if (indexof < 0) {
           if (kind === 'map') {
-            ES.Call(pPush, context['[[value]]'], [next.value[1]]);
+            pPush.call(context['[[value]]'], next.value[1]);
           }
-          ES.Call(pPush, context['[[key]]'], [key]);
-          ES.Call(pPush, context['[[order]]'], [context['[[id]]'].get()]);
+          pPush.call(context['[[key]]'], key);
+          pPush.call(context['[[order]]'], context['[[id]]'].get());
           context['[[id]]'].next();
         } else if (kind === 'map') {
           context['[[value]]'][indexof] = next.value[1];
@@ -343,13 +173,13 @@
     if (isString(iterable)) {
       if (kind === 'map') {
         throw new TypeError(
-          'Iterator value ' + iterable.charAt(0) + ' is not an entry object'
+          'Iterator value ' + pCharAt.call(iterable, 0) + ' is not an entry object'
         );
       }
       next = 0;
       while (next < iterable.length) {
-        char1 = ES.Call(pCharAt, iterable, [next]);
-        char2 = ES.Call(pCharAt, iterable, [next + 1]);
+        var char1 = pCharAt.call(iterable, next);
+        var char2 = pCharAt.call(iterable, next + 1);
         if (isSurrogatePair(char1, char2)) {
           key = char1 + char2;
           next += 1;
@@ -362,8 +192,8 @@
           'SameValueZero'
         );
         if (indexof < 0) {
-          ES.Call(pPush, context['[[key]]'], [key]);
-          ES.Call(pPush, context['[[order]]'], [context['[[id]]'].get()]);
+          pPush.call(context['[[key]]'], key);
+          pPush.call(context['[[order]]'], context['[[id]]'].get());
           context['[[id]]'].next();
         }
         next += 1;
@@ -391,10 +221,10 @@
         );
         if (indexof < 0) {
           if (kind === 'map') {
-            ES.Call(pPush, context['[[value]]'], [iterable[next][1]]);
+            pPush.call(context['[[value]]'], iterable[next][1]);
           }
-          ES.Call(pPush, context['[[key]]'], [key]);
-          ES.Call(pPush, context['[[order]]'], [context['[[id]]'].get()]);
+          pPush.call(context['[[key]]'], key);
+          pPush.call(context['[[order]]'], context['[[id]]'].get());
           context['[[id]]'].next();
         } else if (kind === 'map') {
           context['[[value]]'][indexof] = iterable[next][1];
@@ -402,7 +232,7 @@
         next += 1;
       }
     }
-    defProp(context, 'size', context['[[key]]'].length, true);
+    define.defineProperty(context, 'size', context['[[key]]'].length, true);
   }
 
   /**
@@ -417,27 +247,26 @@
    * @return {Object} The Map/Set object.
    */
   function baseForEach(kind, context, callback, thisArg) {
-    var pointers, length, value, key;
     assertIsObject(context);
     assertIsCallable(callback);
-    pointers = {
+    var pointers = {
       index: 0,
       order: context['[[order]]'][0]
     };
     context['[[change]]'] = false;
-    length = context['[[key]]'].length;
+    var length = context['[[key]]'].length;
     while (pointers.index < length) {
-      if (ES.Call(hasOwn, context['[[key]]'], [pointers.index])) {
-        key = context['[[key]]'][pointers.index];
-        value = kind === 'map' ?  context['[[value]]'][pointers.index] :  key;
-        ES.Call(callback, thisArg, [value, key, context]);
+      if (hasOwnProperty(context['[[key]]'], pointers.index)) {
+        var key = context['[[key]]'][pointers.index];
+        var value = kind === 'map' ? context['[[value]]'][pointers.index] : key;
+        callback.call(thisArg, value, key, context);
       }
       if (context['[[change]]']) {
         length = context['[[key]]'].length;
-        ES.Call(pSome, context['[[order]]'], [function (id, count) {
+        pSome.call(context['[[order]]'], function (id, count) {
           pointers.index = count;
           return id > pointers.order;
-        }]);
+        });
         context['[[change]]'] = false;
       } else {
         pointers.index += 1;
@@ -456,7 +285,7 @@
    * @return {boolean} Returns true if an element with the specified key/value
    *  exists in the Map/Set object; otherwise false.
    */
-  baseHas = function has(key) {
+  var baseHas = function has(key) {
     /*jshint validthis:true */
     return indexOf(assertIsObject(this)['[[key]]'], key, 'SameValueZero') > -1;
   };
@@ -491,19 +320,17 @@
    */
   function baseDelete(kind, context, key) {
     var indexof = indexOf(
-        assertIsObject(context)['[[key]]'],
-        key,
-        'SameValueZero'
-      ),
-      result = false,
-      args;
+      assertIsObject(context)['[[key]]'],
+      key,
+      'SameValueZero'
+    );
+    var result = false;
     if (indexof > -1) {
-      args = [indexof, 1];
       if (kind === 'map') {
-        ES.Call(pSplice, context['[[value]]'], args);
+        pSplice.call(context['[[value]]'], indexof, 1);
       }
-      ES.Call(pSplice, context['[[key]]'], args);
-      ES.Call(pSplice, context['[[order]]'], args);
+      pSplice.call(context['[[key]]'], indexof, 1);
+      pSplice.call(context['[[order]]'], indexof, 1);
       context['[[change]]'] = true;
       context.size = context['[[key]]'].length;
       result = true;
@@ -533,10 +360,10 @@
       }
     } else {
       if (kind === 'map') {
-        ES.Call(pPush, context['[[value]]'], [value]);
+        pPush.call(context['[[value]]'], value);
       }
-      ES.Call(pPush, context['[[key]]'], [key]);
-      ES.Call(pPush, context['[[order]]'], [context['[[id]]'].get()]);
+      pPush.call(context['[[key]]'], key);
+      pPush.call(context['[[order]]'], context['[[id]]'].get());
       context['[[id]]'].next();
       context['[[change]]'] = true;
       context.size = context['[[key]]'].length;
@@ -558,7 +385,7 @@
    * @param {string} iteratorKind Values are `value`, `key` or `key+value`.
    */
   function SetIterator(context, iteratorKind) {
-    defProps(this, {
+    define.defineProperties(this, {
       '[[Set]]': assertIsObject(context),
       '[[SetNextIndex]]': 0,
       '[[SetIterationKind]]': iteratorKind || 'value',
@@ -573,12 +400,12 @@
    * @function next
    * @return {Object} Returns an object with two properties: done and value.
    */
-  defProp(SetIterator.prototype, 'next', function next() {
-    var context = assertIsObject(this['[[Set]]']),
-      index = this['[[SetNextIndex]]'],
-      iteratorKind = this['[[SetIterationKind]]'],
-      more = this['[[IteratorHasMore]]'],
-      object;
+  define.defineProperty(SetIterator.prototype, 'next', function next() {
+    var context = assertIsObject(this['[[Set]]']);
+    var index = this['[[SetNextIndex]]'];
+    var iteratorKind = this['[[SetIterationKind]]'];
+    var more = this['[[IteratorHasMore]]'];
+    var object;
     if (index < context['[[key]]'].length && more) {
       object = {
         done: false
@@ -594,7 +421,7 @@
       this['[[SetNextIndex]]'] += 1;
     } else {
       this['[[IteratorHasMore]]'] = false;
-      object =  {
+      object = {
         done: true,
         value: void 0
       };
@@ -609,7 +436,7 @@
    * @memberof SetIterator.prototype
    * @return {Object} This Iterator object.
    */
-  defProp(SetIterator.prototype, symIt, function iterator() {
+  define.defineProperty(SetIterator.prototype, symIt, function iterator() {
     return this;
   });
 
@@ -621,7 +448,7 @@
    * @this Set
    * @return {Object} A new Iterator object.
    */
-  setValuesIterator = function values() {
+  var setValuesIterator = function values() {
     /*jshint validthis:true */
     return new SetIterator(this);
   };
@@ -670,15 +497,15 @@
    * console.log(uneval([...mySet])); // Will show you exactly the same Array
    *                                  // as myArray
    */
-  SetObject = function Set() {
+  var SetObject = function Set() {
     if (!this || !(this instanceof SetObject)) {
       throw new TypeError('Constructor Set requires \'new\'');
     }
     parseIterable('set', this, arguments.length ? arguments[0] : void 0);
   };
   /** @borrows Set as Set */
-  module.exports.Set = useCompatability ? SetObject : NativeSet;
-  defProps(SetObject.prototype, /** @lends module:collections-x.Set.prototype */ {
+  module.exports.Set = SetObject;
+  define.defineProperties(SetObject.prototype, /** @lends module:collections-x.Set.prototype */ {
     /**
      * The has() method returns a boolean indicating whether an element with the
      * specified value exists in a Set object or not.
@@ -887,7 +714,7 @@
    * console.log(setIter.next().value); // 1
    * console.log(setIter.next().value); // Object
    */
-  defProp(SetObject.prototype, symIt, setValuesIterator);
+  define.defineProperty(SetObject.prototype, symIt, setValuesIterator);
 
   /**
    * An object is an iterator when it knows how to access items from a
@@ -903,7 +730,7 @@
    * @param {string} iteratorKind Values are `value`, `key` or `key+value`.
    */
   function MapIterator(context, iteratorKind) {
-    defProps(this, {
+    define.defineProperties(this, {
       '[[Map]]': assertIsObject(context),
       '[[MapNextIndex]]': 0,
       '[[MapIterationKind]]': iteratorKind,
@@ -918,12 +745,12 @@
    * @function next
    * @return {Object} Returns an object with two properties: done and value.
    */
-  defProp(MapIterator.prototype, 'next', function next() {
-    var context = assertIsObject(this['[[Map]]']),
-      index = this['[[MapNextIndex]]'],
-      iteratorKind = this['[[MapIterationKind]]'],
-      more = this['[[IteratorHasMore]]'],
-      object;
+  define.defineProperty(MapIterator.prototype, 'next', function next() {
+    var context = assertIsObject(this['[[Map]]']);
+    var index = this['[[MapNextIndex]]'];
+    var iteratorKind = this['[[MapIterationKind]]'];
+    var more = this['[[IteratorHasMore]]'];
+    var object;
     assertIsObject(context);
     if (index < context['[[key]]'].length && more) {
       object = {
@@ -955,13 +782,9 @@
    * @memberof MapIterator.prototype
    * @return {Object} This Iterator object.
    */
-  defProp(MapIterator.prototype, symIt, function iterator() {
+  define.defineProperty(MapIterator.prototype, symIt, function iterator() {
     return this;
   });
-
-  mapEntries = function entries() {
-    return new MapIterator(this, 'key+value');
-  };
 
   /**
    * The Map object is a simple key/value map. Any value (both objects and
@@ -1015,15 +838,15 @@
    *
    * myMap.get("key1"); // returns "value1"
    */
-  MapObject = function Map() {
+  var MapObject = function Map() {
     if (!this || !(this instanceof MapObject)) {
       throw new TypeError('Constructor Map requires \'new\'');
     }
     parseIterable('map', this, arguments.length ? arguments[0] : void 0);
   };
   /** @borrows Map as Map */
-  module.exports.Map = useCompatability ? MapObject : NativeMap;
-  defProps(MapObject.prototype, /** @lends module:collections-x.Map.prototype */ {
+  module.exports.Map = MapObject;
+  define.defineProperties(MapObject.prototype, /** @lends module:collections-x.Map.prototype */ {
     /**
      * The has() method returns a boolean indicating whether an element with
      * the specified key exists or not.
@@ -1206,7 +1029,9 @@
      * console.log(mapIter.next().value); // [1, "bar"]
      * console.log(mapIter.next().value); // [Object, "baz"]
      */
-    entries: mapEntries,
+    entries: function entries() {
+      return new MapIterator(this, 'key+value');
+    },
     /**
      * The value of size is an integer representing how many entries the Map
      * object has.
@@ -1247,5 +1072,5 @@
    * console.log(mapIter.next().value); // [1, "bar"]
    * console.log(mapIter.next().value); // [Object, "baz"]
    */
-  defProp(MapObject.prototype, symIt, mapEntries);
+  define.defineProperty(MapObject.prototype, symIt, MapObject.prototype.entries);
 }());

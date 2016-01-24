@@ -1,13 +1,13 @@
 {
   "name": "collections-x",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "ES6 collections fallback library: Map and Set.",
   "homepage": "https://github.com/Xotic750/collections-x",
   "author": {
     "name": "Graham Fairweather",
     "email": "xotic750@gmail.com"
   },
-  "copyright": "Copyright (c) 2015",
+  "copyright": "Copyright (c) 2015-2016",
   "keywords": [
     "es6",
     "Map",
@@ -30,24 +30,23 @@
     "url": "https://github.com/Xotic750/collections-x/issues"
   },
   "dependencies": {
-    "es-abstract": "^1.5.0",
-    "define-properties": "^1.1.2",
-    "define-property-x": "^1.0.7",
+    "is-callable": "^1.1.2",
+    "define-properties-x": "^1.0.0",
     "is-string": "^1.0.4",
-    "is-array-like-x": "^1.0.7",
-    "is-surrogate-pair-x": "^1.0.6",
+    "is-array-like-x": "^1.0.8",
+    "is-surrogate-pair-x": "^1.0.7",
     "is-primitive": "^2.0.0",
-    "index-of-x": "^1.0.8",
-    "assert-is-callable-x": "^1.0.9",
-    "assert-is-object-x": "^1.0.8",
-    "big-counter-x": "^1.0.5",
-    "has-symbol-support-x": "^1.0.5",
-    "is-nil-x": "^1.0.4",
-    "validate.io-undefined": "^1.0.3"
+    "index-of-x": "^1.0.11",
+    "assert-is-callable-x": "^1.0.10",
+    "assert-is-object-x": "^1.0.9",
+    "big-counter-x": "^1.0.6",
+    "has-symbol-support-x": "^1.0.6",
+    "is-nil-x": "^1.0.5",
+    "has-own-property-x": "^1.0.6"
   },
   "devDependencies": {
-    "es5-shim": "^4.4.1",
-    "es6-shim": "^0.34.1",
+    "es5-shim": "^4.5.0",
+    "es6-shim": "^0.34.2",
     "json3": "^3.3.2",
     "jscs": "^2.8.0",
     "uglify-js": "^2.6.1",

@@ -39,7 +39,7 @@ es5-shim.js to be able to work properly.
 `es6.shim.js` provides compatibility shims so that legacy JavaScript engines
 behave as closely as possible to ECMAScript 6 (Harmony).
 
-**Version**: 1.0.6  
+**Version**: 1.0.7  
 **Author:** Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  
@@ -58,7 +58,6 @@ behave as closely as possible to ECMAScript 6 (Harmony).
         * [`.entries()`](#module_collections-x.Set+entries) ⇒ <code>Object</code>
         * [`.symIt()`](#module_collections-x.Set+symIt) ⇒ <code>Object</code>
     * [`.Map`](#module_collections-x.Map)
-        * [`.entries`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
         * [`.size`](#module_collections-x.Map+size) : <code>number</code>
         * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
         * [`.set(key, value)`](#module_collections-x.Map+set) ⇒ <code>Object</code>
@@ -68,6 +67,7 @@ behave as closely as possible to ECMAScript 6 (Harmony).
         * [`.forEach(callback, [thisArg])`](#module_collections-x.Map+forEach) ⇒ <code>Object</code>
         * [`.values()`](#module_collections-x.Map+values) ⇒ <code>Object</code>
         * [`.keys()`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
+        * [`.entries()`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
         * [`.symIt()`](#module_collections-x.Map+symIt) ⇒ <code>Object</code>
 
 <a name="module_collections-x.symIt"></a>
@@ -321,7 +321,6 @@ console.log(setIter.next().value); // Object
 **Kind**: static property of <code>[collections-x](#module_collections-x)</code>  
 
 * [`.Map`](#module_collections-x.Map)
-    * [`.entries`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
     * [`.size`](#module_collections-x.Map+size) : <code>number</code>
     * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
     * [`.set(key, value)`](#module_collections-x.Map+set) ⇒ <code>Object</code>
@@ -331,29 +330,9 @@ console.log(setIter.next().value); // Object
     * [`.forEach(callback, [thisArg])`](#module_collections-x.Map+forEach) ⇒ <code>Object</code>
     * [`.values()`](#module_collections-x.Map+values) ⇒ <code>Object</code>
     * [`.keys()`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
+    * [`.entries()`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
     * [`.symIt()`](#module_collections-x.Map+symIt) ⇒ <code>Object</code>
 
-<a name="module_collections-x.Map+entries"></a>
-#### `map.entries` ⇒ <code>Object</code>
-The entries() method returns a new Iterator object that contains the
-[key, value] pairs for each element in the Map object in insertion order.
-
-**Kind**: instance property of <code>[Map](#module_collections-x.Map)</code>  
-**Returns**: <code>Object</code> - A new Iterator object.  
-**Example**  
-```js
-var Map = require('collections-x').Map;
-var myMap = new Map();
-myMap.set("0", "foo");
-myMap.set(1, "bar");
-myMap.set({}, "baz");
-
-var mapIter = myMap.entries();
-
-console.log(mapIter.next().value); // ["0", "foo"]
-console.log(mapIter.next().value); // [1, "bar"]
-console.log(mapIter.next().value); // [Object, "baz"]
-```
 <a name="module_collections-x.Map+size"></a>
 #### `map.size` : <code>number</code>
 The value of size is an integer representing how many entries the Map
@@ -548,6 +527,27 @@ var mapIter = myMap.keys();
 console.log(mapIter.next().value); // "0"
 console.log(mapIter.next().value); // 1
 console.log(mapIter.next().value); // Object
+```
+<a name="module_collections-x.Map+entries"></a>
+#### `map.entries()` ⇒ <code>Object</code>
+The entries() method returns a new Iterator object that contains the
+[key, value] pairs for each element in the Map object in insertion order.
+
+**Kind**: instance method of <code>[Map](#module_collections-x.Map)</code>  
+**Returns**: <code>Object</code> - A new Iterator object.  
+**Example**  
+```js
+var Map = require('collections-x').Map;
+var myMap = new Map();
+myMap.set("0", "foo");
+myMap.set(1, "bar");
+myMap.set({}, "baz");
+
+var mapIter = myMap.entries();
+
+console.log(mapIter.next().value); // ["0", "foo"]
+console.log(mapIter.next().value); // [1, "bar"]
+console.log(mapIter.next().value); // [Object, "baz"]
 ```
 <a name="module_collections-x.Map+symIt"></a>
 #### `map.symIt()` ⇒ <code>Object</code>
