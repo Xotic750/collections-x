@@ -39,7 +39,7 @@
  * `es6.shim.js` provides compatibility shims so that legacy JavaScript engines
  * behave as closely as possible to ECMAScript 6 (Harmony).
  *
- * @version 1.0.9
+ * @version 1.0.10
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -129,9 +129,9 @@
   function parseIterable(kind, context, iterable) {
     var symbolIterator = getSymbolIterator(iterable);
     if (kind === 'map') {
-      define.defineProperty(context, '[[value]]', []);
+      define.property(context, '[[value]]', []);
     }
-    define.defineProperties(context, {
+    define.properties(context, {
       '[[key]]': [],
       '[[order]]': [],
       '[[id]]': new IdGenerator(),
@@ -232,7 +232,7 @@
         next += 1;
       }
     }
-    define.defineProperty(context, 'size', context['[[key]]'].length, true);
+    define.property(context, 'size', context['[[key]]'].length, true);
   }
 
   /**
@@ -385,7 +385,7 @@
    * @param {string} iteratorKind Values are `value`, `key` or `key+value`.
    */
   function SetIterator(context, iteratorKind) {
-    define.defineProperties(this, {
+    define.properties(this, {
       '[[Set]]': assertIsObject(context),
       '[[SetNextIndex]]': 0,
       '[[SetIterationKind]]': iteratorKind || 'value',
@@ -400,7 +400,7 @@
    * @function next
    * @return {Object} Returns an object with two properties: done and value.
    */
-  define.defineProperty(SetIterator.prototype, 'next', function next() {
+  define.property(SetIterator.prototype, 'next', function next() {
     var context = assertIsObject(this['[[Set]]']);
     var index = this['[[SetNextIndex]]'];
     var iteratorKind = this['[[SetIterationKind]]'];
@@ -436,7 +436,7 @@
    * @memberof SetIterator.prototype
    * @return {Object} This Iterator object.
    */
-  define.defineProperty(SetIterator.prototype, symIt, function iterator() {
+  define.property(SetIterator.prototype, symIt, function iterator() {
     return this;
   });
 
@@ -505,7 +505,7 @@
   };
   /** @borrows Set as Set */
   module.exports.Set = SetObject;
-  define.defineProperties(SetObject.prototype, /** @lends module:collections-x.Set.prototype */ {
+  define.properties(SetObject.prototype, /** @lends module:collections-x.Set.prototype */ {
     /**
      * The has() method returns a boolean indicating whether an element with the
      * specified value exists in a Set object or not.
@@ -714,7 +714,7 @@
    * console.log(setIter.next().value); // 1
    * console.log(setIter.next().value); // Object
    */
-  define.defineProperty(SetObject.prototype, symIt, setValuesIterator);
+  define.property(SetObject.prototype, symIt, setValuesIterator);
 
   /**
    * An object is an iterator when it knows how to access items from a
@@ -730,7 +730,7 @@
    * @param {string} iteratorKind Values are `value`, `key` or `key+value`.
    */
   function MapIterator(context, iteratorKind) {
-    define.defineProperties(this, {
+    define.properties(this, {
       '[[Map]]': assertIsObject(context),
       '[[MapNextIndex]]': 0,
       '[[MapIterationKind]]': iteratorKind,
@@ -745,7 +745,7 @@
    * @function next
    * @return {Object} Returns an object with two properties: done and value.
    */
-  define.defineProperty(MapIterator.prototype, 'next', function next() {
+  define.property(MapIterator.prototype, 'next', function next() {
     var context = assertIsObject(this['[[Map]]']);
     var index = this['[[MapNextIndex]]'];
     var iteratorKind = this['[[MapIterationKind]]'];
@@ -782,7 +782,7 @@
    * @memberof MapIterator.prototype
    * @return {Object} This Iterator object.
    */
-  define.defineProperty(MapIterator.prototype, symIt, function iterator() {
+  define.property(MapIterator.prototype, symIt, function iterator() {
     return this;
   });
 
@@ -846,7 +846,7 @@
   };
   /** @borrows Map as Map */
   module.exports.Map = MapObject;
-  define.defineProperties(MapObject.prototype, /** @lends module:collections-x.Map.prototype */ {
+  define.properties(MapObject.prototype, /** @lends module:collections-x.Map.prototype */ {
     /**
      * The has() method returns a boolean indicating whether an element with
      * the specified key exists or not.
@@ -1072,5 +1072,5 @@
    * console.log(mapIter.next().value); // [1, "bar"]
    * console.log(mapIter.next().value); // [Object, "baz"]
    */
-  define.defineProperty(MapObject.prototype, symIt, MapObject.prototype.entries);
+  define.property(MapObject.prototype, symIt, MapObject.prototype.entries);
 }());
