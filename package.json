@@ -1,6 +1,6 @@
 {
   "name": "collections-x",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "ES6 collections fallback library: Map and Set.",
   "homepage": "https://github.com/Xotic750/collections-x",
   "author": {
@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "is-callable": "^1.1.2",
-    "define-properties-x": "^1.0.1",
+    "define-properties-x": "^1.0.2",
     "is-string": "^1.0.4",
     "is-array-like-x": "^1.0.9",
     "is-surrogate-pair-x": "^1.0.8",
@@ -39,10 +39,10 @@
     "index-of-x": "^1.0.13",
     "assert-is-callable-x": "^1.0.11",
     "assert-is-object-x": "^1.0.10",
-    "big-counter-x": "^1.0.7",
+    "big-counter-x": "^1.0.8",
     "has-symbol-support-x": "^1.0.7",
     "is-nil-x": "^1.0.6",
-    "has-own-property-x": "^1.0.7"
+    "has-own-property-x": "^1.0.8"
   },
   "devDependencies": {
     "es5-shim": "^4.5.0",
