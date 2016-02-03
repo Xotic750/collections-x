@@ -1,6 +1,6 @@
 {
   "name": "collections-x",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "ES6 collections fallback library: Map and Set.",
   "homepage": "https://github.com/Xotic750/collections-x",
   "author": {
@@ -31,21 +31,21 @@
   },
   "dependencies": {
     "is-callable": "^1.1.2",
-    "define-properties-x": "^1.1.1",
+    "define-properties-x": "^1.1.2",
     "is-string": "^1.0.4",
-    "is-array-like-x": "^1.0.10",
-    "is-surrogate-pair-x": "^1.0.9",
+    "is-array-like-x": "^1.0.11",
+    "is-surrogate-pair-x": "^1.0.10",
     "is-primitive": "^2.0.0",
-    "index-of-x": "^1.0.14",
-    "assert-is-callable-x": "^1.0.12",
-    "assert-is-object-x": "^1.0.11",
-    "big-counter-x": "^1.0.9",
-    "has-symbol-support-x": "^1.0.8",
-    "is-nil-x": "^1.0.7",
-    "has-own-property-x": "^1.0.9"
+    "index-of-x": "^1.0.15",
+    "assert-is-callable-x": "^1.0.13",
+    "assert-is-object-x": "^1.0.12",
+    "big-counter-x": "^1.0.10",
+    "has-symbol-support-x": "^1.0.9",
+    "is-nil-x": "^1.0.8",
+    "has-own-property-x": "^1.0.10"
   },
   "devDependencies": {
-    "es5-shim": "^4.5.0",
+    "es5-shim": "^4.5.2",
     "es6-shim": "^0.34.2",
     "json3": "^3.3.2",
     "jscs": "^2.9.0",
