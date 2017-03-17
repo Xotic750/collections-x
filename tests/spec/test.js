@@ -1,21 +1,27 @@
-/*jslint maxlen:80, es6:true, this:true, white:true */
+/* jslint maxlen:80, es6:true, white:true */
 
-/*jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
-  freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
-  nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
-  es3:true, esnext:true, plusplus:true, maxparams:3, maxdepth:2,
-  maxstatements:38, maxcomplexity:7 */
+/* jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
+   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
+   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
+   es3:false, esnext:true, plusplus:true, maxparams:1, maxdepth:2,
+   maxstatements:12, maxcomplexity:4 */
 
-/*global JSON:true, expect, module, require, describe, it, xit, jasmine,
-  returnExports */
+/* eslint strict: 1, max-lines: 1, symbol-description: 1, max-nested-callbacks: 1,
+   max-statements: 1, id-length: 1, new-cap: 1, no-prototype-builtins: 1, no-new: 1 */
 
-(function () {
+/* global JSON:true, expect, module, require, describe, it, xit, jasmine,
+   returnExports */
+
+;(function () { // eslint-disable-line no-extra-semi
+
   'use strict';
 
-  var  hasOwn = Object.prototype.hasOwnProperty,
-    functionsHaveNames = (function foo() {}).name === 'foo',
-    ifFunctionsHaveNamesIt = functionsHaveNames ? it : xit,
-    MapObject, SetObject, symIt;
+  var hasOwn = Object.prototype.hasOwnProperty;
+  var functionsHaveNames = function foo() {}.name === 'foo';
+  var ifFunctionsHaveNamesIt = functionsHaveNames ? it : xit;
+  var MapObject;
+  var SetObject;
+  var symIt;
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
     require('es5-shim/es5-sham');
@@ -46,19 +52,19 @@
     });
 
     it('should have valid getter and setter calls', function () {
-      var map = new MapObject(),
-        props = [
-          'has',
-          'set',
-          'clear',
-          'delete',
-          'forEach',
-          'values',
-          'entries',
-          'keys',
-          'size',
-          symIt
-        ];
+      var map = new MapObject();
+      var props = [
+        'has',
+        'set',
+        'clear',
+        'delete',
+        'forEach',
+        'values',
+        'entries',
+        'keys',
+        'size',
+        symIt
+      ];
       props.forEach(function (method) {
         if (method === 'size') {
           expect(typeof map[method] === 'number').toBe(true, method);
@@ -69,16 +75,16 @@
     });
 
     ifFunctionsHaveNamesIt('should have correct names', function () {
-      var map = new MapObject(),
-        props = [
-          'has',
-          'set',
-          'clear',
-          'forEach',
-          'values',
-          'entries',
-          'keys'
-        ];
+      var map = new MapObject();
+      var props = [
+        'has',
+        'set',
+        'clear',
+        'forEach',
+        'values',
+        'entries',
+        'keys'
+      ];
       props.forEach(function (method) {
         expect(map[method].name).toBe(method);
       });
@@ -86,7 +92,7 @@
 
     it('should not be callable without "new"', function () {
       var threw = false;
-      /*jshint newcap:false */
+      /* jshint newcap:false */
       try {
         SetObject();
       } catch (e) {
@@ -97,14 +103,14 @@
     });
 
     it('constructor behavior', function () {
-      var a = 1,
-        b = {},
-        c = new MapObject(),
-        m = new MapObject([
-          [a, 1],
-          [b, 2],
-          [c, 3]
-        ]);
+      var a = 1;
+      var b = {};
+      var c = new MapObject();
+      var m = new MapObject([
+        [a, 1],
+        [b, 2],
+        [c, 3]
+      ]);
       expect(new MapObject()).toEqual(jasmine.any(MapObject));
       expect(m.has(a)).toBe(true);
       expect(m.has(b)).toBe(true);
@@ -118,15 +124,15 @@
     });
 
     it('constructor behavior using another Map', function () {
-      var a = 1,
-        b = {},
-        c = new MapObject(),
-        m = new MapObject([
-          [a, 1],
-          [b, 2],
-          [c, 3]
-        ]),
-        d = new MapObject(m);
+      var a = 1;
+      var b = {};
+      var c = new MapObject();
+      var m = new MapObject([
+        [a, 1],
+        [b, 2],
+        [c, 3]
+      ]);
+      var d = new MapObject(m);
       expect(d.has(a)).toBe(true);
       expect(d.has(b)).toBe(true);
       expect(d.has(c)).toBe(true);
@@ -156,11 +162,11 @@
     });
 
     it('constructor behavior using a Set should throw', function () {
-      var a = 1,
-        b = {},
-        c = new MapObject(),
-        s = new SetObject([a, b, c]),
-        threw = false;
+      var a = 1;
+      var b = {};
+      var c = new MapObject();
+      var s = new SetObject([a, b, c]);
+      var threw = false;
       try {
         new MapObject(s);
       } catch (e) {
@@ -176,33 +182,33 @@
         expect(o.size).toBe(0);
         o.set('a', 'a');
         expect(o.size).toBe(1);
-        o['delete']('a');
+        o.delete('a');
         expect(o.size).toBe(0);
       }
     });
 
     it('has', function () {
-      var o = new MapObject(),
-        generic = {},
-        callback = function () {};
+      var o = new MapObject();
+      var generic = {};
+      var callback = function () {};
       expect(o.has(callback)).toBe(false);
       o.set(callback, generic);
       expect(o.has(callback)).toBe(true);
     });
 
     it('get', function () {
-      var o = new MapObject(),
-        generic = {},
-        callback = function () {};
+      var o = new MapObject();
+      var generic = {};
+      var callback = function () {};
       o.set(callback, generic);
       expect(o.get(callback, 123)).toBe(generic);
       expect(o.get(callback)).toBe(generic);
     });
 
     it('set', function () {
-      var o = new MapObject(),
-        generic = {},
-        callback = function () {};
+      var o = new MapObject();
+      var generic = {};
+      var callback = function () {};
       o.set(callback, generic);
       expect(o.get(callback)).toBe(generic);
       o.set(callback, callback);
@@ -232,20 +238,20 @@
     });
 
     it('delete', function () {
-      var o = new MapObject(),
-        generic = {},
-        callback = function () {};
+      var o = new MapObject();
+      var generic = {};
+      var callback = function () {};
       o.set(callback, generic);
       o.set(generic, callback);
       o.set(o, callback);
       expect(o.has(callback) && o.has(generic) && o.has(o)).toBe(true);
-      o['delete'](callback);
-      o['delete'](generic);
-      o['delete'](o);
+      o.delete(callback);
+      o.delete(generic);
+      o.delete(o);
       expect(!o.has(callback) && !o.has(generic) && !o.has(o)).toBe(true);
-      expect(o['delete'](o)).toBe(false);
+      expect(o.delete(o)).toBe(false);
       o.set(o, callback);
-      expect(o['delete'](o)).toBe(true);
+      expect(o.delete(o)).toBe(true);
     });
 
     it('non object key does not throw an error', function () {
@@ -260,17 +266,16 @@
     it('keys, values, entries behavior', function () {
       // test that things get returned in insertion order as per the specs
       var o = new MapObject([
-          ['1', 1],
-          ['2', 2],
-          ['3', 3]
-        ]),
-        keys = o.keys(),
-        values = o.values(),
-        k = keys.next(),
-        v = values.next(),
-        e, entriesagain;
+        ['1', 1],
+        ['2', 2],
+        ['3', 3]
+      ]);
+      var keys = o.keys();
+      var values = o.values();
+      var k = keys.next();
+      var v = values.next();
       expect(k.value === '1' && v.value === 1).toBe(true);
-      o['delete']('2');
+      o.delete('2');
       k = keys.next();
       v = values.next();
       expect(k.value === '3' && v.value === 3).toBe(true);
@@ -280,7 +285,7 @@
       v = values.next();
       expect(k.value === '2' && v.value === 2).toBe(true);
       // when called again, new iterator starts from beginning
-      entriesagain = o.entries();
+      var entriesagain = o.entries();
       expect(entriesagain.next().value[0]).toBe('1');
       expect(entriesagain.next().value[0]).toBe('3');
       expect(entriesagain.next().value[0]).toBe('2');
@@ -296,7 +301,7 @@
       v = values.next();
       expect(k.done && v.done).toBe(true);
       // new element shows up in iterators that didn't yet
-      e = entriesagain.next();
+      var e = entriesagain.next();
       expect(e.done).toBe(false);
       expect(e.value[0]).toBe('4');
       expect(entriesagain.next().done).toBe(true);
@@ -310,26 +315,26 @@
         expect('key ' + value).toBe(key);
         expect(obj).toBe(o);
         // even if dropped, keeps looping
-        o['delete'](key);
+        o.delete(key);
       });
       expect(!o.size).toBe(true);
     });
 
     it('forEach with mutations', function () {
       var o = new MapObject([
-          ['0', 0],
-          ['1', 1],
-          ['2', 2]
-        ]),
-        seen = [];
+        ['0', 0],
+        ['1', 1],
+        ['2', 2]
+      ]);
+      var seen = [];
       o.forEach(function (value, key, obj) {
         seen.push(value);
         expect(obj).toBe(o);
         expect(String(value)).toBe(key);
         // mutations work as expected
         if (value === 1) {
-          o['delete']('0'); // remove from before current index
-          o['delete']('2'); // remove from after current index
+          o.delete('0'); // remove from before current index
+          o.delete('2'); // remove from after current index
           o.set('3', 3); // insertion
         } else if (value === 3) {
           o.set('0', 0); // insertion at the end
@@ -348,9 +353,9 @@
     });
 
     it('treats positive and negative zero the same', function () {
-      var value1 = {},
-        value2 = {},
-        map = new MapObject();
+      var value1 = {};
+      var value2 = {};
+      var map = new MapObject();
       map.set(0, value1);
       expect(map.size).toBe(1);
       expect(map.has(-0)).toBe(true);
@@ -367,27 +372,27 @@
         return;
       }
       var supportsDescriptors = Object.defineProperty && (function () {
-          try {
-              var obj = {};
-              Object.defineProperty(obj, 'x', {
-                enumerable: false,
-                value: obj
-              });
-              return !Object.keys(obj).length && obj.x === obj;
-          } catch (ignore) {}
-          return false;
+        try {
+          var obj = {};
+          Object.defineProperty(obj, 'x', {
+            enumerable: false,
+            value: obj
+          });
+          return !Object.keys(obj).length && obj.x === obj;
+        } catch (ignore) {}
+        return false;
       }());
-      function defineByDescriptor(object, property, descriptor) {
+      var defineByDescriptor = function (object, property, descriptor) {
         if (supportsDescriptors) {
           Object.defineProperty(object, property, descriptor);
         } else if ('value' in descriptor) {
           object[property] = descriptor.value;
         }
-      }
+      };
       // Simple shim for Object.create on ES3 browsers
       // (unlike real shim, no attempt to support `prototype === null`)
       var create = Object.create || function (prototype, properties) {
-        var Prototype = function Prototype() {};
+        var Prototype = function () {};
         Prototype.prototype = prototype;
         var object = new Prototype();
         if (typeof properties !== 'undefined') {
@@ -397,15 +402,13 @@
         }
         return object;
       };
-      var MyMap = function MyMap() {
+      var MyMap = function () {
         var testMap = new MapObject([['a', 'b']]);
         Object.setPrototypeOf(testMap, MyMap.prototype);
         return testMap;
       };
       Object.setPrototypeOf(MyMap, MapObject);
-      MyMap.prototype = create(MapObject.prototype, {
-        constructor: { value: MyMap }
-      });
+      MyMap.prototype = create(MapObject.prototype, { constructor: { value: MyMap } });
 
       var myMap = new MyMap();
       expect(myMap.has('c')).toBe(false);
@@ -441,7 +444,7 @@
       expect(typeof MapObject.prototype.get).toBe('function');
       expect(typeof MapObject.prototype.set).toBe('function');
       expect(typeof MapObject.prototype.has).toBe('function');
-      expect(typeof MapObject.prototype['delete']).toBe('function');
+      expect(typeof MapObject.prototype.delete).toBe('function');
     });
   });
 
@@ -457,19 +460,19 @@
     });
 
     it('should have valid getter and setter calls', function () {
-      var set = new SetObject(),
-        props = [
-          'has',
-          'add',
-          'clear',
-          'delete',
-          'forEach',
-          'values',
-          'entries',
-          'keys',
-          'size',
-          symIt
-        ];
+      var set = new SetObject();
+      var props = [
+        'has',
+        'add',
+        'clear',
+        'delete',
+        'forEach',
+        'values',
+        'entries',
+        'keys',
+        'size',
+        symIt
+      ];
       props.forEach(function (method) {
         if (method === 'size') {
           expect(typeof set[method] === 'number').toBe(true, method);
@@ -480,15 +483,15 @@
     });
 
     ifFunctionsHaveNamesIt('should have correct names', function () {
-      var set = new SetObject(),
-        props = [
-          'has',
-          'add',
-          'clear',
-          'forEach',
-          'values',
-          'entries'
-        ];
+      var set = new SetObject();
+      var props = [
+        'has',
+        'add',
+        'clear',
+        'forEach',
+        'values',
+        'entries'
+      ];
       props.forEach(function (method) {
         expect(set[method].name).toBe(method);
       });
@@ -496,7 +499,7 @@
 
     it('should not be callable without "new"', function () {
       var threw = false;
-      /*jshint newcap:false */
+      /* jshint newcap:false */
       try {
         SetObject();
       } catch (e) {
@@ -533,7 +536,7 @@
         expect(o.size).toBe(0);
         o.add('a');
         expect(o.size).toBe(1);
-        o['delete']('a');
+        o.delete('a');
         expect(o.size).toBe(0);
       }
     });
@@ -545,31 +548,30 @@
     });
 
     it('delete', function () {
-      var o = new SetObject(),
-        generic = {},
-        callback = function () {};
+      var o = new SetObject();
+      var generic = {};
+      var callback = function () {};
       o.add(callback);
       o.add(generic);
       o.add(o);
       expect(o.has(callback) && o.has(generic) && o.has(o)).toBe(true);
-      o['delete'](callback);
-      o['delete'](generic);
-      o['delete'](o);
+      o.delete(callback);
+      o.delete(generic);
+      o.delete(o);
       expect(!o.has(callback) && !o.has(generic) && !o.has(o)).toBe(true);
-      expect(o['delete'](o)).toBe(false);
+      expect(o.delete(o)).toBe(false);
       o.add(o);
-      expect(o['delete'](o)).toBe(true);
+      expect(o.delete(o)).toBe(true);
     });
 
     it('values behavior', function () {
       // test that things get returned in insertion order as per the specs
-      var o = new SetObject([1, 2, 3]),
-        values = o.values(),
-        v = values.next(),
-        entriesagain;
+      var o = new SetObject([1, 2, 3]);
+      var values = o.values();
+      var v = values.next();
       expect(o.keys).toBe(o.values); // same function, as per the specs
       expect(v.value).toBe(1);
-      o['delete'](2);
+      o.delete(2);
       v = values.next();
       expect(v.value).toBe(3);
       // insertion of previously-removed item goes to the end
@@ -577,7 +579,7 @@
       v = values.next();
       expect(v.value).toBe(2);
       // when called again, new iterator starts from beginning
-      entriesagain = o.entries();
+      var entriesagain = o.entries();
       expect(entriesagain.next().value[1]).toBe(1);
       expect(entriesagain.next().value[1]).toBe(3);
       expect(entriesagain.next().value[1]).toBe(2);
@@ -595,16 +597,16 @@
     });
 
     it('has', function () {
-      var o = new SetObject(),
-        callback = function () {};
+      var o = new SetObject();
+      var callback = function () {};
       expect(o.has(callback)).toBe(false);
       o.add(callback);
       expect(o.has(callback)).toBe(true);
     });
 
     it('forEach', function () {
-      var o = new SetObject(),
-        i = 0;
+      var o = new SetObject();
+      var i = 0;
       o.add('value 0');
       o.add('value 1');
       o.forEach(function (value, sameValue, obj) {
@@ -613,22 +615,22 @@
         expect(obj).toBe(o);
         expect(sameValue).toBe(value);
         // even if dropped, keeps looping
-        o['delete'](value);
+        o.delete(value);
       });
       expect(!o.size).toBe(true);
     });
 
     it('forEach with mutations', function () {
-      var o = new SetObject([0, 1, 2]),
-        seen = [];
+      var o = new SetObject([0, 1, 2]);
+      var seen = [];
       o.forEach(function (value, sameValue, obj) {
         seen.push(value);
         expect(obj).toBe(o);
         expect(sameValue).toBe(value);
         // mutations work as expected
         if (value === 1) {
-          o['delete'](0); // remove from before current index
-          o['delete'](2); // remove from after current index
+          o.delete(0); // remove from before current index
+          o.delete(2); // remove from after current index
           o.add(3); // insertion
         } else if (value === 3) {
           o.add(0); // insertion at the end
@@ -663,9 +665,9 @@
 
   describe('Map and Set', function () {
     it('add, set are chainable now', function () {
-      var s = new SetObject(),
-        m = new MapObject(),
-        a = {};
+      var s = new SetObject();
+      var m = new MapObject();
+      var a = {};
       s.add(1).add(2);
       expect(s.has(1) && s.has(2) && s.size).toBe(2);
       m.set(1, 1).set(a, 2);

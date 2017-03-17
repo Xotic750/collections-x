@@ -39,24 +39,28 @@
  * `es6.shim.js` provides compatibility shims so that legacy JavaScript engines
  * behave as closely as possible to ECMAScript 6 (Harmony).
  *
- * @version 1.0.13
+ * @version 1.1.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
  * @module collections-x
  */
 
-/*jslint maxlen:80, es6:true, this:false, white:true */
+/* jslint maxlen:80, es6:true, white:true */
 
-/*jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
-  freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
-  nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
-  es3:false, esnext:true, plusplus:true, maxparams:4, maxdepth:4,
-  maxstatements:57, maxcomplexity:24 */
+/* jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
+   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
+   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
+   es3:false, esnext:true, plusplus:true, maxparams:1, maxdepth:1,
+   maxstatements:3, maxcomplexity:2 */
 
-/*global require, module */
+/* eslint strict: 1, max-statements: 1, id-length: 1, complexity: 1,
+   func-name-matching: 1, no-invalid-this: 1, no-multi-assign: 1, max-lines: 1 */
 
-;(function () {
+/* global require, module */
+
+;(function () { // eslint-disable-line no-extra-semi
+
   'use strict';
 
   var hasOwnProperty = require('has-own-property-x');
@@ -75,10 +79,8 @@
   var assertIsObject = require('assert-is-object-x');
   var IdGenerator = require('big-counter-x');
   var isNil = require('is-nil-x');
-  var hasRealSymbolIterator = require('has-symbol-support-x') &&
-    typeof Symbol.iterator === 'symbol';
-  var hasFakeSymbolIterator = typeof Symbol === 'object' &&
-    typeof Symbol.iterator === 'string';
+  var hasRealSymbolIterator = require('has-symbol-support-x') && typeof Symbol.iterator === 'symbol';
+  var hasFakeSymbolIterator = typeof Symbol === 'object' && typeof Symbol.iterator === 'string';
   var symIt;
 
   if (hasRealSymbolIterator || hasFakeSymbolIterator) {
@@ -103,7 +105,7 @@
    * @param {*} iterable Value to detect iterator function.
    * @return {Symbol|string|undefined} The iterator property identifier.
    */
-  function getSymbolIterator(iterable) {
+  var getSymbolIterator = function (iterable) {
     if (!isNil(iterable)) {
       if ((hasRealSymbolIterator || hasFakeSymbolIterator) && iterable[symIt]) {
         return symIt;
@@ -115,7 +117,8 @@
         return '@@iterator';
       }
     }
-  }
+    return void 0;
+  };
 
   /**
    * If an iterable object is passed, all of its elements will be added to the
@@ -126,27 +129,27 @@
    * @param {Object} context The Map/Set object.
    * @param {*} iterable Value to parsed.
    */
-  function parseIterable(kind, context, iterable) {
+  var parseIterable = function (kind, context, iterable) {
     var symbolIterator = getSymbolIterator(iterable);
     if (kind === 'map') {
       define.property(context, '[[value]]', []);
     }
     define.properties(context, {
-      '[[key]]': [],
-      '[[order]]': [],
+      '[[changed]]': false,
       '[[id]]': new IdGenerator(),
-      '[[changed]]': false
+      '[[key]]': [],
+      '[[order]]': []
     });
-    var next, key, indexof;
+    var next;
+    var key;
+    var indexof;
     if (iterable && isCallable(iterable[symbolIterator])) {
       var iterator = iterable[symbolIterator]();
       next = iterator.next();
       if (kind === 'map') {
         if (!isArrayLike(next.value) || next.value.length < 2) {
           throw new TypeError(
-            'Iterator value ' +
-            isArrayLike(next.value) +
-            ' is not an entry object'
+            'Iterator value ' + isArrayLike(next.value) + ' is not an entry object'
           );
         }
       }
@@ -204,9 +207,7 @@
         if (kind === 'map') {
           if (isPrimitive(iterable[next])) {
             throw new TypeError(
-              'Iterator value ' +
-              isArrayLike(next.value) +
-              ' is not an entry object'
+              'Iterator value ' + isArrayLike(next.value) + ' is not an entry object'
             );
           }
           key = iterable[next][0];
@@ -233,7 +234,7 @@
       }
     }
     define.property(context, 'size', context['[[key]]'].length, true);
-  }
+  };
 
   /**
    * The base forEach method executes a provided function once per each value
@@ -246,7 +247,7 @@
    * @param {*} [thisArg] Value to use as this when executing callback.
    * @return {Object} The Map/Set object.
    */
-  function baseForEach(kind, context, callback, thisArg) {
+  var baseForEach = function (kind, context, callback, thisArg) {
     assertIsObject(context);
     assertIsCallable(callback);
     var pointers = {
@@ -274,7 +275,7 @@
       pointers.order = context['[[order]]'][pointers.index];
     }
     return context;
-  }
+  };
 
   /**
    * The base has method returns a boolean indicating whether an element with
@@ -286,7 +287,7 @@
    *  exists in the Map/Set object; otherwise false.
    */
   var baseHas = function has(key) {
-    /*jshint validthis:true */
+    /* jshint validthis:true */
     return indexOf(assertIsObject(this)['[[key]]'], key, 'SameValueZero') > -1;
   };
 
@@ -298,7 +299,7 @@
    * @param {Object} context The Map/Set object.
    * @return {Object} The Map/Set object.
    */
-  function baseClear(kind, context) {
+  var baseClear = function (kind, context) {
     assertIsObject(context);
     context['[[id]]'].reset();
     context['[[change]]'] = true;
@@ -307,7 +308,7 @@
       context['[[value]]'].length = 0;
     }
     return context;
-  }
+  };
 
   /**
    * The base delete method removes the specified element from a Map/Set object.
@@ -318,7 +319,7 @@
    * @param {*} key The key/value of the element to remove from Map/Set object.
    * @return {Object} The Map/Set object.
    */
-  function baseDelete(kind, context, key) {
+  var baseDelete = function (kind, context, key) {
     var indexof = indexOf(
       assertIsObject(context)['[[key]]'],
       key,
@@ -336,7 +337,7 @@
       result = true;
     }
     return result;
-  }
+  };
 
   /**
    * The base set and add method.
@@ -348,7 +349,7 @@
    * @param {*} value The value of the element to add to the Map object.
    * @return {Object} The Map/Set object.
    */
-  function baseAddSet(kind, context, key, value) {
+  var baseAddSet = function (kind, context, key, value) {
     var index = indexOf(
       assertIsObject(context)['[[key]]'],
       key,
@@ -369,7 +370,7 @@
       context.size = context['[[key]]'].length;
     }
     return context;
-  }
+  };
 
   /**
    * An object is an iterator when it knows how to access items from a
@@ -384,14 +385,15 @@
    * @param {Object} context The Set object.
    * @param {string} iteratorKind Values are `value`, `key` or `key+value`.
    */
-  function SetIterator(context, iteratorKind) {
+  var SetIt = function SetIterator(context, iteratorKind) {
     define.properties(this, {
+      '[[IteratorHasMore]]': true,
       '[[Set]]': assertIsObject(context),
-      '[[SetNextIndex]]': 0,
       '[[SetIterationKind]]': iteratorKind || 'value',
-      '[[IteratorHasMore]]': true
+      '[[SetNextIndex]]': 0
     });
-  }
+  };
+
   /**
    * Once initialized, the next() method can be called to access key-value
    * pairs from the object in turn.
@@ -400,16 +402,14 @@
    * @function next
    * @return {Object} Returns an object with two properties: done and value.
    */
-  define.property(SetIterator.prototype, 'next', function next() {
+  define.property(SetIt.prototype, 'next', function next() {
     var context = assertIsObject(this['[[Set]]']);
     var index = this['[[SetNextIndex]]'];
     var iteratorKind = this['[[SetIterationKind]]'];
     var more = this['[[IteratorHasMore]]'];
     var object;
     if (index < context['[[key]]'].length && more) {
-      object = {
-        done: false
-      };
+      object = { done: false };
       if (iteratorKind === 'key+value') {
         object.value = [
           context['[[key]]'][index],
@@ -428,6 +428,7 @@
     }
     return object;
   });
+
   /**
    * The @@iterator property is the same Iterator object.
    *
@@ -436,7 +437,7 @@
    * @memberof SetIterator.prototype
    * @return {Object} This Iterator object.
    */
-  define.property(SetIterator.prototype, symIt, function iterator() {
+  define.property(SetIt.prototype, symIt, function iterator() {
     return this;
   });
 
@@ -449,8 +450,8 @@
    * @return {Object} A new Iterator object.
    */
   var setValuesIterator = function values() {
-    /*jshint validthis:true */
-    return new SetIterator(this);
+    /* jshint validthis:true */
+    return new SetIt(this);
   };
 
   /**
@@ -503,26 +504,10 @@
     }
     parseIterable('set', this, arguments.length ? arguments[0] : void 0);
   };
+
   /** @borrows Set as Set */
   module.exports.Set = SetObject;
   define.properties(SetObject.prototype, /** @lends module:collections-x.Set.prototype */ {
-    /**
-     * The has() method returns a boolean indicating whether an element with the
-     * specified value exists in a Set object or not.
-     *
-     * @function
-     * @param {*} value The value to test for presence in the Set object.
-     * @return {boolean} Returns true if an element with the specified value
-     *  exists in the Set object; otherwise false.
-     * @example
-     * var Set = require('collections-x').Set;
-     * var mySet = new Set();
-     * mySet.add("foo");
-     *
-     * mySet.has("foo");  // returns true
-     * mySet.has("bar");  // returns false
-     */
-    has: baseHas,
     /**
      * The add() method appends a new element with a specified value to the end
      * of a Set object.
@@ -586,69 +571,6 @@
       return baseDelete('set', this, value);
     },
     /**
-     * The forEach() method executes a provided function once per each value
-     * in the Set object, in insertion order.
-     *
-     * @param {Function} callback Function to execute for each element.
-     * @param {*} [thisArg] Value to use as this when executing callback.
-     * @return {Object} The Set object.
-     * @example
-     * function logSetElements(value1, value2, set) {
-     *     console.log("s[" + value1 + "] = " + value2);
-     * }
-     *
-     * new Set(["foo", "bar", undefined]).forEach(logSetElements);
-     *
-     * // logs:
-     * // "s[foo] = foo"
-     * // "s[bar] = bar"
-     * // "s[undefined] = undefined"
-     */
-    forEach: function forEach(callback, thisArg) {
-      return baseForEach('set', this, callback, thisArg);
-    },
-    /**
-     * The values() method returns a new Iterator object that contains the
-     * values for each element in the Set object in insertion order.
-     *
-     * @function
-     * @return {Object} A new Iterator object.
-     * @example
-     * var Set = require('collections-x').Set
-     * var mySet = new Set();
-     * mySet.add("foo");
-     * mySet.add("bar");
-     * mySet.add("baz");
-     *
-     * var setIter = mySet.values();
-     *
-     * console.log(setIter.next().value); // "foo"
-     * console.log(setIter.next().value); // "bar"
-     * console.log(setIter.next().value); // "baz"
-     */
-    values: setValuesIterator,
-    /**
-     * The keys() method is an alias for the `values` method (for similarity
-     * with Map objects); it behaves exactly the same and returns values of
-     * Set elements.
-     *
-     * @function
-     * @return {Object} A new Iterator object.
-     * @example
-     * var Set = require('collections-x').Set
-     * var mySet = new Set();
-     * mySet.add("foo");
-     * mySet.add("bar");
-     * mySet.add("baz");
-     *
-     * var setIter = mySet.keys();
-     *
-     * console.log(setIter.next().value); // "foo"
-     * console.log(setIter.next().value); // "bar"
-     * console.log(setIter.next().value); // "baz"
-     */
-    keys: setValuesIterator,
-    /**
      * The entries() method returns a new Iterator object that contains an
      * array of [value, value] for each element in the Set object, in
      * insertion order. For Set objects there is no key like in Map objects.
@@ -672,8 +594,68 @@
      * console.log(setIter.next().value); // ["baz", "baz"]
      */
     entries: function entries() {
-      return new SetIterator(this, 'key+value');
+      return new SetIt(this, 'key+value');
     },
+    /**
+     * The forEach() method executes a provided function once per each value
+     * in the Set object, in insertion order.
+     *
+     * @param {Function} callback Function to execute for each element.
+     * @param {*} [thisArg] Value to use as this when executing callback.
+     * @return {Object} The Set object.
+     * @example
+     * function logSetElements(value1, value2, set) {
+     *     console.log("s[" + value1 + "] = " + value2);
+     * }
+     *
+     * new Set(["foo", "bar", undefined]).forEach(logSetElements);
+     *
+     * // logs:
+     * // "s[foo] = foo"
+     * // "s[bar] = bar"
+     * // "s[undefined] = undefined"
+     */
+    forEach: function forEach(callback, thisArg) {
+      return baseForEach('set', this, callback, thisArg);
+    },
+    /**
+     * The has() method returns a boolean indicating whether an element with the
+     * specified value exists in a Set object or not.
+     *
+     * @function
+     * @param {*} value The value to test for presence in the Set object.
+     * @return {boolean} Returns true if an element with the specified value
+     *  exists in the Set object; otherwise false.
+     * @example
+     * var Set = require('collections-x').Set;
+     * var mySet = new Set();
+     * mySet.add("foo");
+     *
+     * mySet.has("foo");  // returns true
+     * mySet.has("bar");  // returns false
+     */
+    has: baseHas,
+    /**
+     * The keys() method is an alias for the `values` method (for similarity
+     * with Map objects); it behaves exactly the same and returns values of
+     * Set elements.
+     *
+     * @function
+     * @return {Object} A new Iterator object.
+     * @example
+     * var Set = require('collections-x').Set
+     * var mySet = new Set();
+     * mySet.add("foo");
+     * mySet.add("bar");
+     * mySet.add("baz");
+     *
+     * var setIter = mySet.keys();
+     *
+     * console.log(setIter.next().value); // "foo"
+     * console.log(setIter.next().value); // "bar"
+     * console.log(setIter.next().value); // "baz"
+     */
+    keys: setValuesIterator,
     /**
      * The value of size is an integer representing how many entries the Set
      * object has.
@@ -691,7 +673,27 @@
      *
      * mySet.size; // 3
      */
-    size: 0
+    size: 0,
+    /**
+     * The values() method returns a new Iterator object that contains the
+     * values for each element in the Set object in insertion order.
+     *
+     * @function
+     * @return {Object} A new Iterator object.
+     * @example
+     * var Set = require('collections-x').Set
+     * var mySet = new Set();
+     * mySet.add("foo");
+     * mySet.add("bar");
+     * mySet.add("baz");
+     *
+     * var setIter = mySet.values();
+     *
+     * console.log(setIter.next().value); // "foo"
+     * console.log(setIter.next().value); // "bar"
+     * console.log(setIter.next().value); // "baz"
+     */
+    values: setValuesIterator
   });
   /**
    * The initial value of the @@iterator property is the same function object
@@ -729,14 +731,15 @@
    * @param {Object} context The Map object.
    * @param {string} iteratorKind Values are `value`, `key` or `key+value`.
    */
-  function MapIterator(context, iteratorKind) {
+  var MapIt = function MapIterator(context, iteratorKind) {
     define.properties(this, {
+      '[[IteratorHasMore]]': true,
       '[[Map]]': assertIsObject(context),
-      '[[MapNextIndex]]': 0,
       '[[MapIterationKind]]': iteratorKind,
-      '[[IteratorHasMore]]': true
+      '[[MapNextIndex]]': 0
     });
-  }
+  };
+
   /**
    * Once initialized, the next() method can be called to access key-value
    * pairs from the object in turn.
@@ -745,7 +748,7 @@
    * @function next
    * @return {Object} Returns an object with two properties: done and value.
    */
-  define.property(MapIterator.prototype, 'next', function next() {
+  define.property(MapIt.prototype, 'next', function next() {
     var context = assertIsObject(this['[[Map]]']);
     var index = this['[[MapNextIndex]]'];
     var iteratorKind = this['[[MapIterationKind]]'];
@@ -753,9 +756,7 @@
     var object;
     assertIsObject(context);
     if (index < context['[[key]]'].length && more) {
-      object = {
-        done: false
-      };
+      object = { done: false };
       if (iteratorKind === 'key+value') {
         object.value = [
           context['[[key]]'][index],
@@ -782,7 +783,7 @@
    * @memberof MapIterator.prototype
    * @return {Object} This Iterator object.
    */
-  define.property(MapIterator.prototype, symIt, function iterator() {
+  define.property(MapIt.prototype, symIt, function iterator() {
     return this;
   });
 
@@ -844,48 +845,10 @@
     }
     parseIterable('map', this, arguments.length ? arguments[0] : void 0);
   };
+
   /** @borrows Map as Map */
   module.exports.Map = MapObject;
   define.properties(MapObject.prototype, /** @lends module:collections-x.Map.prototype */ {
-    /**
-     * The has() method returns a boolean indicating whether an element with
-     * the specified key exists or not.
-     *
-     * @function
-     * @param {*} key The key of the element to test for presence in the
-     *  Map object.
-     * @return {boolean} Returns true if an element with the specified key
-     *  exists in the Map object; otherwise false.
-     * @example
-     * var Map = require('collections-x').Map;
-     * var myMap = new Map();
-     * myMap.set("bar", "foo");
-     *
-     * myMap.has("bar");  // returns true
-     * myMap.has("baz");  // returns false
-     */
-    has: baseHas,
-    /**
-     * The set() method adds a new element with a specified key and value to
-     * a Map object.
-     *
-     * @param {*} key The key of the element to add to the Map object.
-     * @param {*} value The value of the element to add to the Map object.
-     * @return {Object} The Map object.
-     * @example
-     * var Map = require('collections-x').Map;
-     * var myMap = new Map();
-     *
-     * // Add new elements to the map
-     * myMap.set("bar", "foo");
-     * myMap.set(1, "foobar");
-     *
-     * // Update an element in the map
-     * myMap.set("bar", "fuuu");
-     */
-    set: function set(key, value) {
-      return baseAddSet('map', this, key, value);
-    },
     /**
      * The clear() method removes all elements from a Map object.
      *
@@ -908,28 +871,6 @@
       return baseClear('map', this);
     },
     /**
-     * The get() method returns a specified element from a Map object.
-     *
-     * @param {*} key The key of the element to return from the Map object.
-     * @return {*} Returns the element associated with the specified key or
-     *  undefined if the key can't be found in the Map object.
-     * @example
-     * var Map = require('collections-x').Map;
-     * var myMap = new Map();
-     * myMap.set("bar", "foo");
-     *
-     * myMap.get("bar");  // Returns "foo".
-     * myMap.get("baz");  // Returns undefined.
-     */
-    get: function get(key) {
-      var index = indexOf(
-        assertIsObject(this)['[[key]]'],
-        key,
-        'SameValueZero'
-      );
-      return index > -1 ? this['[[value]]'][index] : void 0;
-    },
-    /**
      * The delete() method removes the specified element from a Map object.
      *
      * @param {*} key The key of the element to remove from the Map object.
@@ -946,6 +887,27 @@
      */
     'delete': function de1ete(key) {
       return baseDelete('map', this, key);
+    },
+    /**
+     * The entries() method returns a new Iterator object that contains the
+     * [key, value] pairs for each element in the Map object in insertion order.
+     *
+     * @return {Object} A new Iterator object.
+     * @example
+     * var Map = require('collections-x').Map;
+     * var myMap = new Map();
+     * myMap.set("0", "foo");
+     * myMap.set(1, "bar");
+     * myMap.set({}, "baz");
+     *
+     * var mapIter = myMap.entries();
+     *
+     * console.log(mapIter.next().value); // ["0", "foo"]
+     * console.log(mapIter.next().value); // [1, "bar"]
+     * console.log(mapIter.next().value); // [Object, "baz"]
+     */
+    entries: function entries() {
+      return new MapIt(this, 'key+value');
     },
     /**
      * The forEach() method executes a provided function once per each
@@ -970,26 +932,45 @@
       return baseForEach('map', this, callback, thisArg);
     },
     /**
-     * The values() method returns a new Iterator object that contains the
-     * values for each element in the Map object in insertion order.
+     * The get() method returns a specified element from a Map object.
      *
-     * @return {Object} A new Iterator object.
+     * @param {*} key The key of the element to return from the Map object.
+     * @return {*} Returns the element associated with the specified key or
+     *  undefined if the key can't be found in the Map object.
      * @example
      * var Map = require('collections-x').Map;
      * var myMap = new Map();
-     * myMap.set("0", "foo");
-     * myMap.set(1, "bar");
-     * myMap.set({}, "baz");
+     * myMap.set("bar", "foo");
      *
-     * var mapIter = myMap.values();
-     *
-     * console.log(mapIter.next().value); // "foo"
-     * console.log(mapIter.next().value); // "bar"
-     * console.log(mapIter.next().value); // "baz"
+     * myMap.get("bar");  // Returns "foo".
+     * myMap.get("baz");  // Returns undefined.
      */
-    values: function values() {
-      return new MapIterator(this, 'value');
+    get: function get(key) {
+      var index = indexOf(
+        assertIsObject(this)['[[key]]'],
+        key,
+        'SameValueZero'
+      );
+      return index > -1 ? this['[[value]]'][index] : void 0;
     },
+    /**
+     * The has() method returns a boolean indicating whether an element with
+     * the specified key exists or not.
+     *
+     * @function
+     * @param {*} key The key of the element to test for presence in the
+     *  Map object.
+     * @return {boolean} Returns true if an element with the specified key
+     *  exists in the Map object; otherwise false.
+     * @example
+     * var Map = require('collections-x').Map;
+     * var myMap = new Map();
+     * myMap.set("bar", "foo");
+     *
+     * myMap.has("bar");  // returns true
+     * myMap.has("baz");  // returns false
+     */
+    has: baseHas,
     /**
      * The keys() method returns a new Iterator object that contains the keys
      * for each element in the Map object in insertion order.
@@ -1009,28 +990,28 @@
      * console.log(mapIter.next().value); // Object
      */
     keys: function keys() {
-      return new MapIterator(this, 'key');
+      return new MapIt(this, 'key');
     },
     /**
-     * The entries() method returns a new Iterator object that contains the
-     * [key, value] pairs for each element in the Map object in insertion order.
+     * The set() method adds a new element with a specified key and value to
+     * a Map object.
      *
-     * @return {Object} A new Iterator object.
+     * @param {*} key The key of the element to add to the Map object.
+     * @param {*} value The value of the element to add to the Map object.
+     * @return {Object} The Map object.
      * @example
      * var Map = require('collections-x').Map;
      * var myMap = new Map();
-     * myMap.set("0", "foo");
-     * myMap.set(1, "bar");
-     * myMap.set({}, "baz");
      *
-     * var mapIter = myMap.entries();
+     * // Add new elements to the map
+     * myMap.set("bar", "foo");
+     * myMap.set(1, "foobar");
      *
-     * console.log(mapIter.next().value); // ["0", "foo"]
-     * console.log(mapIter.next().value); // [1, "bar"]
-     * console.log(mapIter.next().value); // [Object, "baz"]
+     * // Update an element in the map
+     * myMap.set("bar", "fuuu");
      */
-    entries: function entries() {
-      return new MapIterator(this, 'key+value');
+    set: function set(key, value) {
+      return baseAddSet('map', this, key, value);
     },
     /**
      * The value of size is an integer representing how many entries the Map
@@ -1049,7 +1030,28 @@
      *
      * myMap.size; // 3
      */
-    size: 0
+    size: 0,
+    /**
+     * The values() method returns a new Iterator object that contains the
+     * values for each element in the Map object in insertion order.
+     *
+     * @return {Object} A new Iterator object.
+     * @example
+     * var Map = require('collections-x').Map;
+     * var myMap = new Map();
+     * myMap.set("0", "foo");
+     * myMap.set(1, "bar");
+     * myMap.set({}, "baz");
+     *
+     * var mapIter = myMap.values();
+     *
+     * console.log(mapIter.next().value); // "foo"
+     * console.log(mapIter.next().value); // "bar"
+     * console.log(mapIter.next().value); // "baz"
+     */
+    values: function values() {
+      return new MapIt(this, 'value');
+    }
   });
   /**
    * The initial value of the @@iterator property is the same function object
