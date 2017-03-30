@@ -22,37 +22,14 @@
  *
  * ES6 collections fallback library: Map and Set.
  *
- * <h2>ECMAScript compatibility shims for legacy JavaScript engines</h2>
- * `es5-shim.js` monkey-patches a JavaScript context to contain all EcmaScript 5
- * methods that can be faithfully emulated with a legacy JavaScript engine.
+ * Requires ES3 or above.
  *
- * `es5-sham.js` monkey-patches other ES5 methods as closely as possible.
- * For these methods, as closely as possible to ES5 is not very close.
- * Many of these shams are intended only to allow code to be written to ES5
- * without causing run-time errors in older engines. In many cases,
- * this means that these shams cause many ES5 methods to silently fail.
- * Decide carefully whether this is what you want. Note: es5-sham.js requires
- * es5-shim.js to be able to work properly.
- *
- * `json3.js` monkey-patches the EcmaScript 5 JSON implimentation faithfully.
- *
- * `es6.shim.js` provides compatibility shims so that legacy JavaScript engines
- * behave as closely as possible to ECMAScript 6 (Harmony).
- *
- * @version 1.1.0
+ * @version 1.2.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
  * @module collections-x
  */
-
-/* jslint maxlen:80, es6:true, white:true */
-
-/* jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
-   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
-   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
-   es3:false, esnext:true, plusplus:true, maxparams:1, maxdepth:1,
-   maxstatements:3, maxcomplexity:2 */
 
 /* eslint strict: 1, max-statements: 1, id-length: 1, complexity: 1,
    func-name-matching: 1, no-invalid-this: 1, no-multi-assign: 1, max-lines: 1 */
@@ -64,10 +41,6 @@
   'use strict';
 
   var hasOwnProperty = require('has-own-property-x');
-  var pCharAt = String.prototype.charAt;
-  var pPush = Array.prototype.push;
-  var pSome = Array.prototype.some;
-  var pSplice = Array.prototype.splice;
   var isCallable = require('is-callable');
   var define = require('define-properties-x');
   var isString = require('is-string');
@@ -79,6 +52,7 @@
   var assertIsObject = require('assert-is-object-x');
   var IdGenerator = require('big-counter-x');
   var isNil = require('is-nil-x');
+  var some = require('array.prototype.some');
   var hasRealSymbolIterator = require('has-symbol-support-x') && typeof Symbol.iterator === 'symbol';
   var hasFakeSymbolIterator = typeof Symbol === 'object' && typeof Symbol.iterator === 'string';
   var symIt;
@@ -162,10 +136,10 @@
         );
         if (indexof < 0) {
           if (kind === 'map') {
-            pPush.call(context['[[value]]'], next.value[1]);
+            context['[[value]]'].push(next.value[1]);
           }
-          pPush.call(context['[[key]]'], key);
-          pPush.call(context['[[order]]'], context['[[id]]'].get());
+          context['[[key]]'].push(key);
+          context['[[order]]'].push(context['[[id]]'].get());
           context['[[id]]'].next();
         } else if (kind === 'map') {
           context['[[value]]'][indexof] = next.value[1];
@@ -176,13 +150,13 @@
     if (isString(iterable)) {
       if (kind === 'map') {
         throw new TypeError(
-          'Iterator value ' + pCharAt.call(iterable, 0) + ' is not an entry object'
+          'Iterator value ' + iterable.charAt(0) + ' is not an entry object'
         );
       }
       next = 0;
       while (next < iterable.length) {
-        var char1 = pCharAt.call(iterable, next);
-        var char2 = pCharAt.call(iterable, next + 1);
+        var char1 = iterable.charAt(next);
+        var char2 = iterable.charAt(next + 1);
         if (isSurrogatePair(char1, char2)) {
           key = char1 + char2;
           next += 1;
@@ -195,8 +169,8 @@
           'SameValueZero'
         );
         if (indexof < 0) {
-          pPush.call(context['[[key]]'], key);
-          pPush.call(context['[[order]]'], context['[[id]]'].get());
+          context['[[key]]'].push(key);
+          context['[[order]]'].push(context['[[id]]'].get());
           context['[[id]]'].next();
         }
         next += 1;
@@ -222,10 +196,10 @@
         );
         if (indexof < 0) {
           if (kind === 'map') {
-            pPush.call(context['[[value]]'], iterable[next][1]);
+            context['[[value]]'].push(iterable[next][1]);
           }
-          pPush.call(context['[[key]]'], key);
-          pPush.call(context['[[order]]'], context['[[id]]'].get());
+          context['[[key]]'].push(key);
+          context['[[order]]'].push(context['[[id]]'].get());
           context['[[id]]'].next();
         } else if (kind === 'map') {
           context['[[value]]'][indexof] = iterable[next][1];
@@ -264,7 +238,7 @@
       }
       if (context['[[change]]']) {
         length = context['[[key]]'].length;
-        pSome.call(context['[[order]]'], function (id, count) {
+        some(context['[[order]]'], function (id, count) {
           pointers.index = count;
           return id > pointers.order;
         });
@@ -328,10 +302,10 @@
     var result = false;
     if (indexof > -1) {
       if (kind === 'map') {
-        pSplice.call(context['[[value]]'], indexof, 1);
+        context['[[value]]'].splice(indexof, 1);
       }
-      pSplice.call(context['[[key]]'], indexof, 1);
-      pSplice.call(context['[[order]]'], indexof, 1);
+      context['[[key]]'].splice(indexof, 1);
+      context['[[order]]'].splice(indexof, 1);
       context['[[change]]'] = true;
       context.size = context['[[key]]'].length;
       result = true;
@@ -361,10 +335,10 @@
       }
     } else {
       if (kind === 'map') {
-        pPush.call(context['[[value]]'], value);
+        context['[[value]]'].push(value);
       }
-      pPush.call(context['[[key]]'], key);
-      pPush.call(context['[[order]]'], context['[[id]]'].get());
+      context['[[key]]'].push(key);
+      context['[[order]]'].push(context['[[id]]'].get());
       context['[[id]]'].next();
       context['[[change]]'] = true;
       context.size = context['[[key]]'].length;
