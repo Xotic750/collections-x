@@ -7,7 +7,8 @@
    maxstatements:12, maxcomplexity:4 */
 
 /* eslint strict: 1, max-lines: 1, symbol-description: 1, max-nested-callbacks: 1,
-   max-statements: 1, id-length: 1, new-cap: 1, no-prototype-builtins: 1, no-new: 1 */
+   max-statements: 1, id-length: 1, new-cap: 1, no-prototype-builtins: 1, no-new: 1,
+   dot-notation: 1 */
 
 /* global JSON:true, expect, module, require, describe, it, xit, jasmine,
    returnExports */
@@ -182,7 +183,7 @@
         expect(o.size).toBe(0);
         o.set('a', 'a');
         expect(o.size).toBe(1);
-        o.delete('a');
+        o['delete']('a');
         expect(o.size).toBe(0);
       }
     });
@@ -245,13 +246,13 @@
       o.set(generic, callback);
       o.set(o, callback);
       expect(o.has(callback) && o.has(generic) && o.has(o)).toBe(true);
-      o.delete(callback);
-      o.delete(generic);
-      o.delete(o);
+      o['delete'](callback);
+      o['delete'](generic);
+      o['delete'](o);
       expect(!o.has(callback) && !o.has(generic) && !o.has(o)).toBe(true);
-      expect(o.delete(o)).toBe(false);
+      expect(o['delete'](o)).toBe(false);
       o.set(o, callback);
-      expect(o.delete(o)).toBe(true);
+      expect(o['delete'](o)).toBe(true);
     });
 
     it('non object key does not throw an error', function () {
@@ -275,7 +276,7 @@
       var k = keys.next();
       var v = values.next();
       expect(k.value === '1' && v.value === 1).toBe(true);
-      o.delete('2');
+      o['delete']('2');
       k = keys.next();
       v = values.next();
       expect(k.value === '3' && v.value === 3).toBe(true);
@@ -315,7 +316,7 @@
         expect('key ' + value).toBe(key);
         expect(obj).toBe(o);
         // even if dropped, keeps looping
-        o.delete(key);
+        o['delete'](key);
       });
       expect(!o.size).toBe(true);
     });
@@ -333,8 +334,8 @@
         expect(String(value)).toBe(key);
         // mutations work as expected
         if (value === 1) {
-          o.delete('0'); // remove from before current index
-          o.delete('2'); // remove from after current index
+          o['delete']('0'); // remove from before current index
+          o['delete']('2'); // remove from after current index
           o.set('3', 3); // insertion
         } else if (value === 3) {
           o.set('0', 0); // insertion at the end
@@ -444,7 +445,7 @@
       expect(typeof MapObject.prototype.get).toBe('function');
       expect(typeof MapObject.prototype.set).toBe('function');
       expect(typeof MapObject.prototype.has).toBe('function');
-      expect(typeof MapObject.prototype.delete).toBe('function');
+      expect(typeof MapObject.prototype['delete']).toBe('function');
     });
   });
 
@@ -536,7 +537,7 @@
         expect(o.size).toBe(0);
         o.add('a');
         expect(o.size).toBe(1);
-        o.delete('a');
+        o['delete']('a');
         expect(o.size).toBe(0);
       }
     });
@@ -555,13 +556,13 @@
       o.add(generic);
       o.add(o);
       expect(o.has(callback) && o.has(generic) && o.has(o)).toBe(true);
-      o.delete(callback);
-      o.delete(generic);
-      o.delete(o);
+      o['delete'](callback);
+      o['delete'](generic);
+      o['delete'](o);
       expect(!o.has(callback) && !o.has(generic) && !o.has(o)).toBe(true);
-      expect(o.delete(o)).toBe(false);
+      expect(o['delete'](o)).toBe(false);
       o.add(o);
-      expect(o.delete(o)).toBe(true);
+      expect(o['delete'](o)).toBe(true);
     });
 
     it('values behavior', function () {
@@ -571,7 +572,7 @@
       var v = values.next();
       expect(o.keys).toBe(o.values); // same function, as per the specs
       expect(v.value).toBe(1);
-      o.delete(2);
+      o['delete'](2);
       v = values.next();
       expect(v.value).toBe(3);
       // insertion of previously-removed item goes to the end
@@ -615,7 +616,7 @@
         expect(obj).toBe(o);
         expect(sameValue).toBe(value);
         // even if dropped, keeps looping
-        o.delete(value);
+        o['delete'](value);
       });
       expect(!o.size).toBe(true);
     });
@@ -629,8 +630,8 @@
         expect(sameValue).toBe(value);
         // mutations work as expected
         if (value === 1) {
-          o.delete(0); // remove from before current index
-          o.delete(2); // remove from after current index
+          o['delete'](0); // remove from before current index
+          o['delete'](2); // remove from after current index
           o.add(3); // insertion
         } else if (value === 3) {
           o.add(0); // insertion at the end

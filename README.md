@@ -25,7 +25,7 @@ ES6 collections fallback library: Map and Set.
 
 Requires ES3 or above.
 
-**Version**: 1.3.0  
+**Version**: 1.3.1  
 **Author**: Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  
