@@ -25,7 +25,7 @@ ES6 collections fallback library: Map and Set.
 
 Requires ES3 or above.
 
-**Version**: 1.3.1  
+**Version**: 1.4.0  
 **Author**: Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  
@@ -33,27 +33,27 @@ Requires ES3 or above.
 * [collections-x](#module_collections-x)
     * [`.symIt`](#module_collections-x.symIt)
     * [`.Set`](#module_collections-x.Set)
+        * [`.add`](#module_collections-x.Set+add) ⇒ <code>Object</code>
+        * [`.clear`](#module_collections-x.Set+clear) ⇒ <code>Object</code>
+        * [`.delete`](#module_collections-x.Set+delete) ⇒ <code>boolean</code>
+        * [`.forEach`](#module_collections-x.Set+forEach) ⇒ <code>Object</code>
         * [`.size`](#module_collections-x.Set+size) : <code>number</code>
-        * [`.add(value)`](#module_collections-x.Set+add) ⇒ <code>Object</code>
-        * [`.clear()`](#module_collections-x.Set+clear) ⇒ <code>Object</code>
-        * [`.delete(value)`](#module_collections-x.Set+delete) ⇒ <code>boolean</code>
         * [`.entries()`](#module_collections-x.Set+entries) ⇒ <code>Object</code>
-        * [`.forEach(callback, [thisArg])`](#module_collections-x.Set+forEach) ⇒ <code>Object</code>
         * [`.has(value)`](#module_collections-x.Set+has) ⇒ <code>boolean</code>
         * [`.keys()`](#module_collections-x.Set+keys) ⇒ <code>Object</code>
         * [`.values()`](#module_collections-x.Set+values) ⇒ <code>Object</code>
         * [`.symIt()`](#module_collections-x.Set+symIt) ⇒ <code>Object</code>
     * [`.Map`](#module_collections-x.Map)
+        * [`.clear`](#module_collections-x.Map+clear) ⇒ <code>Object</code>
+        * [`.delete`](#module_collections-x.Map+delete) ⇒ <code>boolean</code>
+        * [`.entries`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
+        * [`.forEach`](#module_collections-x.Map+forEach) ⇒ <code>Object</code>
+        * [`.get`](#module_collections-x.Map+get) ⇒ <code>\*</code>
+        * [`.keys`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
+        * [`.set`](#module_collections-x.Map+set) ⇒ <code>Object</code>
         * [`.size`](#module_collections-x.Map+size) : <code>number</code>
-        * [`.clear()`](#module_collections-x.Map+clear) ⇒ <code>Object</code>
-        * [`.delete(key)`](#module_collections-x.Map+delete) ⇒ <code>boolean</code>
-        * [`.entries()`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
-        * [`.forEach(callback, [thisArg])`](#module_collections-x.Map+forEach) ⇒ <code>Object</code>
-        * [`.get(key)`](#module_collections-x.Map+get) ⇒ <code>\*</code>
+        * [`.values`](#module_collections-x.Map+values) ⇒ <code>Object</code>
         * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
-        * [`.keys()`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
-        * [`.set(key, value)`](#module_collections-x.Map+set) ⇒ <code>Object</code>
-        * [`.values()`](#module_collections-x.Map+values) ⇒ <code>Object</code>
         * [`.symIt()`](#module_collections-x.Map+symIt) ⇒ <code>Object</code>
 
 <a name="module_collections-x.symIt"></a>
@@ -63,48 +63,31 @@ The iterator identifier that is in use.
 
 type {Symbol|string}
 
-**Kind**: static property of <code>[collections-x](#module_collections-x)</code>  
+**Kind**: static property of [<code>collections-x</code>](#module_collections-x)  
 <a name="module_collections-x.Set"></a>
 
 ### `collections-x.Set`
-**Kind**: static property of <code>[collections-x](#module_collections-x)</code>  
+**Kind**: static property of [<code>collections-x</code>](#module_collections-x)  
 
 * [`.Set`](#module_collections-x.Set)
+    * [`.add`](#module_collections-x.Set+add) ⇒ <code>Object</code>
+    * [`.clear`](#module_collections-x.Set+clear) ⇒ <code>Object</code>
+    * [`.delete`](#module_collections-x.Set+delete) ⇒ <code>boolean</code>
+    * [`.forEach`](#module_collections-x.Set+forEach) ⇒ <code>Object</code>
     * [`.size`](#module_collections-x.Set+size) : <code>number</code>
-    * [`.add(value)`](#module_collections-x.Set+add) ⇒ <code>Object</code>
-    * [`.clear()`](#module_collections-x.Set+clear) ⇒ <code>Object</code>
-    * [`.delete(value)`](#module_collections-x.Set+delete) ⇒ <code>boolean</code>
     * [`.entries()`](#module_collections-x.Set+entries) ⇒ <code>Object</code>
-    * [`.forEach(callback, [thisArg])`](#module_collections-x.Set+forEach) ⇒ <code>Object</code>
     * [`.has(value)`](#module_collections-x.Set+has) ⇒ <code>boolean</code>
     * [`.keys()`](#module_collections-x.Set+keys) ⇒ <code>Object</code>
     * [`.values()`](#module_collections-x.Set+values) ⇒ <code>Object</code>
     * [`.symIt()`](#module_collections-x.Set+symIt) ⇒ <code>Object</code>
 
-<a name="module_collections-x.Set+size"></a>
-
-#### `set.size` : <code>number</code>
-The value of size is an integer representing how many entries the Set
-object has.
-
-**Kind**: instance property of <code>[Set](#module_collections-x.Set)</code>  
-**Example**  
-```js
-var Set = require('collections-x').Set
-var mySet = new Set();
-mySet.add(1);
-mySet.add(5);
-mySet.add("some text");
-
-mySet.size; // 3
-```
 <a name="module_collections-x.Set+add"></a>
 
-#### `set.add(value)` ⇒ <code>Object</code>
+#### `set.add` ⇒ <code>Object</code>
 The add() method appends a new element with a specified value to the end
 of a Set object.
 
-**Kind**: instance method of <code>[Set](#module_collections-x.Set)</code>  
+**Kind**: instance property of [<code>Set</code>](#module_collections-x.Set)  
 **Returns**: <code>Object</code> - The Set object.  
 
 | Param | Type | Description |
@@ -124,10 +107,10 @@ console.log(mySet);
 ```
 <a name="module_collections-x.Set+clear"></a>
 
-#### `set.clear()` ⇒ <code>Object</code>
+#### `set.clear` ⇒ <code>Object</code>
 The clear() method removes all elements from a Set object.
 
-**Kind**: instance method of <code>[Set](#module_collections-x.Set)</code>  
+**Kind**: instance property of [<code>Set</code>](#module_collections-x.Set)  
 **Returns**: <code>Object</code> - The Set object.  
 **Example**  
 ```js
@@ -146,10 +129,10 @@ mySet.has("bar")  // false
 ```
 <a name="module_collections-x.Set+delete"></a>
 
-#### `set.delete(value)` ⇒ <code>boolean</code>
+#### `set.delete` ⇒ <code>boolean</code>
 The delete() method removes the specified element from a Set object.
 
-**Kind**: instance method of <code>[Set](#module_collections-x.Set)</code>  
+**Kind**: instance property of [<code>Set</code>](#module_collections-x.Set)  
 **Returns**: <code>boolean</code> - Returns true if an element in the Set object has been
  removed successfully; otherwise false.  
 
@@ -170,39 +153,13 @@ mySet.delete("foo"); // Returns true.  Successfully removed.
 mySet.has("foo");    // Returns false. The "foo" element is no
                      //longer present.
 ```
-<a name="module_collections-x.Set+entries"></a>
-
-#### `set.entries()` ⇒ <code>Object</code>
-The entries() method returns a new Iterator object that contains an
-array of [value, value] for each element in the Set object, in
-insertion order. For Set objects there is no key like in Map objects.
-However, to keep the API similar to the Map object, each entry has the
-same value for its key and value here, so that an array [value, value]
-is returned.
-
-**Kind**: instance method of <code>[Set](#module_collections-x.Set)</code>  
-**Returns**: <code>Object</code> - A new Iterator object.  
-**Example**  
-```js
-var Set = require('collections-x').Set
-var mySet = new Set();
-mySet.add("foobar");
-mySet.add(1);
-mySet.add("baz");
-
-var setIter = mySet.entries();
-
-console.log(setIter.next().value); // ["foobar", "foobar"]
-console.log(setIter.next().value); // [1, 1]
-console.log(setIter.next().value); // ["baz", "baz"]
-```
 <a name="module_collections-x.Set+forEach"></a>
 
-#### `set.forEach(callback, [thisArg])` ⇒ <code>Object</code>
+#### `set.forEach` ⇒ <code>Object</code>
 The forEach() method executes a provided function once per each value
 in the Set object, in insertion order.
 
-**Kind**: instance method of <code>[Set](#module_collections-x.Set)</code>  
+**Kind**: instance property of [<code>Set</code>](#module_collections-x.Set)  
 **Returns**: <code>Object</code> - The Set object.  
 
 | Param | Type | Description |
@@ -223,13 +180,56 @@ new Set(["foo", "bar", undefined]).forEach(logSetElements);
 // "s[bar] = bar"
 // "s[undefined] = undefined"
 ```
+<a name="module_collections-x.Set+size"></a>
+
+#### `set.size` : <code>number</code>
+The value of size is an integer representing how many entries the Set
+object has.
+
+**Kind**: instance property of [<code>Set</code>](#module_collections-x.Set)  
+**Example**  
+```js
+var Set = require('collections-x').Set
+var mySet = new Set();
+mySet.add(1);
+mySet.add(5);
+mySet.add("some text");
+
+mySet.size; // 3
+```
+<a name="module_collections-x.Set+entries"></a>
+
+#### `set.entries()` ⇒ <code>Object</code>
+The entries() method returns a new Iterator object that contains an
+array of [value, value] for each element in the Set object, in
+insertion order. For Set objects there is no key like in Map objects.
+However, to keep the API similar to the Map object, each entry has the
+same value for its key and value here, so that an array [value, value]
+is returned.
+
+**Kind**: instance method of [<code>Set</code>](#module_collections-x.Set)  
+**Returns**: <code>Object</code> - A new Iterator object.  
+**Example**  
+```js
+var Set = require('collections-x').Set
+var mySet = new Set();
+mySet.add("foobar");
+mySet.add(1);
+mySet.add("baz");
+
+var setIter = mySet.entries();
+
+console.log(setIter.next().value); // ["foobar", "foobar"]
+console.log(setIter.next().value); // [1, 1]
+console.log(setIter.next().value); // ["baz", "baz"]
+```
 <a name="module_collections-x.Set+has"></a>
 
 #### `set.has(value)` ⇒ <code>boolean</code>
 The has() method returns a boolean indicating whether an element with the
 specified value exists in a Set object or not.
 
-**Kind**: instance method of <code>[Set](#module_collections-x.Set)</code>  
+**Kind**: instance method of [<code>Set</code>](#module_collections-x.Set)  
 **Returns**: <code>boolean</code> - Returns true if an element with the specified value
  exists in the Set object; otherwise false.  
 
@@ -253,7 +253,7 @@ The keys() method is an alias for the `values` method (for similarity
 with Map objects); it behaves exactly the same and returns values of
 Set elements.
 
-**Kind**: instance method of <code>[Set](#module_collections-x.Set)</code>  
+**Kind**: instance method of [<code>Set</code>](#module_collections-x.Set)  
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
@@ -275,7 +275,7 @@ console.log(setIter.next().value); // "baz"
 The values() method returns a new Iterator object that contains the
 values for each element in the Set object in insertion order.
 
-**Kind**: instance method of <code>[Set](#module_collections-x.Set)</code>  
+**Kind**: instance method of [<code>Set</code>](#module_collections-x.Set)  
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
@@ -297,7 +297,7 @@ console.log(setIter.next().value); // "baz"
 The initial value of the @@iterator property is the same function object
 as the initial value of the values property.
 
-**Kind**: instance method of <code>[Set](#module_collections-x.Set)</code>  
+**Kind**: instance method of [<code>Set</code>](#module_collections-x.Set)  
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
@@ -317,44 +317,27 @@ console.log(setIter.next().value); // Object
 <a name="module_collections-x.Map"></a>
 
 ### `collections-x.Map`
-**Kind**: static property of <code>[collections-x](#module_collections-x)</code>  
+**Kind**: static property of [<code>collections-x</code>](#module_collections-x)  
 
 * [`.Map`](#module_collections-x.Map)
+    * [`.clear`](#module_collections-x.Map+clear) ⇒ <code>Object</code>
+    * [`.delete`](#module_collections-x.Map+delete) ⇒ <code>boolean</code>
+    * [`.entries`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
+    * [`.forEach`](#module_collections-x.Map+forEach) ⇒ <code>Object</code>
+    * [`.get`](#module_collections-x.Map+get) ⇒ <code>\*</code>
+    * [`.keys`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
+    * [`.set`](#module_collections-x.Map+set) ⇒ <code>Object</code>
     * [`.size`](#module_collections-x.Map+size) : <code>number</code>
-    * [`.clear()`](#module_collections-x.Map+clear) ⇒ <code>Object</code>
-    * [`.delete(key)`](#module_collections-x.Map+delete) ⇒ <code>boolean</code>
-    * [`.entries()`](#module_collections-x.Map+entries) ⇒ <code>Object</code>
-    * [`.forEach(callback, [thisArg])`](#module_collections-x.Map+forEach) ⇒ <code>Object</code>
-    * [`.get(key)`](#module_collections-x.Map+get) ⇒ <code>\*</code>
+    * [`.values`](#module_collections-x.Map+values) ⇒ <code>Object</code>
     * [`.has(key)`](#module_collections-x.Map+has) ⇒ <code>boolean</code>
-    * [`.keys()`](#module_collections-x.Map+keys) ⇒ <code>Object</code>
-    * [`.set(key, value)`](#module_collections-x.Map+set) ⇒ <code>Object</code>
-    * [`.values()`](#module_collections-x.Map+values) ⇒ <code>Object</code>
     * [`.symIt()`](#module_collections-x.Map+symIt) ⇒ <code>Object</code>
 
-<a name="module_collections-x.Map+size"></a>
-
-#### `map.size` : <code>number</code>
-The value of size is an integer representing how many entries the Map
-object has.
-
-**Kind**: instance property of <code>[Map](#module_collections-x.Map)</code>  
-**Example**  
-```js
-var Map = require('collections-x').Map;
-var myMap = new Map();
-myMap.set(1, true);
-myMap.set(5, false);
-myMap.set("some text", 1);
-
-myMap.size; // 3
-```
 <a name="module_collections-x.Map+clear"></a>
 
-#### `map.clear()` ⇒ <code>Object</code>
+#### `map.clear` ⇒ <code>Object</code>
 The clear() method removes all elements from a Map object.
 
-**Kind**: instance method of <code>[Map](#module_collections-x.Map)</code>  
+**Kind**: instance property of [<code>Map</code>](#module_collections-x.Map)  
 **Returns**: <code>Object</code> - The Map object.  
 **Example**  
 ```js
@@ -373,10 +356,10 @@ myMap.has("bar")  // false
 ```
 <a name="module_collections-x.Map+delete"></a>
 
-#### `map.delete(key)` ⇒ <code>boolean</code>
+#### `map.delete` ⇒ <code>boolean</code>
 The delete() method removes the specified element from a Map object.
 
-**Kind**: instance method of <code>[Map](#module_collections-x.Map)</code>  
+**Kind**: instance property of [<code>Map</code>](#module_collections-x.Map)  
 **Returns**: <code>boolean</code> - Returns true if an element in the Map object has been
  removed successfully.  
 
@@ -396,11 +379,11 @@ myMap.has("bar");    // Returns false.
 ```
 <a name="module_collections-x.Map+entries"></a>
 
-#### `map.entries()` ⇒ <code>Object</code>
+#### `map.entries` ⇒ <code>Object</code>
 The entries() method returns a new Iterator object that contains the
 [key, value] pairs for each element in the Map object in insertion order.
 
-**Kind**: instance method of <code>[Map](#module_collections-x.Map)</code>  
+**Kind**: instance property of [<code>Map</code>](#module_collections-x.Map)  
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
@@ -418,11 +401,11 @@ console.log(mapIter.next().value); // [Object, "baz"]
 ```
 <a name="module_collections-x.Map+forEach"></a>
 
-#### `map.forEach(callback, [thisArg])` ⇒ <code>Object</code>
+#### `map.forEach` ⇒ <code>Object</code>
 The forEach() method executes a provided function once per each
 key/value pair in the Map object, in insertion order.
 
-**Kind**: instance method of <code>[Map](#module_collections-x.Map)</code>  
+**Kind**: instance property of [<code>Map</code>](#module_collections-x.Map)  
 **Returns**: <code>Object</code> - The Map object.  
 
 | Param | Type | Description |
@@ -445,10 +428,10 @@ myMap.forEach(logElements);
 ```
 <a name="module_collections-x.Map+get"></a>
 
-#### `map.get(key)` ⇒ <code>\*</code>
+#### `map.get` ⇒ <code>\*</code>
 The get() method returns a specified element from a Map object.
 
-**Kind**: instance method of <code>[Map](#module_collections-x.Map)</code>  
+**Kind**: instance property of [<code>Map</code>](#module_collections-x.Map)  
 **Returns**: <code>\*</code> - Returns the element associated with the specified key or
  undefined if the key can't be found in the Map object.  
 
@@ -465,36 +448,13 @@ myMap.set("bar", "foo");
 myMap.get("bar");  // Returns "foo".
 myMap.get("baz");  // Returns undefined.
 ```
-<a name="module_collections-x.Map+has"></a>
-
-#### `map.has(key)` ⇒ <code>boolean</code>
-The has() method returns a boolean indicating whether an element with
-the specified key exists or not.
-
-**Kind**: instance method of <code>[Map](#module_collections-x.Map)</code>  
-**Returns**: <code>boolean</code> - Returns true if an element with the specified key
- exists in the Map object; otherwise false.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| key | <code>\*</code> | The key of the element to test for presence in the  Map object. |
-
-**Example**  
-```js
-var Map = require('collections-x').Map;
-var myMap = new Map();
-myMap.set("bar", "foo");
-
-myMap.has("bar");  // returns true
-myMap.has("baz");  // returns false
-```
 <a name="module_collections-x.Map+keys"></a>
 
-#### `map.keys()` ⇒ <code>Object</code>
+#### `map.keys` ⇒ <code>Object</code>
 The keys() method returns a new Iterator object that contains the keys
 for each element in the Map object in insertion order.
 
-**Kind**: instance method of <code>[Map](#module_collections-x.Map)</code>  
+**Kind**: instance property of [<code>Map</code>](#module_collections-x.Map)  
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
@@ -512,11 +472,11 @@ console.log(mapIter.next().value); // Object
 ```
 <a name="module_collections-x.Map+set"></a>
 
-#### `map.set(key, value)` ⇒ <code>Object</code>
+#### `map.set` ⇒ <code>Object</code>
 The set() method adds a new element with a specified key and value to
 a Map object.
 
-**Kind**: instance method of <code>[Map](#module_collections-x.Map)</code>  
+**Kind**: instance property of [<code>Map</code>](#module_collections-x.Map)  
 **Returns**: <code>Object</code> - The Map object.  
 
 | Param | Type | Description |
@@ -536,13 +496,30 @@ myMap.set(1, "foobar");
 // Update an element in the map
 myMap.set("bar", "fuuu");
 ```
+<a name="module_collections-x.Map+size"></a>
+
+#### `map.size` : <code>number</code>
+The value of size is an integer representing how many entries the Map
+object has.
+
+**Kind**: instance property of [<code>Map</code>](#module_collections-x.Map)  
+**Example**  
+```js
+var Map = require('collections-x').Map;
+var myMap = new Map();
+myMap.set(1, true);
+myMap.set(5, false);
+myMap.set("some text", 1);
+
+myMap.size; // 3
+```
 <a name="module_collections-x.Map+values"></a>
 
-#### `map.values()` ⇒ <code>Object</code>
+#### `map.values` ⇒ <code>Object</code>
 The values() method returns a new Iterator object that contains the
 values for each element in the Map object in insertion order.
 
-**Kind**: instance method of <code>[Map](#module_collections-x.Map)</code>  
+**Kind**: instance property of [<code>Map</code>](#module_collections-x.Map)  
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js
@@ -558,13 +535,36 @@ console.log(mapIter.next().value); // "foo"
 console.log(mapIter.next().value); // "bar"
 console.log(mapIter.next().value); // "baz"
 ```
+<a name="module_collections-x.Map+has"></a>
+
+#### `map.has(key)` ⇒ <code>boolean</code>
+The has() method returns a boolean indicating whether an element with
+the specified key exists or not.
+
+**Kind**: instance method of [<code>Map</code>](#module_collections-x.Map)  
+**Returns**: <code>boolean</code> - Returns true if an element with the specified key
+ exists in the Map object; otherwise false.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>\*</code> | The key of the element to test for presence in the  Map object. |
+
+**Example**  
+```js
+var Map = require('collections-x').Map;
+var myMap = new Map();
+myMap.set("bar", "foo");
+
+myMap.has("bar");  // returns true
+myMap.has("baz");  // returns false
+```
 <a name="module_collections-x.Map+symIt"></a>
 
 #### `map.symIt()` ⇒ <code>Object</code>
 The initial value of the @@iterator property is the same function object
 as the initial value of the entries property.
 
-**Kind**: instance method of <code>[Map](#module_collections-x.Map)</code>  
+**Kind**: instance method of [<code>Map</code>](#module_collections-x.Map)  
 **Returns**: <code>Object</code> - A new Iterator object.  
 **Example**  
 ```js

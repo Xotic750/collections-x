@@ -154,7 +154,11 @@
     it('constructor behavior, not entry object should throw', function () {
       var threw = false;
       try {
-        new MapObject([1, 2, 3]);
+        new MapObject([
+          1,
+          2,
+          3
+        ]);
       } catch (e) {
         expect(e).toEqual(jasmine.any(TypeError));
         threw = true;
@@ -166,7 +170,11 @@
       var a = 1;
       var b = {};
       var c = new MapObject();
-      var s = new SetObject([a, b, c]);
+      var s = new SetObject([
+        a,
+        b,
+        c
+      ]);
       var threw = false;
       try {
         new MapObject(s);
@@ -183,7 +191,7 @@
         expect(o.size).toBe(0);
         o.set('a', 'a');
         expect(o.size).toBe(1);
-        o['delete']('a');
+        o.delete('a');
         expect(o.size).toBe(0);
       }
     });
@@ -246,13 +254,13 @@
       o.set(generic, callback);
       o.set(o, callback);
       expect(o.has(callback) && o.has(generic) && o.has(o)).toBe(true);
-      o['delete'](callback);
-      o['delete'](generic);
-      o['delete'](o);
+      o.delete(callback);
+      o.delete(generic);
+      o.delete(o);
       expect(!o.has(callback) && !o.has(generic) && !o.has(o)).toBe(true);
-      expect(o['delete'](o)).toBe(false);
+      expect(o.delete(o)).toBe(false);
       o.set(o, callback);
-      expect(o['delete'](o)).toBe(true);
+      expect(o.delete(o)).toBe(true);
     });
 
     it('non object key does not throw an error', function () {
@@ -276,7 +284,7 @@
       var k = keys.next();
       var v = values.next();
       expect(k.value === '1' && v.value === 1).toBe(true);
-      o['delete']('2');
+      o.delete('2');
       k = keys.next();
       v = values.next();
       expect(k.value === '3' && v.value === 3).toBe(true);
@@ -316,7 +324,7 @@
         expect('key ' + value).toBe(key);
         expect(obj).toBe(o);
         // even if dropped, keeps looping
-        o['delete'](key);
+        o.delete(key);
       });
       expect(!o.size).toBe(true);
     });
@@ -334,14 +342,19 @@
         expect(String(value)).toBe(key);
         // mutations work as expected
         if (value === 1) {
-          o['delete']('0'); // remove from before current index
-          o['delete']('2'); // remove from after current index
+          o.delete('0'); // remove from before current index
+          o.delete('2'); // remove from after current index
           o.set('3', 3); // insertion
         } else if (value === 3) {
           o.set('0', 0); // insertion at the end
         }
       });
-      expect(seen).toEqual([0, 1, 3, 0]);
+      expect(seen).toEqual([
+        0,
+        1,
+        3,
+        0
+      ]);
     });
 
     it('clear', function () {
@@ -428,7 +441,12 @@
     it('uses SameValueZero even on a Map of size > 4', function () {
       // Chrome 38-42, node 0.11/0.12, iojs 1/2 have a bug when the Map
       // has a size > 4
-      var firstFour = [[1, 0], [2, 0], [3, 0], [4, 0]];
+      var firstFour = [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0]
+      ];
       var fourMap = new MapObject(firstFour);
       expect(fourMap.size).toBe(4);
       expect(fourMap.has(-0)).toBe(false);
@@ -445,7 +463,7 @@
       expect(typeof MapObject.prototype.get).toBe('function');
       expect(typeof MapObject.prototype.set).toBe('function');
       expect(typeof MapObject.prototype.has).toBe('function');
-      expect(typeof MapObject.prototype['delete']).toBe('function');
+      expect(typeof MapObject.prototype.delete).toBe('function');
     });
   });
 
@@ -537,7 +555,7 @@
         expect(o.size).toBe(0);
         o.add('a');
         expect(o.size).toBe(1);
-        o['delete']('a');
+        o.delete('a');
         expect(o.size).toBe(0);
       }
     });
@@ -556,23 +574,27 @@
       o.add(generic);
       o.add(o);
       expect(o.has(callback) && o.has(generic) && o.has(o)).toBe(true);
-      o['delete'](callback);
-      o['delete'](generic);
-      o['delete'](o);
+      o.delete(callback);
+      o.delete(generic);
+      o.delete(o);
       expect(!o.has(callback) && !o.has(generic) && !o.has(o)).toBe(true);
-      expect(o['delete'](o)).toBe(false);
+      expect(o.delete(o)).toBe(false);
       o.add(o);
-      expect(o['delete'](o)).toBe(true);
+      expect(o.delete(o)).toBe(true);
     });
 
     it('values behavior', function () {
       // test that things get returned in insertion order as per the specs
-      var o = new SetObject([1, 2, 3]);
+      var o = new SetObject([
+        1,
+        2,
+        3
+      ]);
       var values = o.values();
       var v = values.next();
       expect(o.keys).toBe(o.values); // same function, as per the specs
       expect(v.value).toBe(1);
-      o['delete'](2);
+      o.delete(2);
       v = values.next();
       expect(v.value).toBe(3);
       // insertion of previously-removed item goes to the end
@@ -616,13 +638,17 @@
         expect(obj).toBe(o);
         expect(sameValue).toBe(value);
         // even if dropped, keeps looping
-        o['delete'](value);
+        o.delete(value);
       });
       expect(!o.size).toBe(true);
     });
 
     it('forEach with mutations', function () {
-      var o = new SetObject([0, 1, 2]);
+      var o = new SetObject([
+        0,
+        1,
+        2
+      ]);
       var seen = [];
       o.forEach(function (value, sameValue, obj) {
         seen.push(value);
@@ -630,14 +656,19 @@
         expect(sameValue).toBe(value);
         // mutations work as expected
         if (value === 1) {
-          o['delete'](0); // remove from before current index
-          o['delete'](2); // remove from after current index
+          o.delete(0); // remove from before current index
+          o.delete(2); // remove from after current index
           o.add(3); // insertion
         } else if (value === 3) {
           o.add(0); // insertion at the end
         }
       });
-      expect(seen).toEqual([0, 1, 3, 0]);
+      expect(seen).toEqual([
+        0,
+        1,
+        3,
+        0
+      ]);
     });
 
     it('clear', function () {
