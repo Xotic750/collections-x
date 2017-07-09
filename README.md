@@ -1,6 +1,8 @@
 <a name="module_collections-x"></a>
 
 ## collections-x
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/Xotic750/collections-x.svg)](https://greenkeeper.io/)
 <a href="https://travis-ci.org/Xotic750/collections-x"
 title="Travis status">
 <img src="https://travis-ci.org/Xotic750/collections-x.svg?branch=master"
