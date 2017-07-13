@@ -1,30 +1,6 @@
 /**
- * @file
- * <a href="https://travis-ci.org/Xotic750/collections-x"
- * title="Travis status">
- * <img src="https://travis-ci.org/Xotic750/collections-x.svg?branch=master"
- * alt="Travis status" height="18">
- * </a>
- * <a href="https://david-dm.org/Xotic750/collections-x"
- * title="Dependency status">
- * <img src="https://david-dm.org/Xotic750/collections-x.svg"
- * alt="Dependency status" height="18"/>
- * </a>
- * <a href="https://david-dm.org/Xotic750/collections-x#info=devDependencies"
- * title="devDependency status">
- * <img src="https://david-dm.org/Xotic750/collections-x/dev-status.svg"
- * alt="devDependency status" height="18"/>
- * </a>
- * <a href="https://badge.fury.io/js/collections-x" title="npm version">
- * <img src="https://badge.fury.io/js/collections-x.svg"
- * alt="npm version" height="18">
- * </a>
- *
- * ES6 collections fallback library: Map and Set.
- *
- * Requires ES3 or above.
- *
- * @version 1.4.0
+ * @file ES6 collections fallback library: Map and Set.
+ * @version 1.5.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -33,8 +9,8 @@
 
 'use strict';
 
-var hasOwnProperty = require('has-own-property-x');
-var isCallable = require('is-callable');
+var hasOwn = require('has-own-property-x');
+var isFunction = require('is-function-x');
 var defineProperty = require('object-define-property-x');
 var defineProperties = require('object-define-properties-x');
 var isString = require('is-string');
@@ -42,18 +18,19 @@ var isArrayLike = require('is-array-like-x');
 var isPrimitive = require('is-primitive');
 var isSurrogatePair = require('is-surrogate-pair-x');
 var indexOf = require('index-of-x');
-var assertIsCallable = require('assert-is-callable-x');
+var assertIsFunction = require('assert-is-function-x');
 var assertIsObject = require('assert-is-object-x');
 var IdGenerator = require('big-counter-x');
 var isNil = require('is-nil-x');
 var some = require('array.prototype.some');
-var hasRealSymbolIterator = require('has-symbol-support-x') && typeof Symbol.iterator === 'symbol';
+var hasSymbolSupport = require('has-symbol-support-x');
+var hasRealSymbolIterator = hasSymbolSupport && typeof Symbol.iterator === 'symbol';
 var hasFakeSymbolIterator = typeof Symbol === 'object' && typeof Symbol.iterator === 'string';
 var symIt;
 
 if (hasRealSymbolIterator || hasFakeSymbolIterator) {
   symIt = Symbol.iterator;
-} else if (isCallable(Array.prototype['_es6-shim iterator_'])) {
+} else if (isFunction(Array.prototype['_es6-shim iterator_'])) {
   symIt = '_es6-shim iterator_';
 } else {
   symIt = '@@iterator';
@@ -127,7 +104,7 @@ var parseIterable = function _parseIterable(kind, context, iterable) {
   var next;
   var key;
   var indexof;
-  if (iterable && isCallable(iterable[symbolIterator])) {
+  if (iterable && isFunction(iterable[symbolIterator])) {
     var iterator = iterable[symbolIterator]();
     next = iterator.next();
     if (kind === 'map') {
@@ -252,7 +229,7 @@ var parseIterable = function _parseIterable(kind, context, iterable) {
 // eslint-disable-next-line max-params
 var baseForEach = function _baseForEach(kind, context, callback, thisArg) {
   assertIsObject(context);
-  assertIsCallable(callback);
+  assertIsFunction(callback);
   var pointers = {
     index: 0,
     order: context['[[order]]'][0]
@@ -261,7 +238,7 @@ var baseForEach = function _baseForEach(kind, context, callback, thisArg) {
   context['[[change]]'] = false;
   var length = context['[[key]]'].length;
   while (pointers.index < length) {
-    if (hasOwnProperty(context['[[key]]'], pointers.index)) {
+    if (hasOwn(context['[[key]]'], pointers.index)) {
       var key = context['[[key]]'][pointers.index];
       var value = kind === 'map' ? context['[[value]]'][pointers.index] : key;
       callback.call(thisArg, value, key, context);
