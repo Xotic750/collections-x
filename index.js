@@ -1,6 +1,6 @@
 /**
  * @file ES6 collections fallback library: Map and Set.
- * @version 1.6.0
+ * @version 2.0.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -22,7 +22,14 @@ var assertIsFunction = require('assert-is-function-x');
 var assertIsObject = require('assert-is-object-x');
 var IdGenerator = require('big-counter-x');
 var isNil = require('is-nil-x');
-var some = require('array.prototype.some');
+var isMap = require('is-map-x');
+var isSet = require('is-set-x');
+var isObjectLike = require('is-object-like-x');
+var isArray = require('is-array-x');
+var isBoolean = require('is-boolean-object');
+var isUndefined = require('validate.io-undefined');
+var some = require('array-some-x');
+var getPrototypeOf = require('get-prototype-of-x');
 var hasSymbolSupport = require('has-symbol-support-x');
 var hasRealSymbolIterator = hasSymbolSupport && typeof Symbol.iterator === 'symbol';
 var hasFakeSymbolIterator = typeof Symbol === 'object' && typeof Symbol.iterator === 'string';
@@ -36,12 +43,9 @@ if (hasRealSymbolIterator || hasFakeSymbolIterator) {
   symIt = '@@iterator';
 }
 
-/**
- * The iterator identifier that is in use.
- *
- * type {Symbol|string}
- */
-module.exports.symIt = symIt;
+var isNumberType = function _isNumberType(value) {
+  return typeof value === 'number';
+};
 
 /**
  * Detect an interator function.
@@ -513,8 +517,6 @@ var SetObject = function Set() {
   parseIterable('set', this, arguments.length ? arguments[0] : void 0);
 };
 
-/** @borrows Set as Set */
-module.exports.Set = SetObject;
 defineProperties(SetObject.prototype, /** @lends module:collections-x.Set.prototype */ {
   /**
    * The add() method appends a new element with a specified value to the end
@@ -891,8 +893,6 @@ var MapObject = function Map() {
   parseIterable('map', this, arguments.length ? arguments[0] : void 0);
 };
 
-/** @borrows Map as Map */
-module.exports.Map = MapObject;
 defineProperties(MapObject.prototype, /** @lends module:collections-x.Map.prototype */ {
   /**
    * The clear() method removes all elements from a Map object.
@@ -1145,3 +1145,347 @@ defineProperties(MapObject.prototype, /** @lends module:collections-x.Map.protot
 defineProperty(MapObject.prototype, symIt, {
   value: MapObject.prototype.entries
 });
+
+/*
+ * Determine whether to use shim or native.
+ */
+
+var ExportMap = MapObject;
+try {
+  ExportMap = new Map() ? Map : MapObject;
+} catch (ignore) {}
+
+var ExportSet = SetObject;
+try {
+  ExportSet = new Set() ? Set : SetObject;
+} catch (ignore) {}
+
+var testMap;
+
+if (ExportMap !== MapObject) {
+  testMap = new ExportMap();
+  if (isNumberType(testMap.size) === false || testMap.size !== 0) {
+    ExportMap = MapObject;
+  } else {
+    var propsMap = [
+      'has',
+      'set',
+      'clear',
+      'delete',
+      'forEach',
+      'values',
+      'entries',
+      'keys',
+      symIt
+    ];
+
+    var failedMap = some(propsMap, function (method) {
+      return isFunction(testMap[method]) === false;
+    });
+
+    if (failedMap) {
+      ExportMap = MapObject;
+    }
+  }
+}
+
+if (ExportMap !== MapObject) {
+  // Safari 8, for example, doesn't accept an iterable.
+  var mapAcceptsArguments = false;
+  try {
+    mapAcceptsArguments = new ExportMap([[1, 2]]).get(1) === 2;
+  } catch (ignore) {}
+
+  if (mapAcceptsArguments === false) {
+    ExportMap = MapObject;
+  }
+}
+
+if (ExportMap !== MapObject) {
+  testMap = new ExportMap();
+  var mapSupportsChaining = testMap.set(1, 2) === testMap;
+  if (mapSupportsChaining === false) {
+    ExportMap = MapObject;
+  }
+}
+
+if (ExportMap !== MapObject) {
+  // Chrome 38-42, node 0.11/0.12, iojs 1/2 also have a bug when the Map has a size > 4
+  testMap = new ExportMap([
+    [1, 0],
+    [2, 0],
+    [3, 0],
+    [4, 0]
+  ]);
+  testMap.set(-0, testMap);
+  var gets = testMap.get(0) === testMap && testMap.get(-0) === testMap;
+  var mapUsesSameValueZero = gets && testMap.has(0) && testMap.has(-0);
+
+  if (mapUsesSameValueZero === false) {
+    ExportMap = MapObject;
+  }
+}
+
+if (ExportMap !== MapObject) {
+  if (Object.setPrototypeOf) {
+    var MyMap = function (arg) {
+      testMap = new ExportMap(arg);
+      Object.setPrototypeOf(testMap, MyMap.prototype);
+      return testMap;
+    };
+    Object.setPrototypeOf(MyMap, ExportMap);
+    MyMap.prototype = Object.create(ExportMap.prototype, { constructor: { value: MyMap } });
+
+    var mapSupportsSubclassing = false;
+    try {
+      testMap = new MyMap([]);
+      // Firefox 32 is ok with the instantiating the subclass but will
+      // throw when the map is used.
+      testMap.set(42, 42);
+      mapSupportsSubclassing = testMap instanceof MyMap;
+    } catch (ignore) {}
+
+    if (mapSupportsSubclassing === false) {
+      ExportMap = MapObject;
+    }
+  }
+}
+
+if (ExportMap !== MapObject) {
+  var mapRequiresNew;
+  try {
+    // eslint-disable-next-line new-cap
+    mapRequiresNew = (ExportMap() instanceof ExportMap) === false;
+  } catch (e) {
+    mapRequiresNew = e instanceof TypeError;
+  }
+
+  if (mapRequiresNew === false) {
+    ExportMap = MapObject;
+  }
+}
+
+if (ExportMap !== MapObject) {
+  testMap = new ExportMap();
+  // eslint-disable-next-line id-length
+  var mapIterationThrowsStopIterator;
+  try {
+    mapIterationThrowsStopIterator = testMap.keys().next().done === false;
+  } catch (ignore) {
+    mapIterationThrowsStopIterator = true;
+  }
+
+  if (mapIterationThrowsStopIterator) {
+    ExportMap = MapObject;
+  }
+}
+
+// Safari 8
+if (ExportMap !== MapObject && isFunction(new ExportMap().keys().next) === false) {
+  ExportMap = MapObject;
+}
+
+if (hasRealSymbolIterator && ExportMap !== MapObject) {
+  var testMapProto = getPrototypeOf(new ExportMap().keys());
+  var hasBuggyMapIterator = true;
+  if (testMapProto) {
+    hasBuggyMapIterator = isFunction(testMapProto[symIt]) === false;
+  }
+
+  if (hasBuggyMapIterator) {
+    ExportMap = MapObject;
+  }
+}
+
+var testSet;
+
+if (ExportSet !== SetObject) {
+  testSet = new ExportSet();
+  if (isNumberType(testSet.size) === false || testSet.size !== 0) {
+    ExportMap = MapObject;
+  } else {
+    var propsSet = [
+      'has',
+      'add',
+      'clear',
+      'delete',
+      'forEach',
+      'values',
+      'entries',
+      'keys',
+      symIt
+    ];
+
+    var failedSet = some(propsSet, function (method) {
+      return isFunction(testSet[method]) === false;
+    });
+
+    if (failedSet) {
+      ExportSet = SetObject;
+    }
+  }
+}
+
+if (ExportSet !== SetObject) {
+  testSet = new ExportSet();
+  testSet['delete'](0);
+  testSet.add(-0);
+  var setUsesSameValueZero = testSet.has(0) && testSet.has(-0);
+  if (setUsesSameValueZero === false) {
+    ExportSet = SetObject;
+  }
+}
+
+if (ExportSet !== SetObject) {
+  testSet = new ExportSet();
+  var setSupportsChaining = testSet.add(1) === testSet;
+  if (setSupportsChaining === false) {
+    ExportSet = SetObject;
+  }
+}
+
+if (ExportSet !== SetObject) {
+  if (Object.setPrototypeOf) {
+    var MySet = function (arg) {
+      testSet = new ExportSet(arg);
+      Object.setPrototypeOf(testSet, MySet.prototype);
+      return testSet;
+    };
+    Object.setPrototypeOf(MySet, ExportSet);
+    MySet.prototype = Object.create(ExportSet.prototype, { constructor: { value: MySet } });
+
+    var setSupportsSubclassing = false;
+    try {
+      testSet = new MySet([]);
+      testSet.add(42, 42);
+      setSupportsSubclassing = testSet instanceof MySet;
+    } catch (ignore) {}
+
+    if (setSupportsSubclassing === false) {
+      ExportSet = SetObject;
+    }
+  }
+}
+
+if (ExportSet !== SetObject) {
+  var setRequiresNew;
+  try {
+    // eslint-disable-next-line new-cap
+    setRequiresNew = (ExportSet() instanceof ExportSet) === false;
+  } catch (e) {
+    setRequiresNew = e instanceof TypeError;
+  }
+
+  if (setRequiresNew === false) {
+    ExportSet = SetObject;
+  }
+}
+
+if (ExportSet !== SetObject) {
+  testSet = new ExportSet();
+  // eslint-disable-next-line id-length
+  var setIterationThrowsStopIterator;
+  try {
+    setIterationThrowsStopIterator = testSet.keys().next().done === false;
+  } catch (ignore) {
+    setIterationThrowsStopIterator = true;
+  }
+
+  if (setIterationThrowsStopIterator) {
+    ExportSet = SetObject;
+  }
+}
+
+// Safari 8
+if (ExportSet !== SetObject && isFunction(new ExportSet().keys().next) === false) {
+  ExportSet = SetObject;
+}
+
+if (hasRealSymbolIterator && ExportSet !== SetObject) {
+  var testSetProto = getPrototypeOf(new ExportSet().keys());
+  var hasBuggySetIterator = true;
+  if (testSetProto) {
+    hasBuggySetIterator = isFunction(testSetProto[symIt]) === false;
+  }
+
+  if (hasBuggySetIterator) {
+    ExportSet = SetObject;
+  }
+}
+
+var hasCommon = function _hasCommon(object) {
+  return isObjectLike(object) && isFunction(object[symIt]) && isBoolean(object['[[changed]]']) && isObjectLike(object['[[id]]']) && isArray(object['[[key]]']) && isArray(object['[[order]]']) && isNumberType(object.size);
+};
+
+var $isMap;
+if (ExportMap === MapObject) {
+  $isMap = function _isMap(object) {
+    if (isMap(object)) {
+      return true;
+    }
+
+    return hasCommon(object) && isArray(object['[[value]]']);
+  };
+} else {
+  $isMap = isMap;
+}
+
+var $isSet;
+if (ExportSet === SetObject) {
+  $isSet = function _isSet(object) {
+    if (isSet(object)) {
+      return true;
+    }
+
+    return hasCommon(object) && isUndefined(object['[[value]]']);
+  };
+} else {
+  $isSet = isSet;
+}
+
+/*
+ * Exports.
+ */
+
+module.exports = {
+  /**
+   * Determine if an `object` is a `Map`.
+   *
+   * @param {*} object - The object to test.
+   * @returns {boolean} `true` if the `object` is a `Map`,
+   *  else `false`.
+   * @example
+   * var isMap = require('collections-x').isMap;
+   * var m = new Map();
+   *
+   * isMap([]); // false
+   * isMap(true); // false
+   * isMap(m); // true
+   */
+  isMap: $isMap,
+  /**
+   * Determine if an `object` is a `Set`.
+   *
+   * @param {*} object - The object to test.
+   * @returns {boolean} `true` if the `object` is a `Set`,
+   *  else `false`.
+   * @example
+   * var isSet = require('collections-x');
+   * var s = new Set();
+   *
+   * isSet([]); // false
+   * isSet(true); // false
+   * isSet(s); // true
+   */
+  isSet: $isSet,
+  /** @borrows Map as Map */
+  Map: ExportMap,
+  /** @borrows Set as Set */
+  Set: ExportSet,
+  /**
+   * The iterator identifier that is in use.
+   *
+   * type {Symbol|string}
+   */
+  symIt: symIt
+};
