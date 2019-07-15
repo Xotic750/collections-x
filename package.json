@@ -52,7 +52,7 @@
   "dependencies": {
     "array-some-x": "^2.5.0",
     "assert-is-function-x": "^2.1.0",
-    "assert-is-object-x": "^2.1.0",
+    "assert-is-object-x": "^3.0.0",
     "big-counter-x": "^3.1.0",
     "get-prototype-of-x": "^1.4.0",
     "has-own-property-x": "^3.2.0",
