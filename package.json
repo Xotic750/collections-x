@@ -57,7 +57,7 @@
     "get-prototype-of-x": "^2.0.1",
     "has-own-property-x": "^4.0.0",
     "has-symbol-support-x": "^2.0.4",
-    "index-of-x": "^2.3.0",
+    "index-of-x": "^3.0.0",
     "is-array-like-x": "^2.0.1",
     "is-array-x": "^2.0.5",
     "is-boolean-object": "^1.0.0",
