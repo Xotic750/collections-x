@@ -254,7 +254,7 @@ const baseForEach = function _baseForEach(kind, context, callback, thisArg) {
  *  exists in the Map/Set object; otherwise false.
  */
 const baseHas = function has(key) {
-  // eslint-disable-next-line no-invalid-this
+  // eslint-disable-next-line babel/no-invalid-this
   return indexOf(assertIsObject(this)['[[key]]'], key, 'SameValueZero') > -1;
 };
 
