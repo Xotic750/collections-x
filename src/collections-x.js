@@ -7,28 +7,29 @@
  * @module collections-x
  */
 
-const hasOwn = require('has-own-property-x');
-const isFunction = require('is-function-x');
-const defineProperty = require('object-define-property-x');
-const defineProperties = require('object-define-properties-x');
-const isString = require('is-string');
-const isArrayLike = require('is-array-like-x');
-const isPrimitive = require('is-primitive');
-const isSurrogatePair = require('is-surrogate-pair-x');
-const indexOf = require('index-of-x');
-const assertIsFunction = require('assert-is-function-x');
-const assertIsObject = require('assert-is-object-x');
-const IdGenerator = require('big-counter-x');
-const isNil = require('is-nil-x');
-const isMap = require('is-map-x');
-const isSet = require('is-set-x');
-const isObjectLike = require('is-object-like-x');
-const isArray = require('is-array-x');
-const isBoolean = require('is-boolean-object');
-const isUndefined = require('validate.io-undefined');
-const some = require('array-some-x');
-const getPrototypeOf = require('get-prototype-of-x');
-const hasSymbolSupport = require('has-symbol-support-x');
+import hasOwn from 'has-own-property-x';
+
+import isFunction from 'is-function-x';
+import defineProperty from 'object-define-property-x';
+import defineProperties from 'object-define-properties-x';
+import isString from 'is-string';
+import isArrayLike from 'is-array-like-x';
+import isPrimitive from 'is-primitive';
+import isSurrogatePair from 'is-surrogate-pair-x';
+import indexOf from 'index-of-x';
+import assertIsFunction from 'assert-is-function-x';
+import assertIsObject from 'assert-is-object-x';
+import IdGenerator from 'big-counter-x';
+import isNil from 'is-nil-x';
+import isMap from 'is-map-x';
+import isSet from 'is-set-x';
+import isObjectLike from 'is-object-like-x';
+import isArray from 'is-array-x';
+import isBoolean from 'is-boolean-object';
+import isUndefined from 'validate.io-undefined';
+import some from 'array-some-x';
+import getPrototypeOf from 'get-prototype-of-x';
+import hasSymbolSupport from 'has-symbol-support-x';
 
 const hasRealSymbolIterator = hasSymbolSupport && typeof Symbol.iterator === 'symbol';
 const hasFakeSymbolIterator = typeof Symbol === 'object' && typeof Symbol.iterator === 'string';
@@ -1429,7 +1430,7 @@ if (ExportSet === SetObject) {
  * Exports.
  */
 
-module.exports = {
+export default {
   /**
    * Determine if an `object` is a `Map`.
    *
