@@ -69,7 +69,7 @@
     "is-set-x": "^1.5.0",
     "is-string": "^1.0.4",
     "is-surrogate-pair-x": "^3.0.5",
-    "object-define-properties-x": "^4.2.0",
+    "object-define-properties-x": "^5.0.0",
     "object-define-property-x": "^5.0.2",
     "validate.io-undefined": "^1.0.3"
   },
