@@ -1,12 +1,3 @@
-/**
- * @file ES6 collections fallback library: Map and Set.
- * @version 2.0.0
- * @author Xotic750 <Xotic750@gmail.com>
- * @copyright  Xotic750
- * @license {@link <https://opensource.org/licenses/MIT> MIT}
- * @module collections-x
- */
-
 import hasOwn from 'has-own-property-x';
 
 import isFunction from 'is-function-x';
@@ -456,41 +447,6 @@ const setValuesIterator = function values() {
  * @private
  * @param {*} [iterable] - If an iterable object is passed, all of its elements
  * will be added to the new Set. null is treated as undefined.
- * @example
- * var mySet = new Set();
- *
- * mySet.add(1);
- * mySet.add(5);
- * mySet.add("some text");
- * var o = {a: 1, b: 2};
- * mySet.add(o);
- *
- * mySet.has(1); // true
- * mySet.has(3); // false, 3 has not been added to the set
- * mySet.has(5);              // true
- * mySet.has(Math.sqrt(25));  // true
- * mySet.has("Some Text".toLowerCase()); // true
- * mySet.has(o); // true
- *
- * mySet.size; // 4
- *
- * mySet.delete(5); // removes 5 from the set
- * mySet.has(5);    // false, 5 has been removed
- *
- * mySet.size; // 3, we just removed one value
- *
- * // Relation with Array objects
- *
- * var myArray = ["value1", "value2", "value3"];
- *
- * // Use the regular Set constructor to transform an Array into a Set
- * var mySet = new Set(myArray);
- *
- * mySet.has("value1"); // returns true
- *
- * // Use the spread operator to transform a set into an Array.
- * console.log(uneval([...mySet])); // Will show you exactly the same Array
- *                                  // as myArray
  */
 var SetObject = function Set() {
   if (Boolean(this) === false || this instanceof SetObject === false) {
@@ -510,15 +466,6 @@ defineProperties(
      * @param {*} value - Required. The value of the element to add to the Set
      *  object.
      * @returns {object} The Set object.
-     * @example
-     * var Set = require('collections-x').Set
-     * var mySet = new Set();
-     *
-     * mySet.add(1);
-     * mySet.add(5).add("some text"); // chainable
-     *
-     * console.log(mySet);
-     * // Set [1, 5, "some text"]
      */
     add: {
       value: function add(value) {
@@ -529,19 +476,6 @@ defineProperties(
      * The clear() method removes all elements from a Set object.
      *
      * @returns {object} The Set object.
-     * @example
-     * var Set = require('collections-x').Set
-     * var mySet = new Set();
-     * mySet.add(1);
-     * mySet.add("foo");
-     *
-     * mySet.size;       // 2
-     * mySet.has("foo"); // true
-     *
-     * mySet.clear();
-     *
-     * mySet.size;       // 0
-     * mySet.has("bar")  // false
      */
     clear: {
       value: function clear() {
@@ -554,17 +488,6 @@ defineProperties(
      * @param {*} value - The value of the element to remove from the Set object.
      * @returns {boolean} Returns true if an element in the Set object has been
      *  removed successfully; otherwise false.
-     * @example
-     * var Set = require('collections-x').Set
-     * var mySet = new Set();
-     * mySet.add("foo");
-     *
-     * mySet.delete("bar"); // Returns false. No "bar" element found
-     *                      //to be deleted.
-     * mySet.delete("foo"); // Returns true.  Successfully removed.
-     *
-     * mySet.has("foo");    // Returns false. The "foo" element is no
-     *                      //longer present.
      */
     delete: {
       value: function de1ete(value) {
@@ -581,18 +504,6 @@ defineProperties(
      *
      * @function
      * @returns {object} A new Iterator object.
-     * @example
-     * var Set = require('collections-x').Set
-     * var mySet = new Set();
-     * mySet.add("foobar");
-     * mySet.add(1);
-     * mySet.add("baz");
-     *
-     * var setIter = mySet.entries();
-     *
-     * console.log(setIter.next().value); // ["foobar", "foobar"]
-     * console.log(setIter.next().value); // [1, 1]
-     * console.log(setIter.next().value); // ["baz", "baz"]
      */
     entries: {
       value: function entries() {
@@ -606,17 +517,6 @@ defineProperties(
      * @param {Function} callback - Function to execute for each element.
      * @param {*} [thisArg] - Value to use as this when executing callback.
      * @returns {object} The Set object.
-     * @example
-     * function logSetElements(value1, value2, set) {
-     *     console.log("s[" + value1 + "] = " + value2);
-     * }
-     *
-     * new Set(["foo", "bar", undefined]).forEach(logSetElements);
-     *
-     * // logs:
-     * // "s[foo] = foo"
-     * // "s[bar] = bar"
-     * // "s[undefined] = undefined"
      */
     forEach: {
       value: function forEach(callback, thisArg) {
@@ -631,13 +531,6 @@ defineProperties(
      * @param {*} value - The value to test for presence in the Set object.
      * @returns {boolean} Returns true if an element with the specified value
      *  exists in the Set object; otherwise false.
-     * @example
-     * var Set = require('collections-x').Set;
-     * var mySet = new Set();
-     * mySet.add("foo");
-     *
-     * mySet.has("foo");  // returns true
-     * mySet.has("bar");  // returns false
      */
     has: {
       value: baseHas,
@@ -649,18 +542,6 @@ defineProperties(
      *
      * @function
      * @returns {object} A new Iterator object.
-     * @example
-     * var Set = require('collections-x').Set
-     * var mySet = new Set();
-     * mySet.add("foo");
-     * mySet.add("bar");
-     * mySet.add("baz");
-     *
-     * var setIter = mySet.keys();
-     *
-     * console.log(setIter.next().value); // "foo"
-     * console.log(setIter.next().value); // "bar"
-     * console.log(setIter.next().value); // "baz"
      */
     keys: {
       value: setValuesIterator,
@@ -673,14 +554,6 @@ defineProperties(
      * @memberof module:collections-x.Set
      * @instance
      * @type {number}
-     * @example
-     * var Set = require('collections-x').Set
-     * var mySet = new Set();
-     * mySet.add(1);
-     * mySet.add(5);
-     * mySet.add("some text");
-     *
-     * mySet.size; // 3
      */
     size: {
       value: 0,
@@ -692,18 +565,6 @@ defineProperties(
      *
      * @function
      * @returns {object} A new Iterator object.
-     * @example
-     * var Set = require('collections-x').Set
-     * var mySet = new Set();
-     * mySet.add("foo");
-     * mySet.add("bar");
-     * mySet.add("baz");
-     *
-     * var setIter = mySet.values();
-     *
-     * console.log(setIter.next().value); // "foo"
-     * console.log(setIter.next().value); // "bar"
-     * console.log(setIter.next().value); // "baz"
      */
     values: {
       value: setValuesIterator,
@@ -718,19 +579,6 @@ defineProperties(
  * @function symIt
  * @memberof module:collections-x.Set.prototype
  * @returns {object} A new Iterator object.
- * @example
- * var Set = require('collections-x').Set,
- * var symIt = var Set = require('collections-x').symIt;
- * var mySet = new Set();
- * mySet.add("0");
- * mySet.add(1);
- * mySet.add({});
- *
- * var setIter = mySet[symIt]();
- *
- * console.log(setIter.next().value); // "0"
- * console.log(setIter.next().value); // 1
- * console.log(setIter.next().value); // Object
  */
 defineProperty(SetObject.prototype, symIt, {
   value: setValuesIterator,
@@ -830,48 +678,6 @@ defineProperty(MapIt.prototype, symIt, {
  * @param {*} [iterable] - Iterable is an Array or other iterable object whose
  *  elements are key-value pairs (2-element Arrays). Each key-value pair is
  *  added to the new Map. null is treated as undefined.
- * @example
- * var Map = require('collections-x').Map;
- * var myMap = new Map();
- *
- * var keyString = "a string",
- *     keyObj = {},
- *     keyFunc = function () {};
- *
- * // setting the values
- * myMap.set(keyString, "value associated with 'a string'");
- * myMap.set(keyObj, "value associated with keyObj");
- * myMap.set(keyFunc, "value associated with keyFunc");
- *
- * myMap.size; // 3
- *
- * // getting the values
- * myMap.get(keyString);    // "value associated with 'a string'"
- * myMap.get(keyObj);       // "value associated with keyObj"
- * myMap.get(keyFunc);      // "value associated with keyFunc"
- *
- * myMap.get("a string");   // "value associated with 'a string'"
- *                          // because keyString === 'a string'
- * myMap.get({});           // undefined, because keyObj !== {}
- * myMap.get(function() {}) // undefined, because keyFunc !== function () {}
- *
- * // Using NaN as Map keys
- * var myMap = new Map();
- * myMap.set(NaN, "not a number");
- *
- * myMap.get(NaN); // "not a number"
- *
- * var otherNaN = Number("foo");
- * myMap.get(otherNaN); // "not a number"
- *
- * // Relation with Array objects
- * var kvArray = [["key1", "value1"], ["key2", "value2"]];
- *
- * // Use the regular Map constructor to transform a
- * // 2D key-value Array into a map
- * var myMap = new Map(kvArray);
- *
- * myMap.get("key1"); // returns "value1"
  */
 var MapObject = function Map() {
   if (Boolean(this) === false || this instanceof MapObject === false) {
@@ -888,19 +694,6 @@ defineProperties(
      * The clear() method removes all elements from a Map object.
      *
      * @returns {object} The Map object.
-     * @example
-     * var Map = require('collections-x').Map;
-     * var myMap = new Map();
-     * myMap.set("bar", "baz");
-     * myMap.set(1, "foo");
-     *
-     * myMap.size;       // 2
-     * myMap.has("bar"); // true
-     *
-     * myMap.clear();
-     *
-     * myMap.size;       // 0
-     * myMap.has("bar")  // false
      */
     clear: {
       value: function clear() {
@@ -913,14 +706,6 @@ defineProperties(
      * @param {*} key - The key of the element to remove from the Map object.
      * @returns {boolean} Returns true if an element in the Map object has been
      *  removed successfully.
-     * @example
-     * var Map = require('collections-x').Map;
-     * var myMap = new Map();
-     * myMap.set("bar", "foo");
-     *
-     * myMap.delete("bar"); // Returns true. Successfully removed.
-     * myMap.has("bar");    // Returns false.
-     *                      // The "bar" element is no longer present.
      */
     delete: {
       value: function de1ete(key) {
@@ -932,18 +717,6 @@ defineProperties(
      * [key, value] pairs for each element in the Map object in insertion order.
      *
      * @returns {object} A new Iterator object.
-     * @example
-     * var Map = require('collections-x').Map;
-     * var myMap = new Map();
-     * myMap.set("0", "foo");
-     * myMap.set(1, "bar");
-     * myMap.set({}, "baz");
-     *
-     * var mapIter = myMap.entries();
-     *
-     * console.log(mapIter.next().value); // ["0", "foo"]
-     * console.log(mapIter.next().value); // [1, "bar"]
-     * console.log(mapIter.next().value); // [Object, "baz"]
      */
     entries: {
       value: function entries() {
@@ -957,17 +730,6 @@ defineProperties(
      * @param {Function} callback - Function to execute for each element..
      * @param {*} [thisArg] - Value to use as this when executing callback.
      * @returns {object} The Map object.
-     * @example
-     * var Map = require('collections-x').Map;
-     * function logElements(value, key, map) {
-     *      console.log("m[" + key + "] = " + value);
-     * }
-     * var myMap = new Map([["foo", 3], ["bar", {}], ["baz", undefined]]);
-     * myMap.forEach(logElements);
-     * // logs:
-     * // "m[foo] = 3"
-     * // "m[bar] = [object Object]"
-     * // "m[baz] = undefined"
      */
     forEach: {
       value: function forEach(callback, thisArg) {
@@ -980,13 +742,6 @@ defineProperties(
      * @param {*} key - The key of the element to return from the Map object.
      * @returns {*} Returns the element associated with the specified key or
      *  undefined if the key can't be found in the Map object.
-     * @example
-     * var Map = require('collections-x').Map;
-     * var myMap = new Map();
-     * myMap.set("bar", "foo");
-     *
-     * myMap.get("bar");  // Returns "foo".
-     * myMap.get("baz");  // Returns undefined.
      */
     get: {
       value: function get(key) {
@@ -1004,13 +759,6 @@ defineProperties(
      *  Map object.
      * @returns {boolean} Returns true if an element with the specified key
      *  exists in the Map object; otherwise false.
-     * @example
-     * var Map = require('collections-x').Map;
-     * var myMap = new Map();
-     * myMap.set("bar", "foo");
-     *
-     * myMap.has("bar");  // returns true
-     * myMap.has("baz");  // returns false
      */
     has: {
       value: baseHas,
@@ -1020,18 +768,6 @@ defineProperties(
      * for each element in the Map object in insertion order.
      *
      * @returns {object} A new Iterator object.
-     * @example
-     * var Map = require('collections-x').Map;
-     * var myMap = new Map();
-     * myMap.set("0", "foo");
-     * myMap.set(1, "bar");
-     * myMap.set({}, "baz");
-     *
-     * var mapIter = myMap.keys();
-     *
-     * console.log(mapIter.next().value); // "0"
-     * console.log(mapIter.next().value); // 1
-     * console.log(mapIter.next().value); // Object
      */
     keys: {
       value: function keys() {
@@ -1045,16 +781,6 @@ defineProperties(
      * @param {*} key - The key of the element to add to the Map object.
      * @param {*} value - The value of the element to add to the Map object.
      * @returns {object} The Map object.
-     * @example
-     * var Map = require('collections-x').Map;
-     * var myMap = new Map();
-     *
-     * // Add new elements to the map
-     * myMap.set("bar", "foo");
-     * myMap.set(1, "foobar");
-     *
-     * // Update an element in the map
-     * myMap.set("bar", "fuuu");
      */
     set: {
       value: function set(key, value) {
@@ -1069,14 +795,6 @@ defineProperties(
      * @memberof module:collections-x.Map
      * @instance
      * @type {number}
-     * @example
-     * var Map = require('collections-x').Map;
-     * var myMap = new Map();
-     * myMap.set(1, true);
-     * myMap.set(5, false);
-     * myMap.set("some text", 1);
-     *
-     * myMap.size; // 3
      */
     size: {
       value: 0,
@@ -1087,18 +805,6 @@ defineProperties(
      * values for each element in the Map object in insertion order.
      *
      * @returns {object} A new Iterator object.
-     * @example
-     * var Map = require('collections-x').Map;
-     * var myMap = new Map();
-     * myMap.set("0", "foo");
-     * myMap.set(1, "bar");
-     * myMap.set({}, "baz");
-     *
-     * var mapIter = myMap.values();
-     *
-     * console.log(mapIter.next().value); // "foo"
-     * console.log(mapIter.next().value); // "bar"
-     * console.log(mapIter.next().value); // "baz"
      */
     values: {
       value: function values() {
@@ -1115,19 +821,6 @@ defineProperties(
  * @function symIt
  * @memberof module:collections-x.Map.prototype
  * @returns {object} A new Iterator object.
- * @example
- * var Map = require('collections-x').Map;
- * var symIt = require('collections-x').symIt;
- * var myMap = new Map();
- * myMap.set("0", "foo");
- * myMap.set(1, "bar");
- * myMap.set({}, "baz");
- *
- * var mapIter = myMap[symIt]();
- *
- * console.log(mapIter.next().value); // ["0", "foo"]
- * console.log(mapIter.next().value); // [1, "bar"]
- * console.log(mapIter.next().value); // [Object, "baz"]
  */
 defineProperty(MapObject.prototype, symIt, {
   value: MapObject.prototype.entries,
@@ -1140,12 +833,16 @@ defineProperty(MapObject.prototype, symIt, {
 let ExportMap = MapObject;
 try {
   ExportMap = new Map() ? Map : MapObject;
-} catch (ignore) {}
+} catch (ignore) {
+  // empty
+}
 
 let ExportSet = SetObject;
 try {
   ExportSet = new Set() ? Set : SetObject;
-} catch (ignore) {}
+} catch (ignore) {
+  // empty
+}
 
 let testMap;
 
@@ -1172,7 +869,9 @@ if (ExportMap !== MapObject) {
   let mapAcceptsArguments = false;
   try {
     mapAcceptsArguments = new ExportMap([[1, 2]]).get(1) === 2;
-  } catch (ignore) {}
+  } catch (ignore) {
+    // empty
+  }
 
   if (mapAcceptsArguments === false) {
     ExportMap = MapObject;
@@ -1219,7 +918,9 @@ if (ExportMap !== MapObject) {
       // throw when the map is used.
       testMap.set(42, 42);
       mapSupportsSubclassing = testMap instanceof MyMap;
-    } catch (ignore) {}
+    } catch (ignore) {
+      // empty
+    }
 
     if (mapSupportsSubclassing === false) {
       ExportMap = MapObject;
@@ -1331,7 +1032,9 @@ if (ExportSet !== SetObject) {
       testSet = new MySet([]);
       testSet.add(42, 42);
       setSupportsSubclassing = testSet instanceof MySet;
-    } catch (ignore) {}
+    } catch (ignore) {
+      // empty
+    }
 
     if (setSupportsSubclassing === false) {
       ExportSet = SetObject;
@@ -1437,13 +1140,6 @@ export default {
    * @param {*} object - The object to test.
    * @returns {boolean} `true` if the `object` is a `Map`,
    *  else `false`.
-   * @example
-   * var isMap = require('collections-x').isMap;
-   * var m = new Map();
-   *
-   * isMap([]); // false
-   * isMap(true); // false
-   * isMap(m); // true
    */
   isMap: $isMap,
   /**
@@ -1452,13 +1148,6 @@ export default {
    * @param {*} object - The object to test.
    * @returns {boolean} `true` if the `object` is a `Set`,
    *  else `false`.
-   * @example
-   * var isSet = require('collections-x');
-   * var s = new Set();
-   *
-   * isSet([]); // false
-   * isSet(true); // false
-   * isSet(s); // true
    */
   isSet: $isSet,
   /** @borrows Map as Map */
