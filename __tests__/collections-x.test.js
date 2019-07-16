@@ -4,30 +4,6 @@ let SetObject;
 let isSet;
 let symIt;
 
-if (typeof module === 'object' && module.exports) {
-  require('es5-shim');
-  require('es5-shim/es5-sham');
-
-  if (typeof JSON === 'undefined') {
-    JSON = {};
-  }
-
-  require('json3').runInContext(null, JSON);
-  require('es6-shim');
-  const collections = require('../../index.js');
-  MapObject = collections.Map;
-  isMap = collections.isMap;
-  SetObject = collections.Set;
-  isSet = collections.isSet;
-  symIt = collections.symIt;
-} else {
-  MapObject = returnExports.Map;
-  isMap = returnExports.isMap;
-  SetObject = returnExports.Set;
-  isSet = returnExports.isSet;
-  symIt = returnExports.symIt;
-}
-
 const hasOwn = Object.prototype.hasOwnProperty;
 const functionsHaveNames = function foo() {}.name === 'foo';
 const ifFunctionsHaveNamesIt = functionsHaveNames ? it : xit;
