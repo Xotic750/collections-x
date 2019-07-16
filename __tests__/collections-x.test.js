@@ -39,18 +39,18 @@ describe('collections', function() {
 
   describe('map', function() {
     it('existence', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       expect(typeof MapObject).toBe('function');
     });
 
     it('should have the correct arity', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       expect(hasOwn.call(MapObject, 'length')).toBe(true);
       expect(MapObject).toHaveLength(0);
     });
 
     it('should have valid getter and setter calls', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const map = new MapObject();
       const props = ['has', 'set', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', 'size', symIt];
       props.forEach(function(method) {
@@ -71,7 +71,7 @@ describe('collections', function() {
     });
 
     it('should not be callable without "new"', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       let threw = false;
       try {
         // eslint-disable-next-line new-cap
@@ -85,7 +85,7 @@ describe('collections', function() {
     });
 
     it('constructor behavior', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const a = 1;
       const b = {};
       const c = new MapObject();
@@ -104,7 +104,7 @@ describe('collections', function() {
     });
 
     it('constructor behavior using another Map', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const a = 1;
       const b = {};
       const c = new MapObject();
@@ -117,7 +117,7 @@ describe('collections', function() {
     });
 
     it('constructor behavior, string should throw', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       let threw = false;
       try {
         // eslint-disable-next-line no-new
@@ -131,7 +131,7 @@ describe('collections', function() {
     });
 
     it('constructor behavior, not entry object should throw', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       let threw = false;
       try {
         // eslint-disable-next-line no-new
@@ -145,7 +145,7 @@ describe('collections', function() {
     });
 
     it('constructor behavior using a Set should throw', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const a = 1;
       const b = {};
       const c = new MapObject();
@@ -163,7 +163,7 @@ describe('collections', function() {
     });
 
     it('size - Mozilla only', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new MapObject();
 
       if ('size' in o) {
@@ -176,7 +176,7 @@ describe('collections', function() {
     });
 
     it('has', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new MapObject();
       const generic = {};
       const callback = function() {};
@@ -187,7 +187,7 @@ describe('collections', function() {
     });
 
     it('get', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new MapObject();
       const generic = {};
       const callback = function() {};
@@ -198,7 +198,7 @@ describe('collections', function() {
     });
 
     it('set', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new MapObject();
       const generic = {};
       const callback = function() {};
@@ -232,7 +232,7 @@ describe('collections', function() {
     });
 
     it('delete', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new MapObject();
       const generic = {};
       const callback = function() {};
@@ -251,7 +251,7 @@ describe('collections', function() {
     });
 
     it('non object key does not throw an error', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new MapObject();
       try {
         o.set('key', o);
@@ -261,7 +261,7 @@ describe('collections', function() {
     });
 
     it('keys, values, entries behavior', function() {
-      expect.assertions(1)/ // test that things get returned in insertion order as per the specs
+      expect.assertions(1); // test that things get returned in insertion order as per the specs
       const o = new MapObject([['1', 1], ['2', 2], ['3', 3]]);
       const keys = o.keys();
       const values = o.values();
@@ -301,7 +301,7 @@ describe('collections', function() {
     });
 
     it('forEach', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new MapObject();
       o.set('key 0', 0);
       o.set('key 1', 1);
@@ -315,7 +315,7 @@ describe('collections', function() {
     });
 
     it('forEach with mutations', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new MapObject([['0', 0], ['1', 1], ['2', 2]]);
       const seen = [];
       o.forEach(function(value, key, obj) {
@@ -336,7 +336,7 @@ describe('collections', function() {
     });
 
     it('clear', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new MapObject();
       o.set(1, '1');
       o.set(2, '2');
@@ -346,7 +346,7 @@ describe('collections', function() {
     });
 
     it('treats positive and negative zero the same', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const value1 = {};
       const value2 = {};
       const map = new MapObject();
@@ -386,7 +386,7 @@ describe('collections', function() {
     });
 
     it('uses SameValueZero even on a Map of size > 4', function() {
-      expect.assertions(1)/ // Chrome 38-42, node 0.11/0.12, iojs 1/2 have a bug when the Map
+      expect.assertions(1); // Chrome 38-42, node 0.11/0.12, iojs 1/2 have a bug when the Map
       // has a size > 4
       const firstFour = [[1, 0], [2, 0], [3, 0], [4, 0]];
       const fourMap = new MapObject(firstFour);
@@ -401,7 +401,7 @@ describe('collections', function() {
     });
 
     it('should allow common ecmascript idioms', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       expect(new MapObject()).toStrictEqual(jasmine.any(MapObject));
       expect(typeof MapObject.prototype.get).toBe('function');
       expect(typeof MapObject.prototype.set).toBe('function');
@@ -410,7 +410,7 @@ describe('collections', function() {
     });
 
     it('add, set are chainable', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const m = new MapObject();
       const a = {};
       m.set(1, 1).set(a, 2);
@@ -420,18 +420,18 @@ describe('collections', function() {
 
   describe('set', function() {
     it('existence', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       expect(typeof SetObject).toBe('function');
     });
 
     it('should have the correct arity', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       expect(hasOwn.call(SetObject, 'length')).toBe(true);
       expect(SetObject).toHaveLength(0);
     });
 
     it('should have valid getter and setter calls', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const set = new SetObject();
       const props = ['has', 'add', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', 'size', symIt];
       props.forEach(function(method) {
@@ -452,7 +452,7 @@ describe('collections', function() {
     });
 
     it('should not be callable without "new"', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       let threw = false;
       try {
         // eslint-disable-next-line new-cap
@@ -466,7 +466,7 @@ describe('collections', function() {
     });
 
     it('constructor behavior', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const s = new SetObject([1, 2]);
       expect(new SetObject()).toStrictEqual(jasmine.any(SetObject));
       expect(s.has(1)).toBe(true);
@@ -481,7 +481,7 @@ describe('collections', function() {
     });
 
     it('constructor behavior, string should iterate', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const s = new SetObject('123');
       expect(s.has('1')).toBe(true);
       expect(s.has('2')).toBe(true);
@@ -490,7 +490,7 @@ describe('collections', function() {
     });
 
     it('size - Mozilla only', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new SetObject();
 
       if ('size' in o) {
@@ -503,14 +503,14 @@ describe('collections', function() {
     });
 
     it('add', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new SetObject();
       expect(o.add(NaN)).toBe(o);
       expect(o.has(NaN)).toBe(true);
     });
 
     it('delete', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new SetObject();
       const generic = {};
       const callback = function() {};
@@ -529,7 +529,7 @@ describe('collections', function() {
     });
 
     it('values behavior', function() {
-      expect.assertions(1)/ // test that things get returned in insertion order as per the specs
+      expect.assertions(1); // test that things get returned in insertion order as per the specs
       const o = new SetObject([1, 2, 3]);
       const values = o.values();
       let v = values.next();
@@ -561,7 +561,7 @@ describe('collections', function() {
     });
 
     it('has', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new SetObject();
       const callback = function() {};
 
@@ -571,7 +571,7 @@ describe('collections', function() {
     });
 
     it('forEach', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new SetObject();
       let i = 0;
       o.add('value 0');
@@ -588,7 +588,7 @@ describe('collections', function() {
     });
 
     it('forEach with mutations', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new SetObject([0, 1, 2]);
       const seen = [];
       o.forEach(function(value, sameValue, obj) {
@@ -609,7 +609,7 @@ describe('collections', function() {
     });
 
     it('clear', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const o = new SetObject();
       o.add(1);
       o.add(2);
@@ -641,7 +641,7 @@ describe('collections', function() {
     });
 
     it('treats positive and negative zero the same', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const set = new SetObject();
       set.add(0);
       expect(set.has(-0)).toBe(true);
@@ -652,13 +652,13 @@ describe('collections', function() {
     });
 
     it('recognize any iterable as the constructor input', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const a = new SetObject(new SetObject([1, 2]));
       expect(a.has(1)).toBe(true);
     });
 
     it('add, set are chainable', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       const s = new SetObject();
       s.add(1).add(2);
       expect(s.has(1) && s.has(2) && s.size).toBe(2);
@@ -667,7 +667,7 @@ describe('collections', function() {
 
   describe('isMap', function() {
     it('should be false', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       expect(isMap()).toBe(false);
       expect(isMap(undefined)).toBe(false);
       expect(isMap(null)).toBe(false);
@@ -680,14 +680,14 @@ describe('collections', function() {
     });
 
     it('should be true', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       expect(isMap(new MapObject())).toBe(true);
     });
   });
 
   describe('isSet', function() {
     it('should be false', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       expect(isSet()).toBe(false);
       expect(isSet(undefined)).toBe(false);
       expect(isSet(null)).toBe(false);
@@ -700,7 +700,7 @@ describe('collections', function() {
     });
 
     it('should be true', function() {
-      expect.assertions(1)/
+      expect.assertions(1);
       expect(isSet(new SetObject())).toBe(true);
     });
   });
