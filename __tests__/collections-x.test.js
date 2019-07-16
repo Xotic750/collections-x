@@ -73,7 +73,6 @@ describe('collections', function() {
       expect(m.size).toBe(3);
 
       if (proto in {}) {
-        // eslint-disable-next-line no-prototype-builtins
         expect(new MapObject()[proto].isPrototypeOf(new MapObject())).toBe(true);
         expect(new MapObject()[proto]).toBe(MapObject.prototype);
       }
@@ -450,7 +449,6 @@ describe('collections', function() {
       expect(s.size).toBe(2);
 
       if (proto in {}) {
-        // eslint-disable-next-line no-prototype-builtins
         expect(new SetObject()[proto].isPrototypeOf(new SetObject())).toBe(true);
         expect(new SetObject()[proto]).toBe(SetObject.prototype);
       }
