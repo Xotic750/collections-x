@@ -1,8 +1,4 @@
-let MapObject;
-let isMap;
-let SetObject;
-let isSet;
-let symIt;
+import {MapConstructor, isMap, SetConstructor, isSet, symIt} from '../src/collections-x';
 
 const hasOwn = Object.prototype.hasOwnProperty;
 const functionsHaveNames = function foo() {}.name === 'foo';
@@ -16,18 +12,18 @@ describe('collections', function() {
   describe('map', function() {
     it('existence', function() {
       expect.assertions(1);
-      expect(typeof MapObject).toBe('function');
+      expect(typeof MapConstructor).toBe('function');
     });
 
     it('should have the correct arity', function() {
-      expect.assertions(1);
-      expect(hasOwn.call(MapObject, 'length')).toBe(true);
-      expect(MapObject).toHaveLength(0);
+      expect.assertions(2);
+      expect(hasOwn.call(MapConstructor, 'length')).toBe(true);
+      expect(MapConstructor).toHaveLength(0);
     });
 
     it('should have valid getter and setter calls', function() {
-      expect.assertions(1);
-      const map = new MapObject();
+      expect.assertions(10);
+      const map = new MapConstructor();
       const props = ['has', 'set', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', 'size', symIt];
       props.forEach(function(method) {
         if (method === 'size') {
@@ -39,7 +35,7 @@ describe('collections', function() {
     });
 
     ifFunctionsHaveNamesIt('should have correct names', function() {
-      const map = new MapObject();
+      const map = new MapConstructor();
       const props = ['has', 'set', 'clear', 'forEach', 'values', 'entries', 'keys'];
       props.forEach(function(method) {
         expect(map[method].name).toBe(method);
@@ -47,11 +43,11 @@ describe('collections', function() {
     });
 
     it('should not be callable without "new"', function() {
-      expect.assertions(1);
+      expect.assertions(2);
       let threw = false;
       try {
-        // eslint-disable-next-line new-cap
-        SetObject();
+        /* eslint-disable-next-line babel/new-cap */
+        MapConstructor();
       } catch (e) {
         expect(e).toStrictEqual(jasmine.any(TypeError));
         threw = true;
@@ -61,30 +57,30 @@ describe('collections', function() {
     });
 
     it('constructor behavior', function() {
-      expect.assertions(1);
+      expect.assertions(7);
       const a = 1;
       const b = {};
-      const c = new MapObject();
-      const m = new MapObject([[a, 1], [b, 2], [c, 3]]);
-      expect(new MapObject()).toStrictEqual(jasmine.any(MapObject));
+      const c = new MapConstructor();
+      const m = new MapConstructor([[a, 1], [b, 2], [c, 3]]);
+      expect(new MapConstructor()).toStrictEqual(jasmine.any(MapConstructor));
       expect(m.has(a)).toBe(true);
       expect(m.has(b)).toBe(true);
       expect(m.has(c)).toBe(true);
       expect(m.size).toBe(3);
 
       if (proto in {}) {
-        expect(new MapObject()[proto].isPrototypeOf(new MapObject())).toBe(true);
-        expect(new MapObject()[proto]).toBe(MapObject.prototype);
+        expect(new MapConstructor()[proto].isPrototypeOf(new MapConstructor())).toBe(true);
+        expect(new MapConstructor()[proto]).toBe(MapConstructor.prototype);
       }
     });
 
     it('constructor behavior using another Map', function() {
-      expect.assertions(1);
+      expect.assertions(4);
       const a = 1;
       const b = {};
-      const c = new MapObject();
-      const m = new MapObject([[a, 1], [b, 2], [c, 3]]);
-      const d = new MapObject(m);
+      const c = new MapConstructor();
+      const m = new MapConstructor([[a, 1], [b, 2], [c, 3]]);
+      const d = new MapConstructor(m);
       expect(d.has(a)).toBe(true);
       expect(d.has(b)).toBe(true);
       expect(d.has(c)).toBe(true);
@@ -92,11 +88,11 @@ describe('collections', function() {
     });
 
     it('constructor behavior, string should throw', function() {
-      expect.assertions(1);
+      expect.assertions(2);
       let threw = false;
       try {
-        // eslint-disable-next-line no-new
-        new MapObject('123');
+        /* eslint-disable-next-line no-new */
+        new MapConstructor('123');
       } catch (e) {
         expect(e).toStrictEqual(jasmine.any(TypeError));
         threw = true;
@@ -106,11 +102,11 @@ describe('collections', function() {
     });
 
     it('constructor behavior, not entry object should throw', function() {
-      expect.assertions(1);
+      expect.assertions(2);
       let threw = false;
       try {
-        // eslint-disable-next-line no-new
-        new MapObject([1, 2, 3]);
+        /* eslint-disable-next-line no-new */
+        new MapConstructor([1, 2, 3]);
       } catch (e) {
         expect(e).toStrictEqual(jasmine.any(TypeError));
         threw = true;
@@ -120,15 +116,15 @@ describe('collections', function() {
     });
 
     it('constructor behavior using a Set should throw', function() {
-      expect.assertions(1);
+      expect.assertions(2);
       const a = 1;
       const b = {};
-      const c = new MapObject();
-      const s = new SetObject([a, b, c]);
+      const c = new MapConstructor();
+      const s = new SetConstructor([a, b, c]);
       let threw = false;
       try {
-        // eslint-disable-next-line no-new
-        new MapObject(s);
+        /* eslint-disable-next-line no-new */
+        new MapConstructor(s);
       } catch (e) {
         expect(e).toStrictEqual(jasmine.any(TypeError));
         threw = true;
@@ -138,8 +134,8 @@ describe('collections', function() {
     });
 
     it('size - Mozilla only', function() {
-      expect.assertions(1);
-      const o = new MapObject();
+      expect.assertions(3);
+      const o = new MapConstructor();
 
       if ('size' in o) {
         expect(o.size).toBe(0);
@@ -151,8 +147,8 @@ describe('collections', function() {
     });
 
     it('has', function() {
-      expect.assertions(1);
-      const o = new MapObject();
+      expect.assertions(2);
+      const o = new MapConstructor();
       const generic = {};
       const callback = function() {};
 
@@ -162,8 +158,8 @@ describe('collections', function() {
     });
 
     it('get', function() {
-      expect.assertions(1);
-      const o = new MapObject();
+      expect.assertions(2);
+      const o = new MapConstructor();
       const generic = {};
       const callback = function() {};
 
@@ -173,8 +169,8 @@ describe('collections', function() {
     });
 
     it('set', function() {
-      expect.assertions(1);
-      const o = new MapObject();
+      expect.assertions(18);
+      const o = new MapConstructor();
       const generic = {};
       const callback = function() {};
 
@@ -207,8 +203,8 @@ describe('collections', function() {
     });
 
     it('delete', function() {
-      expect.assertions(1);
-      const o = new MapObject();
+      expect.assertions(4);
+      const o = new MapConstructor();
       const generic = {};
       const callback = function() {};
 
@@ -227,17 +223,20 @@ describe('collections', function() {
 
     it('non object key does not throw an error', function() {
       expect.assertions(1);
-      const o = new MapObject();
+      const o = new MapConstructor();
+      let threw = false;
       try {
         o.set('key', o);
       } catch (emAll) {
-        expect(false).toBe(true);
+        threw = true;
       }
+
+      expect(threw).toBe(false);
     });
 
     it('keys, values, entries behavior', function() {
-      expect.assertions(1); // test that things get returned in insertion order as per the specs
-      const o = new MapObject([['1', 1], ['2', 2], ['3', 3]]);
+      expect.assertions(12); // test that things get returned in insertion order as per the specs
+      const o = new MapConstructor([['1', 1], ['2', 2], ['3', 3]]);
       const keys = o.keys();
       const values = o.values();
       let k = keys.next();
@@ -276,8 +275,8 @@ describe('collections', function() {
     });
 
     it('forEach', function() {
-      expect.assertions(1);
-      const o = new MapObject();
+      expect.assertions(5);
+      const o = new MapConstructor();
       o.set('key 0', 0);
       o.set('key 1', 1);
       o.forEach(function(value, key, obj) {
@@ -290,8 +289,8 @@ describe('collections', function() {
     });
 
     it('forEach with mutations', function() {
-      expect.assertions(1);
-      const o = new MapObject([['0', 0], ['1', 1], ['2', 2]]);
+      expect.assertions(9);
+      const o = new MapConstructor([['0', 0], ['1', 1], ['2', 2]]);
       const seen = [];
       o.forEach(function(value, key, obj) {
         seen.push(value);
@@ -312,7 +311,7 @@ describe('collections', function() {
 
     it('clear', function() {
       expect.assertions(1);
-      const o = new MapObject();
+      const o = new MapConstructor();
       o.set(1, '1');
       o.set(2, '2');
       o.set(3, '3');
@@ -321,10 +320,10 @@ describe('collections', function() {
     });
 
     it('treats positive and negative zero the same', function() {
-      expect.assertions(1);
+      expect.assertions(7);
       const value1 = {};
       const value2 = {};
-      const map = new MapObject();
+      const map = new MapConstructor();
       map.set(0, value1);
       expect(map.size).toBe(1);
       expect(map.has(-0)).toBe(true);
@@ -336,15 +335,15 @@ describe('collections', function() {
     });
 
     itSetPrototypeOf('should be subclassable', function() {
-      var MyMap = function() {
-        const testMap = new MapObject([['a', 'b']]);
+      const MyMap = function() {
+        const testMap = new MapConstructor([['a', 'b']]);
         Object.setPrototypeOf(testMap, MyMap.prototype);
 
         return testMap;
       };
 
-      Object.setPrototypeOf(MyMap, MapObject);
-      MyMap.prototype = Object.create(MapObject.prototype, {constructor: {value: MyMap}});
+      Object.setPrototypeOf(MyMap, MapConstructor);
+      MyMap.prototype = Object.create(MapConstructor.prototype, {constructor: {value: MyMap}});
 
       const myMap = new MyMap();
       expect(myMap.has('c')).toBe(false);
@@ -361,10 +360,10 @@ describe('collections', function() {
     });
 
     it('uses SameValueZero even on a Map of size > 4', function() {
-      expect.assertions(1); // Chrome 38-42, node 0.11/0.12, iojs 1/2 have a bug when the Map
+      expect.assertions(5); // Chrome 38-42, node 0.11/0.12, iojs 1/2 have a bug when the Map
       // has a size > 4
       const firstFour = [[1, 0], [2, 0], [3, 0], [4, 0]];
-      const fourMap = new MapObject(firstFour);
+      const fourMap = new MapConstructor(firstFour);
       expect(fourMap.size).toBe(4);
       expect(fourMap.has(-0)).toBe(false);
       expect(fourMap.has(0)).toBe(false);
@@ -375,18 +374,18 @@ describe('collections', function() {
       expect(fourMap.has(-0)).toBe(true);
     });
 
-    it('should allow common ecmascript idioms', function() {
-      expect.assertions(1);
-      expect(new MapObject()).toStrictEqual(jasmine.any(MapObject));
-      expect(typeof MapObject.prototype.get).toBe('function');
-      expect(typeof MapObject.prototype.set).toBe('function');
-      expect(typeof MapObject.prototype.has).toBe('function');
-      expect(typeof MapObject.prototype.delete).toBe('function');
+    it('should allow common ECMAScript idioms', function() {
+      expect.assertions(5);
+      expect(new MapConstructor()).toStrictEqual(jasmine.any(MapConstructor));
+      expect(typeof MapConstructor.prototype.get).toBe('function');
+      expect(typeof MapConstructor.prototype.set).toBe('function');
+      expect(typeof MapConstructor.prototype.has).toBe('function');
+      expect(typeof MapConstructor.prototype.delete).toBe('function');
     });
 
     it('add, set are chainable', function() {
       expect.assertions(1);
-      const m = new MapObject();
+      const m = new MapConstructor();
       const a = {};
       m.set(1, 1).set(a, 2);
       expect(m.has(1) && m.has(a) && m.size).toBe(2);
@@ -396,18 +395,18 @@ describe('collections', function() {
   describe('set', function() {
     it('existence', function() {
       expect.assertions(1);
-      expect(typeof SetObject).toBe('function');
+      expect(typeof SetConstructor).toBe('function');
     });
 
     it('should have the correct arity', function() {
-      expect.assertions(1);
-      expect(hasOwn.call(SetObject, 'length')).toBe(true);
-      expect(SetObject).toHaveLength(0);
+      expect.assertions(2);
+      expect(hasOwn.call(SetConstructor, 'length')).toBe(true);
+      expect(SetConstructor).toHaveLength(0);
     });
 
     it('should have valid getter and setter calls', function() {
-      expect.assertions(1);
-      const set = new SetObject();
+      expect.assertions(10);
+      const set = new SetConstructor();
       const props = ['has', 'add', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', 'size', symIt];
       props.forEach(function(method) {
         if (method === 'size') {
@@ -419,7 +418,7 @@ describe('collections', function() {
     });
 
     ifFunctionsHaveNamesIt('should have correct names', function() {
-      const set = new SetObject();
+      const set = new SetConstructor();
       const props = ['has', 'add', 'clear', 'forEach', 'values', 'entries'];
       props.forEach(function(method) {
         expect(set[method].name).toBe(method);
@@ -427,11 +426,11 @@ describe('collections', function() {
     });
 
     it('should not be callable without "new"', function() {
-      expect.assertions(1);
+      expect.assertions(2);
       let threw = false;
       try {
-        // eslint-disable-next-line new-cap
-        SetObject();
+        /* eslint-disable-next-line babel/new-cap */
+        SetConstructor();
       } catch (e) {
         expect(e).toStrictEqual(jasmine.any(TypeError));
         threw = true;
@@ -441,22 +440,22 @@ describe('collections', function() {
     });
 
     it('constructor behavior', function() {
-      expect.assertions(1);
-      const s = new SetObject([1, 2]);
-      expect(new SetObject()).toStrictEqual(jasmine.any(SetObject));
+      expect.assertions(6);
+      const s = new SetConstructor([1, 2]);
+      expect(new SetConstructor()).toStrictEqual(jasmine.any(SetConstructor));
       expect(s.has(1)).toBe(true);
       expect(s.has(2)).toBe(true);
       expect(s.size).toBe(2);
 
       if (proto in {}) {
-        expect(new SetObject()[proto].isPrototypeOf(new SetObject())).toBe(true);
-        expect(new SetObject()[proto]).toBe(SetObject.prototype);
+        expect(new SetConstructor()[proto].isPrototypeOf(new SetConstructor())).toBe(true);
+        expect(new SetConstructor()[proto]).toBe(SetConstructor.prototype);
       }
     });
 
     it('constructor behavior, string should iterate', function() {
-      expect.assertions(1);
-      const s = new SetObject('123');
+      expect.assertions(4);
+      const s = new SetConstructor('123');
       expect(s.has('1')).toBe(true);
       expect(s.has('2')).toBe(true);
       expect(s.has('3')).toBe(true);
@@ -464,8 +463,8 @@ describe('collections', function() {
     });
 
     it('size - Mozilla only', function() {
-      expect.assertions(1);
-      const o = new SetObject();
+      expect.assertions(3);
+      const o = new SetConstructor();
 
       if ('size' in o) {
         expect(o.size).toBe(0);
@@ -477,15 +476,15 @@ describe('collections', function() {
     });
 
     it('add', function() {
-      expect.assertions(1);
-      const o = new SetObject();
+      expect.assertions(2);
+      const o = new SetConstructor();
       expect(o.add(NaN)).toBe(o);
       expect(o.has(NaN)).toBe(true);
     });
 
     it('delete', function() {
-      expect.assertions(1);
-      const o = new SetObject();
+      expect.assertions(4);
+      const o = new SetConstructor();
       const generic = {};
       const callback = function() {};
 
@@ -503,8 +502,8 @@ describe('collections', function() {
     });
 
     it('values behavior', function() {
-      expect.assertions(1); // test that things get returned in insertion order as per the specs
-      const o = new SetObject([1, 2, 3]);
+      expect.assertions(12); // test that things get returned in insertion order as per the specs
+      const o = new SetConstructor([1, 2, 3]);
       const values = o.values();
       let v = values.next();
       expect(o.keys).toBe(o.values); // same function, as per the specs
@@ -535,8 +534,8 @@ describe('collections', function() {
     });
 
     it('has', function() {
-      expect.assertions(1);
-      const o = new SetObject();
+      expect.assertions(2);
+      const o = new SetConstructor();
       const callback = function() {};
 
       expect(o.has(callback)).toBe(false);
@@ -545,8 +544,8 @@ describe('collections', function() {
     });
 
     it('forEach', function() {
-      expect.assertions(1);
-      const o = new SetObject();
+      expect.assertions(7);
+      const o = new SetConstructor();
       let i = 0;
       o.add('value 0');
       o.add('value 1');
@@ -562,8 +561,8 @@ describe('collections', function() {
     });
 
     it('forEach with mutations', function() {
-      expect.assertions(1);
-      const o = new SetObject([0, 1, 2]);
+      expect.assertions(9);
+      const o = new SetConstructor([0, 1, 2]);
       const seen = [];
       o.forEach(function(value, sameValue, obj) {
         seen.push(value);
@@ -584,7 +583,7 @@ describe('collections', function() {
 
     it('clear', function() {
       expect.assertions(1);
-      const o = new SetObject();
+      const o = new SetConstructor();
       o.add(1);
       o.add(2);
       o.clear();
@@ -592,15 +591,15 @@ describe('collections', function() {
     });
 
     itSetPrototypeOf('should be subclassable', function() {
-      var MySet = function() {
-        const testSet = new SetObject(['a', 'b']);
+      const MySet = function() {
+        const testSet = new SetConstructor(['a', 'b']);
         Object.setPrototypeOf(testSet, MySet.prototype);
 
         return testSet;
       };
 
-      Object.setPrototypeOf(MySet, SetObject);
-      MySet.prototype = Object.create(SetObject.prototype, {constructor: {value: MySet}});
+      Object.setPrototypeOf(MySet, SetConstructor);
+      MySet.prototype = Object.create(SetConstructor.prototype, {constructor: {value: MySet}});
 
       const mySet = new MySet();
       expect(mySet.has('c')).toBe(false);
@@ -615,8 +614,8 @@ describe('collections', function() {
     });
 
     it('treats positive and negative zero the same', function() {
-      expect.assertions(1);
-      const set = new SetObject();
+      expect.assertions(5);
+      const set = new SetConstructor();
       set.add(0);
       expect(set.has(-0)).toBe(true);
       expect(set.size).toBe(1);
@@ -627,13 +626,13 @@ describe('collections', function() {
 
     it('recognize any iterable as the constructor input', function() {
       expect.assertions(1);
-      const a = new SetObject(new SetObject([1, 2]));
+      const a = new SetConstructor(new SetConstructor([1, 2]));
       expect(a.has(1)).toBe(true);
     });
 
     it('add, set are chainable', function() {
       expect.assertions(1);
-      const s = new SetObject();
+      const s = new SetConstructor();
       s.add(1).add(2);
       expect(s.has(1) && s.has(2) && s.size).toBe(2);
     });
@@ -641,7 +640,7 @@ describe('collections', function() {
 
   describe('isMap', function() {
     it('should be false', function() {
-      expect.assertions(1);
+      expect.assertions(9);
       expect(isMap()).toBe(false);
       expect(isMap(undefined)).toBe(false);
       expect(isMap(null)).toBe(false);
@@ -650,18 +649,18 @@ describe('collections', function() {
       expect(isMap('abc')).toBe(false);
       expect(isMap([])).toBe(false);
       expect(isMap({})).toBe(false);
-      expect(isMap(new SetObject())).toBe(false);
+      expect(isMap(new SetConstructor())).toBe(false);
     });
 
     it('should be true', function() {
       expect.assertions(1);
-      expect(isMap(new MapObject())).toBe(true);
+      expect(isMap(new MapConstructor())).toBe(true);
     });
   });
 
   describe('isSet', function() {
     it('should be false', function() {
-      expect.assertions(1);
+      expect.assertions(9);
       expect(isSet()).toBe(false);
       expect(isSet(undefined)).toBe(false);
       expect(isSet(null)).toBe(false);
@@ -670,12 +669,12 @@ describe('collections', function() {
       expect(isSet('abc')).toBe(false);
       expect(isSet([])).toBe(false);
       expect(isSet({})).toBe(false);
-      expect(isSet(new MapObject())).toBe(false);
+      expect(isSet(new MapConstructor())).toBe(false);
     });
 
     it('should be true', function() {
       expect.assertions(1);
-      expect(isSet(new SetObject())).toBe(true);
+      expect(isSet(new SetConstructor())).toBe(true);
     });
   });
 });
