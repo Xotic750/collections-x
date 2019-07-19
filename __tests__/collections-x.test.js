@@ -49,7 +49,7 @@ describe('collections', function() {
         /* eslint-disable-next-line babel/new-cap */
         MapConstructor();
       } catch (e) {
-        expect(e).toStrictEqual(jasmine.any(TypeError));
+        expect(e).toStrictEqual(expect.any(TypeError));
         threw = true;
       }
 
@@ -62,7 +62,7 @@ describe('collections', function() {
       const b = {};
       const c = new MapConstructor();
       const m = new MapConstructor([[a, 1], [b, 2], [c, 3]]);
-      expect(new MapConstructor()).toStrictEqual(jasmine.any(MapConstructor));
+      expect(new MapConstructor()).toStrictEqual(expect.any(MapConstructor));
       expect(m.has(a)).toBe(true);
       expect(m.has(b)).toBe(true);
       expect(m.has(c)).toBe(true);
@@ -94,7 +94,7 @@ describe('collections', function() {
         /* eslint-disable-next-line no-new */
         new MapConstructor('123');
       } catch (e) {
-        expect(e).toStrictEqual(jasmine.any(TypeError));
+        expect(e).toStrictEqual(expect.any(TypeError));
         threw = true;
       }
 
@@ -108,7 +108,7 @@ describe('collections', function() {
         /* eslint-disable-next-line no-new */
         new MapConstructor([1, 2, 3]);
       } catch (e) {
-        expect(e).toStrictEqual(jasmine.any(TypeError));
+        expect(e).toStrictEqual(expect.any(TypeError));
         threw = true;
       }
 
@@ -126,7 +126,7 @@ describe('collections', function() {
         /* eslint-disable-next-line no-new */
         new MapConstructor(s);
       } catch (e) {
-        expect(e).toStrictEqual(jasmine.any(TypeError));
+        expect(e).toStrictEqual(expect.any(TypeError));
         threw = true;
       }
 
@@ -376,7 +376,7 @@ describe('collections', function() {
 
     it('should allow common ECMAScript idioms', function() {
       expect.assertions(5);
-      expect(new MapConstructor()).toStrictEqual(jasmine.any(MapConstructor));
+      expect(new MapConstructor()).toStrictEqual(expect.any(MapConstructor));
       expect(typeof MapConstructor.prototype.get).toBe('function');
       expect(typeof MapConstructor.prototype.set).toBe('function');
       expect(typeof MapConstructor.prototype.has).toBe('function');
@@ -432,7 +432,7 @@ describe('collections', function() {
         /* eslint-disable-next-line babel/new-cap */
         SetConstructor();
       } catch (e) {
-        expect(e).toStrictEqual(jasmine.any(TypeError));
+        expect(e).toStrictEqual(expect.any(TypeError));
         threw = true;
       }
 
@@ -442,7 +442,7 @@ describe('collections', function() {
     it('constructor behavior', function() {
       expect.assertions(6);
       const s = new SetConstructor([1, 2]);
-      expect(new SetConstructor()).toStrictEqual(jasmine.any(SetConstructor));
+      expect(new SetConstructor()).toStrictEqual(expect.any(SetConstructor));
       expect(s.has(1)).toBe(true);
       expect(s.has(2)).toBe(true);
       expect(s.size).toBe(2);
