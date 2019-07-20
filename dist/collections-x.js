@@ -2,13 +2,13 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-19T22:31:32.048Z",
+  "date": "2019-07-20T20:00:33.253Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
-  "hash": "8a40239947a86a2cf999",
+  "hash": "84cfe59e323c6f8dcd53",
   "license": "MIT",
-  "version": "3.0.3"
+  "version": "3.0.4"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -4774,7 +4774,9 @@ if (object_create_x_esm_isWorking) {
     var getEmptyViaActiveX = function _getEmptyViaActiveX() {
       /* eslint-disable-next-line no-undef */
       var xDoc = new ActiveXObject('htmlfile');
-      xDoc.write('<script></script>');
+      /* eslint-disable-next-line no-useless-escape,prettier/prettier */
+
+      xDoc.write('<script><\/script>');
       xDoc.close(); // noinspection JSUnresolvedVariable
 
       var empty = xDoc.parentWindow.Object.prototype;

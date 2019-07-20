@@ -1,6 +1,6 @@
 {
   "name": "collections-x",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "ES6 collections fallback library: Map and Set.",
   "homepage": "https://github.com/Xotic750/collections-x",
   "author": {
@@ -69,7 +69,7 @@
     "is-set-x": "^2.0.4",
     "is-string": "^1.0.4",
     "is-surrogate-pair-x": "^3.0.12",
-    "object-create-x": "^3.0.3",
+    "object-create-x": "^3.0.4",
     "object-define-properties-x": "^5.0.5",
     "object-define-property-x": "^5.0.8"
   },
