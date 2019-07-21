@@ -2,13 +2,13 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-20T20:00:33.253Z",
+  "date": "2019-07-21T23:20:01.399Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
   "hash": "84cfe59e323c6f8dcd53",
   "license": "MIT",
-  "version": "3.0.4"
+  "version": "3.0.5"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
