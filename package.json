@@ -1,6 +1,6 @@
 {
   "name": "collections-x",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "ES6 collections fallback library: Map and Set.",
   "homepage": "https://github.com/Xotic750/collections-x",
   "author": {
@@ -50,28 +50,28 @@
     "url": "https://github.com/Xotic750/collections-x/issues"
   },
   "dependencies": {
-    "array-some-x": "^3.0.5",
-    "assert-is-function-x": "^3.0.11",
-    "assert-is-object-x": "^3.0.9",
-    "big-counter-x": "^4.0.6",
-    "get-prototype-of-x": "^2.0.10",
-    "has-own-property-x": "^4.0.9",
-    "has-symbol-support-x": "^2.0.13",
-    "index-of-x": "^3.0.9",
-    "is-array-like-x": "^2.0.10",
-    "is-array-x": "^2.0.14",
+    "array-some-x": "^3.0.6",
+    "assert-is-function-x": "^3.0.12",
+    "assert-is-object-x": "^3.0.10",
+    "big-counter-x": "^4.0.7",
+    "get-prototype-of-x": "^2.0.11",
+    "has-own-property-x": "^4.0.10",
+    "has-symbol-support-x": "^2.0.14",
+    "index-of-x": "^3.0.10",
+    "is-array-like-x": "^2.0.11",
+    "is-array-x": "^2.0.15",
     "is-boolean-object": "^1.0.0",
-    "is-function-x": "^4.0.19",
-    "is-map-x": "^2.0.5",
-    "is-nil-x": "^2.0.17",
-    "is-object-like-x": "^2.0.17",
+    "is-function-x": "^4.0.20",
+    "is-map-x": "^2.0.6",
+    "is-nil-x": "^2.0.18",
+    "is-object-like-x": "^2.0.18",
     "is-primitive": "^3.0.1",
-    "is-set-x": "^2.0.5",
+    "is-set-x": "^2.0.6",
     "is-string": "^1.0.4",
-    "is-surrogate-pair-x": "^3.0.14",
-    "object-create-x": "^3.0.5",
-    "object-define-properties-x": "^5.0.6",
-    "object-define-property-x": "^5.0.9"
+    "is-surrogate-pair-x": "^3.0.15",
+    "object-create-x": "^3.0.6",
+    "object-define-properties-x": "^5.0.7",
+    "object-define-property-x": "^5.0.10"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",
@@ -85,7 +85,7 @@
     "@babel/plugin-transform-runtime": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
     "@babel/runtime": "^7.5.5",
-    "@prorenata/eslint-config-vue": "^1.13.9",
+    "@prorenata/eslint-config-vue": "^1.13.10",
     "@types/jest": "^24.0.15",
     "@types/node": "^12.6.8",
     "babel-core": "^7.0.0-0",
@@ -109,7 +109,7 @@
     "eslint-plugin-html": "^6.0.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jest": "^22.13.0",
-    "eslint-plugin-jsdoc": "^15.6.0",
+    "eslint-plugin-jsdoc": "^15.6.1",
     "eslint-plugin-json": "^1.4.0",
     "eslint-plugin-lodash": "^5.1.0",
     "eslint-plugin-no-use-extend-native": "^0.4.1",
@@ -144,7 +144,7 @@
   },
   "engines": {
     "node": ">=8.11.4",
-    "npm": "6.4.1"
+    "npm": "6.10.1"
   },
   "browserslist": [
     "> 1%",
