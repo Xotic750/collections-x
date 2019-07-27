@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-27T15:10:46.028Z",
+  "date": "2019-07-27T20:25:50.224Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
-  "hash": "2494330e1faafd0ece3d",
+  "hash": "00500e3f244ccc53abd0",
   "license": "MIT",
   "version": "3.0.12"
 }
@@ -4670,10 +4670,6 @@ function collections_x_esm_typeof(obj) { if (typeof Symbol === "function" && typ
 
 
 
-/** @type {BooleanConstructor} */
-
-var collections_x_esm_castBoolean = true.constructor;
-/** @type {Function} */
 
 var setPrototypeOf = {}.constructor.setPrototypeOf;
 /* eslint-disable-next-line compat/compat */
@@ -5136,7 +5132,7 @@ var setValuesIterator = function values() {
 
 
 var $SetObject = function Set() {
-  if (collections_x_esm_castBoolean(this) === false || this instanceof $SetObject === false) {
+  if (to_boolean_x_esm(this) === false || !(this instanceof $SetObject)) {
     throw new TypeError("Constructor Set requires 'new'");
   }
   /* eslint-disable-next-line prefer-rest-params,no-void */
@@ -5384,7 +5380,7 @@ object_define_property_x_esm(MapIt.prototype, $symIt, {
 // eslint-enable jsdoc/check-param-names
 
 var $MapObject = function Map() {
-  if (collections_x_esm_castBoolean(this) === false || this instanceof $MapObject === false) {
+  if (to_boolean_x_esm(this) === false || !(this instanceof $MapObject)) {
     throw new TypeError("Constructor Map requires 'new'");
   }
   /* eslint-disable-next-line prefer-rest-params,no-void */
@@ -5654,7 +5650,7 @@ if (ExportMap !== $MapObject) {
 
   try {
     /* eslint-disable-next-line babel/new-cap */
-    mapRequiresNew = ExportMap() instanceof ExportMap === false;
+    mapRequiresNew = !(ExportMap() instanceof ExportMap);
   } catch (e) {
     mapRequiresNew = e instanceof TypeError;
   }
@@ -5772,7 +5768,7 @@ if (ExportSet !== $SetObject) {
 
   try {
     /* eslint-disable-next-line babel/new-cap */
-    setRequiresNew = ExportSet() instanceof ExportSet === false;
+    setRequiresNew = !(ExportSet() instanceof ExportSet);
   } catch (e) {
     setRequiresNew = e instanceof TypeError;
   }

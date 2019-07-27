@@ -26,11 +26,7 @@ import some from 'array-some-x';
 import getPrototypeOf from 'get-prototype-of-x';
 import hasSymbolSupport from 'has-symbol-support-x';
 import create from 'object-create-x';
-/** @type {BooleanConstructor} */
-
-var castBoolean = true.constructor;
-/** @type {Function} */
-
+import toBoolean from 'to-boolean-x';
 var setPrototypeOf = {}.constructor.setPrototypeOf;
 /* eslint-disable-next-line compat/compat */
 
@@ -492,7 +488,7 @@ var setValuesIterator = function values() {
 
 
 var $SetObject = function Set() {
-  if (castBoolean(this) === false || this instanceof $SetObject === false) {
+  if (toBoolean(this) === false || !(this instanceof $SetObject)) {
     throw new TypeError("Constructor Set requires 'new'");
   }
   /* eslint-disable-next-line prefer-rest-params,no-void */
@@ -740,7 +736,7 @@ defineProperty(MapIt.prototype, $symIt, {
 // eslint-enable jsdoc/check-param-names
 
 var $MapObject = function Map() {
-  if (castBoolean(this) === false || this instanceof $MapObject === false) {
+  if (toBoolean(this) === false || !(this instanceof $MapObject)) {
     throw new TypeError("Constructor Map requires 'new'");
   }
   /* eslint-disable-next-line prefer-rest-params,no-void */
@@ -1010,7 +1006,7 @@ if (ExportMap !== $MapObject) {
 
   try {
     /* eslint-disable-next-line babel/new-cap */
-    mapRequiresNew = ExportMap() instanceof ExportMap === false;
+    mapRequiresNew = !(ExportMap() instanceof ExportMap);
   } catch (e) {
     mapRequiresNew = e instanceof TypeError;
   }
@@ -1128,7 +1124,7 @@ if (ExportSet !== $SetObject) {
 
   try {
     /* eslint-disable-next-line babel/new-cap */
-    setRequiresNew = ExportSet() instanceof ExportSet === false;
+    setRequiresNew = !(ExportSet() instanceof ExportSet);
   } catch (e) {
     setRequiresNew = e instanceof TypeError;
   }

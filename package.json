@@ -72,7 +72,8 @@
     "is-surrogate-pair-x": "^3.0.22",
     "object-create-x": "^3.0.12",
     "object-define-properties-x": "^5.0.13",
-    "object-define-property-x": "^5.0.16"
+    "object-define-property-x": "^5.0.16",
+    "to-boolean-x": "^2.0.24"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",
