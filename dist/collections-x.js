@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-30T19:07:45.801Z",
+  "date": "2019-07-30T19:26:51.681Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
-  "hash": "66ddb2044640f93e6aee",
+  "hash": "8812f940630048f43c9c",
   "license": "MIT",
   "version": "3.0.12"
 }
@@ -4646,7 +4646,7 @@ var object_create_x_esm_create = $create;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isMap", function() { return collections_x_esm_isMap; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isSetImplementation", function() { return collections_x_esm_isSetImplementation; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isSet", function() { return collections_x_esm_isSet; });
-var _size, _size2;
+var _sizeDescriptor;
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -5170,6 +5170,10 @@ var collections_x_esm_baseAddSet = function baseAddSet(args) {
 
   return context;
 };
+
+var thisIteratorDescriptor = _defineProperty({}, VALUE, function iterator() {
+  return this;
+});
 /**
  * An object is an iterator when it knows how to access items from a
  * collection one at a time, while keeping track of its current position
@@ -5236,9 +5240,11 @@ object_define_property_x_esm(SetIt.prototype, NEXT, _defineProperty({}, VALUE, f
  * @returns {object} This Iterator object.
  */
 
-object_define_property_x_esm(SetIt.prototype, symIt, _defineProperty({}, VALUE, function iterator() {
-  return this;
-}));
+object_define_property_x_esm(SetIt.prototype, symIt, thisIteratorDescriptor);
+
+var hasDescriptor = _defineProperty({}, VALUE, baseHas);
+
+var sizeDescriptor = (_sizeDescriptor = {}, _defineProperty(_sizeDescriptor, VALUE, 0), _defineProperty(_sizeDescriptor, WRITABLE, true), _sizeDescriptor);
 /**
  * This method returns a new Iterator object that contains the
  * values for each element in the Set object in insertion order.
@@ -5346,7 +5352,7 @@ object_define_properties_x_esm(SetImplementation.prototype,
    * @returns {boolean} Returns true if an element with the specified value
    *  exists in the Set object; otherwise false.
    */
-  has: _defineProperty({}, VALUE, baseHas),
+  has: hasDescriptor,
 
   /**
    * The keys() method is an alias for the `values` method (for similarity
@@ -5366,7 +5372,7 @@ object_define_properties_x_esm(SetImplementation.prototype,
    * @instance
    * @type {number}
    */
-  size: (_size = {}, _defineProperty(_size, VALUE, 0), _defineProperty(_size, WRITABLE, true), _size),
+  size: sizeDescriptor,
 
   /**
    * The values() method returns a new Iterator object that contains the
@@ -5452,9 +5458,7 @@ object_define_property_x_esm(MapIt.prototype, NEXT, _defineProperty({}, VALUE, f
  * @returns {object} This Iterator object.
  */
 
-object_define_property_x_esm(MapIt.prototype, symIt, _defineProperty({}, VALUE, function iterator() {
-  return this;
-})); // eslint-disable jsdoc/check-param-names
+object_define_property_x_esm(MapIt.prototype, symIt, thisIteratorDescriptor); // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
 
 /**
@@ -5545,7 +5549,7 @@ object_define_properties_x_esm(MapImplementation.prototype,
    * @returns {boolean} Returns true if an element with the specified key
    *  exists in the Map object; otherwise false.
    */
-  has: _defineProperty({}, VALUE, baseHas),
+  has: hasDescriptor,
 
   /**
    * The keys() method returns a new Iterator object that contains the keys
@@ -5578,7 +5582,7 @@ object_define_properties_x_esm(MapImplementation.prototype,
    * @instance
    * @type {number}
    */
-  size: (_size2 = {}, _defineProperty(_size2, VALUE, 0), _defineProperty(_size2, WRITABLE, true), _size2),
+  size: sizeDescriptor,
 
   /**
    * The values() method returns a new Iterator object that contains the
@@ -5619,6 +5623,26 @@ var collections_x_esm_getMyClass = function getMyClass(Subject) {
   });
   return MyClass;
 };
+
+var collections_x_esm_noNewfixee = function noNewfixee(Subject) {
+  var res = attempt_x_esm(function attemptee() {
+    /* eslint-disable-next-line babel/new-cap */
+    return Subject();
+  });
+  return res.threw === false;
+};
+
+var collections_x_esm_badDoneFixee = function badDoneFixee(Subject) {
+  var res = attempt_x_esm(function attemptee() {
+    return new Subject().keys()[NEXT]()[DONE] === false;
+  });
+  return res.threw || res.value;
+};
+
+var collections_x_esm_badNextFunction = function badNextFunction(Subject) {
+  // Safari 8
+  return is_function_x_esm(new Subject().keys()[NEXT]) === false;
+};
 /* Map fixes */
 
 /* istanbul ignore next */
@@ -5637,13 +5661,7 @@ var collections_x_esm_performMapFixes = function performMapFixes() {
     }
   };
 
-  var fixees = [function fixee(Subject) {
-    var res = attempt_x_esm(function attemptee() {
-      /* eslint-disable-next-line babel/new-cap */
-      return Subject();
-    });
-    return res.threw === false;
-  }, function fixee(Subject) {
+  var fixees = [collections_x_esm_noNewfixee, function fixee(Subject) {
     var testMap = new Subject();
 
     if (typeof testMap[SIZE] !== 'number' || testMap[SIZE] !== 0) {
@@ -5680,15 +5698,7 @@ var collections_x_esm_performMapFixes = function performMapFixes() {
       return to_boolean_x_esm(new MyMap([]).set(42, 42) instanceof MyMap) === false;
     });
     return res.threw || res.value;
-  }, function fixee(Subject) {
-    var res = attempt_x_esm(function attemptee() {
-      return new Subject().keys()[NEXT]()[DONE] === false;
-    });
-    return res.threw || res.value;
-  }, function fixee(Subject) {
-    // Safari 8
-    return is_function_x_esm(new Subject().keys()[NEXT]) === false;
-  }, function fixee(Subject) {
+  }, collections_x_esm_badDoneFixee, collections_x_esm_badNextFunction, function fixee(Subject) {
     var testMapProto = hasRealSymbolIterator && get_prototype_of_x_esm(new Subject().keys());
     return to_boolean_x_esm(testMapProto) && is_function_x_esm(testMapProto[symIt]) === false;
   }];
@@ -5715,13 +5725,7 @@ var collections_x_esm_performSetFixes = function performSetFixes() {
     }
   };
 
-  var fixees = [function fixee(Subject) {
-    var res = attempt_x_esm(function attemptee() {
-      /* eslint-disable-next-line babel/new-cap */
-      return Subject();
-    });
-    return res.threw === false;
-  }, function fixee(Subject) {
+  var fixees = [collections_x_esm_noNewfixee, function fixee(Subject) {
     var testSet = new Subject();
 
     if (typeof testSet[SIZE] !== 'number' || testSet[SIZE] !== 0) {
@@ -5751,21 +5755,7 @@ var collections_x_esm_performSetFixes = function performSetFixes() {
       return to_boolean_x_esm(new MySet([]).add(42) instanceof MySet) === false;
     });
     return res.threw || res.value;
-  }, function fixee(Subject) {
-    var res = attempt_x_esm(function attemptee() {
-      /* eslint-disable-next-line babel/new-cap */
-      return Subject();
-    });
-    return res.threw === false;
-  }, function fixee(Subject) {
-    var res = attempt_x_esm(function attemptee() {
-      return new Subject().keys()[NEXT]()[DONE] === false;
-    });
-    return res.threw || res.value;
-  }, function fixee(Subject) {
-    // Safari 8
-    return is_function_x_esm(new Subject().keys()[NEXT]) === false;
-  }, function fixee(Subject) {
+  }, collections_x_esm_badDoneFixee, collections_x_esm_badNextFunction, function fixee(Subject) {
     var testSetProto = hasRealSymbolIterator && get_prototype_of_x_esm(new Subject().keys());
     return to_boolean_x_esm(testSetProto) && is_function_x_esm(testSetProto[symIt]) === false;
   }];

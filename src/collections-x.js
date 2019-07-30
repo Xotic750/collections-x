@@ -459,6 +459,12 @@ const baseAddSet = function baseAddSet(args) {
   return context;
 };
 
+const thisIteratorDescriptor = {
+  [VALUE]: function iterator() {
+    return this;
+  },
+};
+
 /**
  * An object is an iterator when it knows how to access items from a
  * collection one at a time, while keeping track of its current position
@@ -525,11 +531,10 @@ defineProperty(SetIt.prototype, NEXT, {
  * @memberof SetIterator.prototype
  * @returns {object} This Iterator object.
  */
-defineProperty(SetIt.prototype, symIt, {
-  [VALUE]: function iterator() {
-    return this;
-  },
-});
+defineProperty(SetIt.prototype, symIt, thisIteratorDescriptor);
+
+const hasDescriptor = {[VALUE]: baseHas};
+const sizeDescriptor = {[VALUE]: 0, [WRITABLE]: true};
 
 /**
  * This method returns a new Iterator object that contains the
@@ -641,9 +646,7 @@ defineProperties(
      * @returns {boolean} Returns true if an element with the specified value
      *  exists in the Set object; otherwise false.
      */
-    has: {
-      [VALUE]: baseHas,
-    },
+    has: hasDescriptor,
     /**
      * The keys() method is an alias for the `values` method (for similarity
      * with Map objects); it behaves exactly the same and returns values of Set elements.
@@ -663,10 +666,7 @@ defineProperties(
      * @instance
      * @type {number}
      */
-    size: {
-      [VALUE]: 0,
-      [WRITABLE]: true,
-    },
+    size: sizeDescriptor,
     /**
      * The values() method returns a new Iterator object that contains the
      * values for each element in the Set object in insertion order.
@@ -761,11 +761,7 @@ defineProperty(MapIt.prototype, NEXT, {
  * @memberof MapIterator.prototype
  * @returns {object} This Iterator object.
  */
-defineProperty(MapIt.prototype, symIt, {
-  [VALUE]: function iterator() {
-    return this;
-  },
-});
+defineProperty(MapIt.prototype, symIt, thisIteratorDescriptor);
 
 // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
@@ -862,9 +858,7 @@ defineProperties(
      * @returns {boolean} Returns true if an element with the specified key
      *  exists in the Map object; otherwise false.
      */
-    has: {
-      [VALUE]: baseHas,
-    },
+    has: hasDescriptor,
     /**
      * The keys() method returns a new Iterator object that contains the keys
      * for each element in the Map object in insertion order.
@@ -898,10 +892,7 @@ defineProperties(
      * @instance
      * @type {number}
      */
-    size: {
-      [VALUE]: 0,
-      [WRITABLE]: true,
-    },
+    size: sizeDescriptor,
     /**
      * The values() method returns a new Iterator object that contains the
      * values for each element in the Map object in insertion order.
@@ -947,6 +938,28 @@ const getMyClass = function getMyClass(Subject) {
   return MyClass;
 };
 
+const noNewfixee = function noNewfixee(Subject) {
+  const res = attempt(function attemptee() {
+    /* eslint-disable-next-line babel/new-cap */
+    return Subject();
+  });
+
+  return res.threw === false;
+};
+
+const badDoneFixee = function badDoneFixee(Subject) {
+  const res = attempt(function attemptee() {
+    return new Subject().keys()[NEXT]()[DONE] === false;
+  });
+
+  return res.threw || res.value;
+};
+
+const badNextFunction = function badNextFunction(Subject) {
+  // Safari 8
+  return isFunction(new Subject().keys()[NEXT]) === false;
+};
+
 /* Map fixes */
 /* istanbul ignore next */
 const performMapFixes = function performMapFixes() {
@@ -964,14 +977,7 @@ const performMapFixes = function performMapFixes() {
   };
 
   const fixees = [
-    function fixee(Subject) {
-      const res = attempt(function attemptee() {
-        /* eslint-disable-next-line babel/new-cap */
-        return Subject();
-      });
-
-      return res.threw === false;
-    },
+    noNewfixee,
 
     function fixee(Subject) {
       const testMap = new Subject();
@@ -1025,18 +1031,9 @@ const performMapFixes = function performMapFixes() {
       return res.threw || res.value;
     },
 
-    function fixee(Subject) {
-      const res = attempt(function attemptee() {
-        return new Subject().keys()[NEXT]()[DONE] === false;
-      });
+    badDoneFixee,
 
-      return res.threw || res.value;
-    },
-
-    function fixee(Subject) {
-      // Safari 8
-      return isFunction(new Subject().keys()[NEXT]) === false;
-    },
+    badNextFunction,
 
     function fixee(Subject) {
       const testMapProto = hasRealSymbolIterator && getPrototypeOf(new Subject().keys());
@@ -1069,14 +1066,7 @@ const performSetFixes = function performSetFixes() {
   };
 
   const fixees = [
-    function fixee(Subject) {
-      const res = attempt(function attemptee() {
-        /* eslint-disable-next-line babel/new-cap */
-        return Subject();
-      });
-
-      return res.threw === false;
-    },
+    noNewfixee,
 
     function fixee(Subject) {
       const testSet = new Subject();
@@ -1120,27 +1110,9 @@ const performSetFixes = function performSetFixes() {
       return res.threw || res.value;
     },
 
-    function fixee(Subject) {
-      const res = attempt(function attemptee() {
-        /* eslint-disable-next-line babel/new-cap */
-        return Subject();
-      });
+    badDoneFixee,
 
-      return res.threw === false;
-    },
-
-    function fixee(Subject) {
-      const res = attempt(function attemptee() {
-        return new Subject().keys()[NEXT]()[DONE] === false;
-      });
-
-      return res.threw || res.value;
-    },
-
-    function fixee(Subject) {
-      // Safari 8
-      return isFunction(new Subject().keys()[NEXT]) === false;
-    },
+    badNextFunction,
 
     function fixee(Subject) {
       const testSetProto = hasRealSymbolIterator && getPrototypeOf(new Subject().keys());
