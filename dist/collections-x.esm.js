@@ -1,6 +1,4 @@
-var _size,
-    _size2,
-    _this = this;
+var _size, _size2;
 
 function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
@@ -941,290 +939,326 @@ defineProperty(MapImplementation.prototype, symIt, _defineProperty({}, VALUE, Ma
  */
 
 var ExportMap = MapImplementation;
-
-try {
-  /* eslint-disable-next-line compat/compat */
-  ExportMap = new Map() ? Map : MapImplementation;
-} catch (ignore) {// empty
-}
-
-export var MapConstructor = ExportMap;
 var ExportSet = SetImplementation;
 
-try {
-  /* eslint-disable-next-line compat/compat */
-  ExportSet = new Set() ? Set : SetImplementation;
-} catch (ignore) {// empty
-}
-
-export var SetConstructor = ExportSet;
-var testMap;
-
-if (ExportMap !== MapImplementation) {
-  testMap = new ExportMap();
-
-  if (typeof testMap[SIZE] !== 'number' || testMap[SIZE] !== 0) {
-    /* istanbul ignore next */
-    ExportMap = MapImplementation;
-  } else {
-    var propsMap = ['has', 'set', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
-    var failedMap = some(propsMap, function (method) {
-      _newArrowCheck(this, _this);
-
-      return isFunction(testMap[method]) === false;
-    }.bind(this));
-
-    if (failedMap) {
-      /* istanbul ignore next */
-      ExportMap = MapImplementation;
-    }
-  }
-}
-
-if (ExportMap !== MapImplementation) {
-  // Safari 8, for example, doesn't accept an iterable.
-  var mapAcceptsArguments = false;
-
+(function fix1() {
   try {
-    mapAcceptsArguments = new ExportMap([[1, 2]]).get(1) === 2;
+    /* eslint-disable-next-line compat/compat */
+    ExportMap = new Map() ? Map : MapImplementation;
   } catch (ignore) {// empty
   }
+})();
 
-  if (mapAcceptsArguments === false) {
-    /* istanbul ignore next */
-    ExportMap = MapImplementation;
+(function fix2() {
+  try {
+    /* eslint-disable-next-line compat/compat */
+    ExportSet = new Set() ? Set : SetImplementation;
+  } catch (ignore) {// empty
   }
-}
+})();
 
-if (ExportMap !== MapImplementation) {
-  testMap = new ExportMap();
-  var mapSupportsChaining = testMap.set(1, 2) === testMap;
+(function fix3() {
+  var _this = this;
 
-  if (mapSupportsChaining === false) {
-    /* istanbul ignore next */
-    ExportMap = MapImplementation;
+  if (ExportMap !== MapImplementation) {
+    var testMap = new ExportMap();
+
+    if (typeof testMap[SIZE] !== 'number' || testMap[SIZE] !== 0) {
+      /* istanbul ignore next */
+      ExportMap = MapImplementation;
+    } else {
+      var propsMap = ['has', 'set', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
+      var failedMap = some(propsMap, function (method) {
+        _newArrowCheck(this, _this);
+
+        return isFunction(testMap[method]) === false;
+      }.bind(this));
+
+      if (failedMap) {
+        /* istanbul ignore next */
+        ExportMap = MapImplementation;
+      }
+    }
   }
-}
+})();
 
-if (ExportMap !== MapImplementation) {
-  // Chrome 38-42, node 0.11/0.12, iojs 1/2 also have a bug when the Map has a size > 4
-  testMap = new ExportMap([[1, 0], [2, 0], [3, 0], [4, 0]]);
-  testMap.set(-0, testMap);
-  var gets = testMap.get(0) === testMap && testMap.get(-0) === testMap;
-  var mapUsesSameValueZero = gets && testMap.has(0) && testMap.has(-0);
-
-  if (mapUsesSameValueZero === false) {
-    /* istanbul ignore next */
-    ExportMap = MapImplementation;
-  }
-}
-
-if (ExportMap !== MapImplementation) {
-  if (setPrototypeOf) {
-    var MyMap = function MyMap(arg) {
-      testMap = new ExportMap(arg);
-      setPrototypeOf(testMap, MyMap.prototype);
-      return testMap;
-    };
-
-    setPrototypeOf(MyMap, ExportMap);
-    MyMap.prototype = create(ExportMap.prototype, {
-      constructor: _defineProperty({}, VALUE, MyMap)
-    });
-    var mapSupportsSubclassing = false;
+(function fix4() {
+  if (ExportMap !== MapImplementation) {
+    // Safari 8, for example, doesn't accept an iterable.
+    var mapAcceptsArguments = false;
 
     try {
-      testMap = new MyMap([]); // Firefox 32 is ok with the instantiating the subclass but will
-      // throw when the map is used.
-
-      testMap.set(42, 42);
-      mapSupportsSubclassing = testMap instanceof MyMap;
+      mapAcceptsArguments = new ExportMap([[1, 2]]).get(1) === 2;
     } catch (ignore) {// empty
     }
 
-    if (mapSupportsSubclassing === false) {
+    if (mapAcceptsArguments === false) {
       /* istanbul ignore next */
       ExportMap = MapImplementation;
     }
   }
-}
+})();
 
-if (ExportMap !== MapImplementation) {
-  var mapRequiresNew;
+(function fix5() {
+  if (ExportMap !== MapImplementation) {
+    var testMap = new ExportMap();
+    var mapSupportsChaining = testMap.set(1, 2) === testMap;
 
-  try {
-    /* eslint-disable-next-line babel/new-cap */
-    mapRequiresNew = !(ExportMap() instanceof ExportMap);
-  } catch (e) {
-    mapRequiresNew = e instanceof TypeError;
-  }
-
-  if (mapRequiresNew === false) {
-    /* istanbul ignore next */
-    ExportMap = MapImplementation;
-  }
-}
-
-if (ExportMap !== MapImplementation) {
-  testMap = new ExportMap();
-  var mapIterationThrowsStopIterator;
-
-  try {
-    mapIterationThrowsStopIterator = testMap.keys()[NEXT]()[DONE] === false;
-  } catch (ignore) {
-    /* istanbul ignore next */
-    mapIterationThrowsStopIterator = true;
-  }
-
-  if (mapIterationThrowsStopIterator) {
-    /* istanbul ignore next */
-    ExportMap = MapImplementation;
-  }
-} // Safari 8
-
-
-if (ExportMap !== MapImplementation && isFunction(new ExportMap().keys()[NEXT]) === false) {
-  /* istanbul ignore next */
-  ExportMap = MapImplementation;
-}
-
-if (hasRealSymbolIterator && ExportMap !== MapImplementation) {
-  var testMapProto = getPrototypeOf(new ExportMap().keys());
-  var hasBuggyMapIterator = true;
-
-  if (testMapProto) {
-    hasBuggyMapIterator = isFunction(testMapProto[symIt]) === false;
-  }
-
-  if (hasBuggyMapIterator) {
-    /* istanbul ignore next */
-    ExportMap = MapImplementation;
-  }
-}
-
-var testSet;
-
-if (ExportSet !== SetImplementation) {
-  testSet = new ExportSet();
-
-  if (typeof testSet[SIZE] !== 'number' || testSet[SIZE] !== 0) {
-    /* istanbul ignore next */
-    ExportMap = MapImplementation;
-  } else {
-    var propsSet = ['has', 'add', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
-    var failedSet = some(propsSet, function predicate(method) {
-      return isFunction(testSet[method]) === false;
-    });
-
-    if (failedSet) {
+    if (mapSupportsChaining === false) {
       /* istanbul ignore next */
-      ExportSet = SetImplementation;
+      ExportMap = MapImplementation;
     }
   }
-}
+})();
 
-if (ExportSet !== SetImplementation) {
-  testSet = new ExportSet();
-  testSet.delete(0);
-  testSet.add(-0);
-  var setUsesSameValueZero = testSet.has(0) && testSet.has(-0);
+(function fix6() {
+  if (ExportMap !== MapImplementation) {
+    // Chrome 38-42, node 0.11/0.12, iojs 1/2 also have a bug when the Map has a size > 4
+    var testMap = new ExportMap([[1, 0], [2, 0], [3, 0], [4, 0]]);
+    testMap.set(-0, testMap);
+    var gets = testMap.get(0) === testMap && testMap.get(-0) === testMap;
+    var mapUsesSameValueZero = gets && testMap.has(0) && testMap.has(-0);
 
-  if (setUsesSameValueZero === false) {
-    /* istanbul ignore next */
-    ExportSet = SetImplementation;
+    if (mapUsesSameValueZero === false) {
+      /* istanbul ignore next */
+      ExportMap = MapImplementation;
+    }
   }
-}
+})();
 
-if (ExportSet !== SetImplementation) {
-  testSet = new ExportSet();
-  var setSupportsChaining = testSet.add(1) === testSet;
+(function fix7() {
+  if (ExportMap !== MapImplementation) {
+    if (setPrototypeOf) {
+      var MyMap = function MyMap(arg) {
+        var testMap = new ExportMap(arg);
+        setPrototypeOf(testMap, MyMap.prototype);
+        return testMap;
+      };
 
-  if (setSupportsChaining === false) {
-    /* istanbul ignore next */
-    ExportSet = SetImplementation;
+      setPrototypeOf(MyMap, ExportMap);
+      MyMap.prototype = create(ExportMap.prototype, {
+        constructor: _defineProperty({}, VALUE, MyMap)
+      });
+      var mapSupportsSubclassing = false;
+
+      try {
+        var testMap = new MyMap([]); // Firefox 32 is ok with the instantiating the subclass but will
+        // throw when the map is used.
+
+        testMap.set(42, 42);
+        mapSupportsSubclassing = testMap instanceof MyMap;
+      } catch (ignore) {// empty
+      }
+
+      if (mapSupportsSubclassing === false) {
+        /* istanbul ignore next */
+        ExportMap = MapImplementation;
+      }
+    }
   }
-}
+})();
 
-if (ExportSet !== SetImplementation) {
-  if (setPrototypeOf) {
-    var MySet = function MySet(arg) {
-      testSet = new ExportSet(arg);
-      setPrototypeOf(testSet, MySet.prototype);
-      return testSet;
-    };
-
-    setPrototypeOf(MySet, ExportSet);
-    MySet.prototype = create(ExportSet.prototype, {
-      constructor: _defineProperty({}, VALUE, MySet)
-    });
-    var setSupportsSubclassing = false;
+(function fix8() {
+  if (ExportMap !== MapImplementation) {
+    var mapRequiresNew;
 
     try {
-      testSet = new MySet([]);
-      testSet.add(42, 42);
-      setSupportsSubclassing = testSet instanceof MySet;
-    } catch (ignore) {// empty
+      /* eslint-disable-next-line babel/new-cap */
+      mapRequiresNew = !(ExportMap() instanceof ExportMap);
+    } catch (e) {
+      mapRequiresNew = e instanceof TypeError;
     }
 
-    if (setSupportsSubclassing === false) {
+    if (mapRequiresNew === false) {
+      /* istanbul ignore next */
+      ExportMap = MapImplementation;
+    }
+  }
+})();
+
+(function fix9() {
+  if (ExportMap !== MapImplementation) {
+    var testMap = new ExportMap();
+    var mapIterationThrowsStopIterator;
+
+    try {
+      mapIterationThrowsStopIterator = testMap.keys()[NEXT]()[DONE] === false;
+    } catch (ignore) {
+      /* istanbul ignore next */
+      mapIterationThrowsStopIterator = true;
+    }
+
+    if (mapIterationThrowsStopIterator) {
+      /* istanbul ignore next */
+      ExportMap = MapImplementation;
+    }
+  }
+})();
+
+(function fix10() {
+  // Safari 8
+  if (ExportMap !== MapImplementation && isFunction(new ExportMap().keys()[NEXT]) === false) {
+    /* istanbul ignore next */
+    ExportMap = MapImplementation;
+  }
+})();
+
+(function fix11() {
+  if (hasRealSymbolIterator && ExportMap !== MapImplementation) {
+    var testMapProto = getPrototypeOf(new ExportMap().keys());
+    var hasBuggyMapIterator = true;
+
+    if (testMapProto) {
+      hasBuggyMapIterator = isFunction(testMapProto[symIt]) === false;
+    }
+
+    if (hasBuggyMapIterator) {
+      /* istanbul ignore next */
+      ExportMap = MapImplementation;
+    }
+  }
+})();
+
+(function fix12() {
+  if (ExportSet !== SetImplementation) {
+    var testSet = new ExportSet();
+
+    if (typeof testSet[SIZE] !== 'number' || testSet[SIZE] !== 0) {
+      /* istanbul ignore next */
+      ExportMap = MapImplementation;
+    } else {
+      var propsSet = ['has', 'add', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
+      var failedSet = some(propsSet, function predicate(method) {
+        return isFunction(testSet[method]) === false;
+      });
+
+      if (failedSet) {
+        /* istanbul ignore next */
+        ExportSet = SetImplementation;
+      }
+    }
+  }
+})();
+
+(function fix13() {
+  if (ExportSet !== SetImplementation) {
+    var testSet = new ExportSet();
+    testSet.delete(0);
+    testSet.add(-0);
+    var setUsesSameValueZero = testSet.has(0) && testSet.has(-0);
+
+    if (setUsesSameValueZero === false) {
       /* istanbul ignore next */
       ExportSet = SetImplementation;
     }
   }
-}
+})();
 
-if (ExportSet !== SetImplementation) {
-  var setRequiresNew;
+(function fix14() {
+  if (ExportSet !== SetImplementation) {
+    var testSet = new ExportSet();
+    var setSupportsChaining = testSet.add(1) === testSet;
 
-  try {
-    /* eslint-disable-next-line babel/new-cap */
-    setRequiresNew = !(ExportSet() instanceof ExportSet);
-  } catch (e) {
-    setRequiresNew = e instanceof TypeError;
+    if (setSupportsChaining === false) {
+      /* istanbul ignore next */
+      ExportSet = SetImplementation;
+    }
   }
+})();
 
-  if (setRequiresNew === false) {
+(function fix15() {
+  if (ExportSet !== SetImplementation) {
+    if (setPrototypeOf) {
+      var MySet = function MySet(arg) {
+        var testSet = new ExportSet(arg);
+        setPrototypeOf(testSet, MySet.prototype);
+        return testSet;
+      };
+
+      setPrototypeOf(MySet, ExportSet);
+      MySet.prototype = create(ExportSet.prototype, {
+        constructor: _defineProperty({}, VALUE, MySet)
+      });
+      var setSupportsSubclassing = false;
+
+      try {
+        var testSet = new MySet([]);
+        testSet.add(42, 42);
+        setSupportsSubclassing = testSet instanceof MySet;
+      } catch (ignore) {// empty
+      }
+
+      if (setSupportsSubclassing === false) {
+        /* istanbul ignore next */
+        ExportSet = SetImplementation;
+      }
+    }
+  }
+})();
+
+(function fix16() {
+  if (ExportSet !== SetImplementation) {
+    var setRequiresNew;
+
+    try {
+      /* eslint-disable-next-line babel/new-cap */
+      setRequiresNew = !(ExportSet() instanceof ExportSet);
+    } catch (e) {
+      setRequiresNew = e instanceof TypeError;
+    }
+
+    if (setRequiresNew === false) {
+      /* istanbul ignore next */
+      ExportSet = SetImplementation;
+    }
+  }
+})();
+
+(function fix17() {
+  if (ExportSet !== SetImplementation) {
+    var testSet = new ExportSet();
+    var setIterationThrowsStopIterator;
+
+    try {
+      setIterationThrowsStopIterator = testSet.keys()[NEXT]()[DONE] === false;
+    } catch (ignore) {
+      /* istanbul ignore next */
+      setIterationThrowsStopIterator = true;
+    }
+
+    if (setIterationThrowsStopIterator) {
+      /* istanbul ignore next */
+      ExportSet = SetImplementation;
+    }
+  }
+})();
+
+(function fix18() {
+  // Safari 8
+  if (ExportSet !== SetImplementation && isFunction(new ExportSet().keys()[NEXT]) === false) {
     /* istanbul ignore next */
     ExportSet = SetImplementation;
   }
-}
+})();
 
-if (ExportSet !== SetImplementation) {
-  testSet = new ExportSet();
-  var setIterationThrowsStopIterator;
+(function fix19() {
+  if (hasRealSymbolIterator && ExportSet !== SetImplementation) {
+    var testSetProto = getPrototypeOf(new ExportSet().keys());
+    var hasBuggySetIterator = true;
 
-  try {
-    setIterationThrowsStopIterator = testSet.keys()[NEXT]()[DONE] === false;
-  } catch (ignore) {
-    /* istanbul ignore next */
-    setIterationThrowsStopIterator = true;
+    if (testSetProto) {
+      hasBuggySetIterator = isFunction(testSetProto[symIt]) === false;
+    }
+
+    if (hasBuggySetIterator) {
+      /* istanbul ignore next */
+      ExportSet = SetImplementation;
+    }
   }
+})();
 
-  if (setIterationThrowsStopIterator) {
-    /* istanbul ignore next */
-    ExportSet = SetImplementation;
-  }
-} // Safari 8
-
-
-if (ExportSet !== SetImplementation && isFunction(new ExportSet().keys()[NEXT]) === false) {
-  /* istanbul ignore next */
-  ExportSet = SetImplementation;
-}
-
-if (hasRealSymbolIterator && ExportSet !== SetImplementation) {
-  var testSetProto = getPrototypeOf(new ExportSet().keys());
-  var hasBuggySetIterator = true;
-
-  if (testSetProto) {
-    hasBuggySetIterator = isFunction(testSetProto[symIt]) === false;
-  }
-
-  if (hasBuggySetIterator) {
-    /* istanbul ignore next */
-    ExportSet = SetImplementation;
-  }
-}
+export var MapConstructor = ExportMap;
+export var SetConstructor = ExportSet;
 
 var hasImplementationProps = function hasImplementationProps(object) {
   return isBoolean(object[PROP_CHANGED]) && isObjectLike(object[PROP_ID]) && isArray(object[PROP_KEY]) && isArray(object[PROP_ORDER]) && typeof object[SIZE] === 'number';
