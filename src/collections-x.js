@@ -21,7 +21,6 @@ import getPrototypeOf from 'get-prototype-of-x';
 import hasSymbolSupport from 'has-symbol-support-x';
 import create from 'object-create-x';
 import toBoolean from 'to-boolean-x';
-import slice from 'array-slice-x';
 
 /* eslint-disable-next-line no-void */
 const UNDEFINED = void 0;
@@ -53,6 +52,8 @@ const SAMEVALUEZERO = 'SameValueZero';
 const ES6_SHIM_ITERATOR = '_es6-shim iterator_';
 const AT_AT_ITERATOR = '@@iterator';
 
+const {push} = [];
+const {charAt} = KEY;
 const {setPrototypeOf} = {}.constructor;
 /* eslint-disable-next-line compat/compat */
 const hasRealSymbolIterator = hasSymbolSupport && typeof Symbol.iterator === 'symbol';
@@ -105,9 +106,8 @@ const getSymbolIterator = function getSymbolIterator(iterable) {
   return UNDEFINED;
 };
 
-const parseIterable = function parseIterable() {
-  /* eslint-disable-next-line prefer-rest-params */
-  const [kind, iterable, context, symbolIterator] = slice(arguments);
+const parseIterable = function parseIterable(args) {
+  const [kind, iterable, context, symbolIterator] = args;
   const iterator = iterable[symbolIterator]();
   let next = iterator[NEXT]();
 
@@ -123,11 +123,11 @@ const parseIterable = function parseIterable() {
 
     if (indexof < 0) {
       if (kind === MAP) {
-        context[PROP_VALUE].push(next[VALUE][1]);
+        push.call(context[PROP_VALUE], next[VALUE][1]);
       }
 
-      context[PROP_KEY].push(key);
-      context[PROP_ORDER].push(context[PROP_ID].get());
+      push.call(context[PROP_KEY], key);
+      push.call(context[PROP_ORDER], context[PROP_ID].get());
       context[PROP_ID][NEXT]();
     } else if (kind === MAP) {
       /* eslint-disable-next-line prefer-destructuring */
@@ -138,18 +138,17 @@ const parseIterable = function parseIterable() {
   }
 };
 
-const parseString = function parseString() {
-  /* eslint-disable-next-line prefer-rest-params */
-  const [kind, iterable, context] = slice(arguments);
+const parseString = function parseString(args) {
+  const [kind, iterable, context] = args;
 
   if (kind === MAP) {
-    throw new TypeError(`Iterator value ${iterable.charAt(0)} is not an entry object`);
+    throw new TypeError(`Iterator value ${charAt.call(iterable, 0)} is not an entry object`);
   }
 
   let next = 0;
   while (next < iterable.length) {
-    const char1 = iterable.charAt(next);
-    const char2 = iterable.charAt(next + 1);
+    const char1 = charAt.call(iterable, next);
+    const char2 = charAt.call(iterable, next + 1);
     let key;
 
     if (isSurrogatePair(char1, char2)) {
@@ -162,8 +161,8 @@ const parseString = function parseString() {
     const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
 
     if (indexof < 0) {
-      context[PROP_KEY].push(key);
-      context[PROP_ORDER].push(context[PROP_ID].get());
+      push.call(context[PROP_KEY], key);
+      push.call(context[PROP_ORDER], context[PROP_ID].get());
       context[PROP_ID][NEXT]();
     }
 
@@ -171,9 +170,8 @@ const parseString = function parseString() {
   }
 };
 
-const parseArrayLike = function parseArrayLike() {
-  /* eslint-disable-next-line prefer-rest-params */
-  const [kind, iterable, context] = slice(arguments);
+const parseArrayLike = function parseArrayLike(args) {
+  const [kind, iterable, context] = args;
   let next = 0;
   while (next < iterable.length) {
     let key;
@@ -193,11 +191,11 @@ const parseArrayLike = function parseArrayLike() {
 
     if (indexof < 0) {
       if (kind === MAP) {
-        context[PROP_VALUE].push(iterable[next][1]);
+        push.call(context[PROP_VALUE], iterable[next][1]);
       }
 
-      context[PROP_KEY].push(key);
-      context[PROP_ORDER].push(context[PROP_ID].get());
+      push.call(context[PROP_KEY], key);
+      push.call(context[PROP_ORDER], context[PROP_ID].get());
       context[PROP_ID][NEXT]();
     } else if (kind === MAP) {
       /* eslint-disable-next-line prefer-destructuring */
@@ -205,6 +203,27 @@ const parseArrayLike = function parseArrayLike() {
     }
 
     next += 1;
+  }
+};
+
+const defineDefaultProps = function defineDefaultProps(context) {
+  defineProperties(context, {
+    [PROP_CHANGED]: {[VALUE]: false},
+    [PROP_ID]: {[VALUE]: new IdGenerator()},
+    [PROP_KEY]: {[VALUE]: []},
+    [PROP_ORDER]: {[VALUE]: []},
+  });
+};
+
+const performParsing = function performParsing(args) {
+  const [, iterable, , symbolIterator] = args;
+
+  if (iterable && isFunction(iterable[symbolIterator])) {
+    parseIterable(args);
+  } else if (isString(iterable)) {
+    parseString(args);
+  } else if (isArrayLike(iterable)) {
+    parseArrayLike(args);
   }
 };
 
@@ -220,29 +239,16 @@ const parseArrayLike = function parseArrayLike() {
  * @param {*} iterable - Value to parsed.
  */
 // eslint-enable jsdoc/check-param-names
-const parse = function parse() {
-  /* eslint-disable-next-line prefer-rest-params */
-  const [kind, context, iterable] = slice(arguments);
+const parse = function parse(args) {
+  const [kind, context, iterable] = args;
   const symbolIterator = getSymbolIterator(iterable);
 
   if (kind === MAP) {
     defineProperty(context, PROP_VALUE, {[VALUE]: []});
   }
 
-  defineProperties(context, {
-    [PROP_CHANGED]: {[VALUE]: false},
-    [PROP_ID]: {[VALUE]: new IdGenerator()},
-    [PROP_KEY]: {[VALUE]: []},
-    [PROP_ORDER]: {[VALUE]: []},
-  });
-
-  if (iterable && isFunction(iterable[symbolIterator])) {
-    parseIterable(kind, iterable, context, symbolIterator);
-  } else if (isString(iterable)) {
-    parseString(kind, iterable, context);
-  } else if (isArrayLike(iterable)) {
-    parseArrayLike(kind, iterable, context);
-  }
+  defineDefaultProps(context);
+  performParsing([kind, iterable, context, symbolIterator]);
 
   defineProperty(context, SIZE, {[VALUE]: context[PROP_KEY].length, [WRITABLE]: true});
 };
@@ -261,9 +267,8 @@ const parse = function parse() {
  * @returns {object} The Map/Set object.
  */
 // eslint-enable jsdoc/check-param-names
-const baseForEach = function baseForEach() {
-  /* eslint-disable-next-line prefer-rest-params */
-  const [kind, context, callback, thisArg] = slice(arguments);
+const baseForEach = function baseForEach(args) {
+  const [kind, context, callback, thisArg] = args;
   assertIsObject(context);
   assertIsFunction(callback);
   const pointers = {index: 0, order: context[PROP_ORDER][0]};
@@ -346,9 +351,8 @@ const baseClear = function baseClear(kind, context) {
  * @returns {object} The Map/Set object.
  */
 // eslint-enable jsdoc/check-param-names
-const baseDelete = function baseDelete() {
-  /* eslint-disable-next-line prefer-rest-params */
-  const [kind, context, key] = slice(arguments);
+const baseDelete = function baseDelete(args) {
+  const [kind, context, key] = args;
   const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
   let result = false;
 
@@ -380,9 +384,8 @@ const baseDelete = function baseDelete() {
  * @returns {object} The Map/Set object.
  */
 // eslint-enable jsdoc/check-param-names
-const baseAddSet = function baseAddSet() {
-  /* eslint-disable-next-line prefer-rest-params */
-  const [kind, context, key, value] = slice(arguments);
+const baseAddSet = function baseAddSet(args) {
+  const [kind, context, key, value] = args;
   const index = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
 
   if (index > -1) {
@@ -391,11 +394,11 @@ const baseAddSet = function baseAddSet() {
     }
   } else {
     if (kind === MAP) {
-      context[PROP_VALUE].push(value);
+      push.call(context[PROP_VALUE], value);
     }
 
-    context[PROP_KEY].push(key);
-    context[PROP_ORDER].push(context[PROP_ID].get());
+    push.call(context[PROP_KEY], key);
+    push.call(context[PROP_ORDER], context[PROP_ID].get());
     context[PROP_ID][NEXT]();
     context[PROP_CHANGE] = true;
     context[SIZE] = context[PROP_KEY].length;
@@ -501,7 +504,7 @@ export const SetImplementation = function Set() {
   }
 
   /* eslint-disable-next-line prefer-rest-params */
-  parse(SET, this, arguments.length ? arguments[0] : UNDEFINED);
+  parse([SET, this, arguments.length ? arguments[0] : UNDEFINED]);
 };
 
 // noinspection JSValidateTypes
@@ -518,7 +521,7 @@ defineProperties(
      */
     add: {
       [VALUE]: function add(value) {
-        return baseAddSet(SET, this, value);
+        return baseAddSet([SET, this, value]);
       },
     },
     /**
@@ -540,7 +543,7 @@ defineProperties(
      */
     delete: {
       [VALUE]: function de1ete(value) {
-        return baseDelete(SET, this, value);
+        return baseDelete([SET, this, value]);
       },
     },
     /**
@@ -569,7 +572,7 @@ defineProperties(
      */
     forEach: {
       [VALUE]: function forEach(callback, thisArg) {
-        return baseForEach(SET, this, callback, thisArg);
+        return baseForEach([SET, this, callback, thisArg]);
       },
     },
     /**
@@ -720,7 +723,7 @@ export const MapImplementation = function Map() {
   }
 
   /* eslint-disable-next-line prefer-rest-params */
-  parse(MAP, this, arguments.length ? arguments[0] : UNDEFINED);
+  parse([MAP, this, arguments.length ? arguments[0] : UNDEFINED]);
 };
 
 // noinspection JSValidateTypes
@@ -746,7 +749,7 @@ defineProperties(
      */
     delete: {
       [VALUE]: function de1ete(key) {
-        return baseDelete(MAP, this, key);
+        return baseDelete([MAP, this, key]);
       },
     },
     /**
@@ -770,7 +773,7 @@ defineProperties(
      */
     forEach: {
       [VALUE]: function forEach(callback, thisArg) {
-        return baseForEach(MAP, this, callback, thisArg);
+        return baseForEach([MAP, this, callback, thisArg]);
       },
     },
     /**
@@ -820,7 +823,7 @@ defineProperties(
      */
     set: {
       [VALUE]: function set(key, value) {
-        return baseAddSet(MAP, this, key, value);
+        return baseAddSet([MAP, this, key, value]);
       },
     },
     /**

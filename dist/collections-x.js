@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-30T12:45:30.292Z",
+  "date": "2019-07-30T13:10:32.934Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
-  "hash": "bdaad49ab2337edd29ad",
+  "hash": "e4d58f95e47cbe5854b3",
   "license": "MIT",
   "version": "3.0.12"
 }
@@ -4652,7 +4652,7 @@ var _size,
 
 function collections_x_esm_newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
-function _defineProperty2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
@@ -4663,7 +4663,6 @@ function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function collections_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { collections_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { collections_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return collections_x_esm_typeof(obj); }
-
 
 
 
@@ -4718,6 +4717,8 @@ var KIND_KEY_VALUE = "".concat(KIND_KEY, "+").concat(KIND_VALUE);
 var SAMEVALUEZERO = 'SameValueZero';
 var ES6_SHIM_ITERATOR = '_es6-shim iterator_';
 var AT_AT_ITERATOR = '@@iterator';
+var push = [].push;
+var collections_x_esm_charAt = KEY.charAt;
 var setPrototypeOf = {}.constructor.setPrototypeOf;
 /* eslint-disable-next-line compat/compat */
 
@@ -4773,14 +4774,12 @@ var collections_x_esm_getSymbolIterator = function getSymbolIterator(iterable) {
   return collections_x_esm_UNDEFINED;
 };
 
-var collections_x_esm_parseIterable = function parseIterable() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice = array_slice_x_esm(arguments),
-      _slice2 = _slicedToArray(_slice, 4),
-      kind = _slice2[0],
-      iterable = _slice2[1],
-      context = _slice2[2],
-      symbolIterator = _slice2[3];
+var collections_x_esm_parseIterable = function parseIterable(args) {
+  var _args = _slicedToArray(args, 4),
+      kind = _args[0],
+      iterable = _args[1],
+      context = _args[2],
+      symbolIterator = _args[3];
 
   var iterator = iterable[symbolIterator]();
   var next = iterator[NEXT]();
@@ -4797,11 +4796,11 @@ var collections_x_esm_parseIterable = function parseIterable() {
 
     if (indexof < 0) {
       if (kind === MAP) {
-        context[PROP_VALUE].push(next[VALUE][1]);
+        push.call(context[PROP_VALUE], next[VALUE][1]);
       }
 
-      context[PROP_KEY].push(key);
-      context[PROP_ORDER].push(context[PROP_ID].get());
+      push.call(context[PROP_KEY], key);
+      push.call(context[PROP_ORDER], context[PROP_ID].get());
       context[PROP_ID][NEXT]();
     } else if (kind === MAP) {
       /* eslint-disable-next-line prefer-destructuring */
@@ -4812,23 +4811,21 @@ var collections_x_esm_parseIterable = function parseIterable() {
   }
 };
 
-var collections_x_esm_parseString = function parseString() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice3 = array_slice_x_esm(arguments),
-      _slice4 = _slicedToArray(_slice3, 3),
-      kind = _slice4[0],
-      iterable = _slice4[1],
-      context = _slice4[2];
+var collections_x_esm_parseString = function parseString(args) {
+  var _args2 = _slicedToArray(args, 3),
+      kind = _args2[0],
+      iterable = _args2[1],
+      context = _args2[2];
 
   if (kind === MAP) {
-    throw new TypeError("Iterator value ".concat(iterable.charAt(0), " is not an entry object"));
+    throw new TypeError("Iterator value ".concat(collections_x_esm_charAt.call(iterable, 0), " is not an entry object"));
   }
 
   var next = 0;
 
   while (next < iterable.length) {
-    var char1 = iterable.charAt(next);
-    var char2 = iterable.charAt(next + 1);
+    var char1 = collections_x_esm_charAt.call(iterable, next);
+    var char2 = collections_x_esm_charAt.call(iterable, next + 1);
     var key = void 0;
 
     if (is_surrogate_pair_x_esm(char1, char2)) {
@@ -4841,8 +4838,8 @@ var collections_x_esm_parseString = function parseString() {
     var indexof = index_of_x_esm(assert_is_object_x_esm(context)[PROP_KEY], key, SAMEVALUEZERO);
 
     if (indexof < 0) {
-      context[PROP_KEY].push(key);
-      context[PROP_ORDER].push(context[PROP_ID].get());
+      push.call(context[PROP_KEY], key);
+      push.call(context[PROP_ORDER], context[PROP_ID].get());
       context[PROP_ID][NEXT]();
     }
 
@@ -4850,13 +4847,11 @@ var collections_x_esm_parseString = function parseString() {
   }
 };
 
-var collections_x_esm_parseArrayLike = function parseArrayLike() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice5 = array_slice_x_esm(arguments),
-      _slice6 = _slicedToArray(_slice5, 3),
-      kind = _slice6[0],
-      iterable = _slice6[1],
-      context = _slice6[2];
+var collections_x_esm_parseArrayLike = function parseArrayLike(args) {
+  var _args3 = _slicedToArray(args, 3),
+      kind = _args3[0],
+      iterable = _args3[1],
+      context = _args3[2];
 
   var next = 0;
 
@@ -4879,11 +4874,11 @@ var collections_x_esm_parseArrayLike = function parseArrayLike() {
 
     if (indexof < 0) {
       if (kind === MAP) {
-        context[PROP_VALUE].push(iterable[next][1]);
+        push.call(context[PROP_VALUE], iterable[next][1]);
       }
 
-      context[PROP_KEY].push(key);
-      context[PROP_ORDER].push(context[PROP_ID].get());
+      push.call(context[PROP_KEY], key);
+      push.call(context[PROP_ORDER], context[PROP_ID].get());
       context[PROP_ID][NEXT]();
     } else if (kind === MAP) {
       /* eslint-disable-next-line prefer-destructuring */
@@ -4891,6 +4886,26 @@ var collections_x_esm_parseArrayLike = function parseArrayLike() {
     }
 
     next += 1;
+  }
+};
+
+var collections_x_esm_defineDefaultProps = function defineDefaultProps(context) {
+  var _defineProperties;
+
+  object_define_properties_x_esm(context, (_defineProperties = {}, _defineProperty(_defineProperties, PROP_CHANGED, _defineProperty({}, VALUE, false)), _defineProperty(_defineProperties, PROP_ID, _defineProperty({}, VALUE, new big_counter_x_esm())), _defineProperty(_defineProperties, PROP_KEY, _defineProperty({}, VALUE, [])), _defineProperty(_defineProperties, PROP_ORDER, _defineProperty({}, VALUE, [])), _defineProperties));
+};
+
+var collections_x_esm_performParsing = function performParsing(args) {
+  var _args4 = _slicedToArray(args, 4),
+      iterable = _args4[1],
+      symbolIterator = _args4[3];
+
+  if (iterable && is_function_x_esm(iterable[symbolIterator])) {
+    collections_x_esm_parseIterable(args);
+  } else if (is_string_default()(iterable)) {
+    collections_x_esm_parseString(args);
+  } else if (is_array_like_x_esm(iterable)) {
+    collections_x_esm_parseArrayLike(args);
   }
 }; // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
@@ -4907,33 +4922,23 @@ var collections_x_esm_parseArrayLike = function parseArrayLike() {
 // eslint-enable jsdoc/check-param-names
 
 
-var collections_x_esm_parse = function parse() {
-  var _defineProperties, _defineProperty3;
+var collections_x_esm_parse = function parse(args) {
+  var _defineProperty3;
 
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice7 = array_slice_x_esm(arguments),
-      _slice8 = _slicedToArray(_slice7, 3),
-      kind = _slice8[0],
-      context = _slice8[1],
-      iterable = _slice8[2];
+  var _args5 = _slicedToArray(args, 3),
+      kind = _args5[0],
+      context = _args5[1],
+      iterable = _args5[2];
 
   var symbolIterator = collections_x_esm_getSymbolIterator(iterable);
 
   if (kind === MAP) {
-    object_define_property_x_esm(context, PROP_VALUE, _defineProperty2({}, VALUE, []));
+    object_define_property_x_esm(context, PROP_VALUE, _defineProperty({}, VALUE, []));
   }
 
-  object_define_properties_x_esm(context, (_defineProperties = {}, _defineProperty2(_defineProperties, PROP_CHANGED, _defineProperty2({}, VALUE, false)), _defineProperty2(_defineProperties, PROP_ID, _defineProperty2({}, VALUE, new big_counter_x_esm())), _defineProperty2(_defineProperties, PROP_KEY, _defineProperty2({}, VALUE, [])), _defineProperty2(_defineProperties, PROP_ORDER, _defineProperty2({}, VALUE, [])), _defineProperties));
-
-  if (iterable && is_function_x_esm(iterable[symbolIterator])) {
-    collections_x_esm_parseIterable(kind, iterable, context, symbolIterator);
-  } else if (is_string_default()(iterable)) {
-    collections_x_esm_parseString(kind, iterable, context);
-  } else if (is_array_like_x_esm(iterable)) {
-    collections_x_esm_parseArrayLike(kind, iterable, context);
-  }
-
-  object_define_property_x_esm(context, SIZE, (_defineProperty3 = {}, _defineProperty2(_defineProperty3, VALUE, context[PROP_KEY].length), _defineProperty2(_defineProperty3, WRITABLE, true), _defineProperty3));
+  collections_x_esm_defineDefaultProps(context);
+  collections_x_esm_performParsing([kind, iterable, context, symbolIterator]);
+  object_define_property_x_esm(context, SIZE, (_defineProperty3 = {}, _defineProperty(_defineProperty3, VALUE, context[PROP_KEY].length), _defineProperty(_defineProperty3, WRITABLE, true), _defineProperty3));
 }; // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
 
@@ -4951,14 +4956,12 @@ var collections_x_esm_parse = function parse() {
 // eslint-enable jsdoc/check-param-names
 
 
-var collections_x_esm_baseForEach = function baseForEach() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice9 = array_slice_x_esm(arguments),
-      _slice10 = _slicedToArray(_slice9, 4),
-      kind = _slice10[0],
-      context = _slice10[1],
-      callback = _slice10[2],
-      thisArg = _slice10[3];
+var collections_x_esm_baseForEach = function baseForEach(args) {
+  var _args6 = _slicedToArray(args, 4),
+      kind = _args6[0],
+      context = _args6[1],
+      callback = _args6[2],
+      thisArg = _args6[3];
 
   assert_is_object_x_esm(context);
   assert_is_function_x_esm(callback);
@@ -5046,13 +5049,11 @@ var collections_x_esm_baseClear = function baseClear(kind, context) {
 // eslint-enable jsdoc/check-param-names
 
 
-var collections_x_esm_baseDelete = function baseDelete() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice11 = array_slice_x_esm(arguments),
-      _slice12 = _slicedToArray(_slice11, 3),
-      kind = _slice12[0],
-      context = _slice12[1],
-      key = _slice12[2];
+var collections_x_esm_baseDelete = function baseDelete(args) {
+  var _args7 = _slicedToArray(args, 3),
+      kind = _args7[0],
+      context = _args7[1],
+      key = _args7[2];
 
   var indexof = index_of_x_esm(assert_is_object_x_esm(context)[PROP_KEY], key, SAMEVALUEZERO);
   var result = false;
@@ -5086,14 +5087,12 @@ var collections_x_esm_baseDelete = function baseDelete() {
 // eslint-enable jsdoc/check-param-names
 
 
-var collections_x_esm_baseAddSet = function baseAddSet() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice13 = array_slice_x_esm(arguments),
-      _slice14 = _slicedToArray(_slice13, 4),
-      kind = _slice14[0],
-      context = _slice14[1],
-      key = _slice14[2],
-      value = _slice14[3];
+var collections_x_esm_baseAddSet = function baseAddSet(args) {
+  var _args8 = _slicedToArray(args, 4),
+      kind = _args8[0],
+      context = _args8[1],
+      key = _args8[2],
+      value = _args8[3];
 
   var index = index_of_x_esm(assert_is_object_x_esm(context)[PROP_KEY], key, SAMEVALUEZERO);
 
@@ -5103,11 +5102,11 @@ var collections_x_esm_baseAddSet = function baseAddSet() {
     }
   } else {
     if (kind === MAP) {
-      context[PROP_VALUE].push(value);
+      push.call(context[PROP_VALUE], value);
     }
 
-    context[PROP_KEY].push(key);
-    context[PROP_ORDER].push(context[PROP_ID].get());
+    push.call(context[PROP_KEY], key);
+    push.call(context[PROP_ORDER], context[PROP_ID].get());
     context[PROP_ID][NEXT]();
     context[PROP_CHANGE] = true;
     context[SIZE] = context[PROP_KEY].length;
@@ -5133,7 +5132,7 @@ var collections_x_esm_baseAddSet = function baseAddSet() {
 var SetIt = function SetIterator(context, iteratorKind) {
   var _PROP_ITERATORHASMORE, _PROP_SETNEXTINDEX, _defineProperties2;
 
-  object_define_properties_x_esm(this, (_defineProperties2 = {}, _defineProperty2(_defineProperties2, PROP_ITERATORHASMORE, (_PROP_ITERATORHASMORE = {}, _defineProperty2(_PROP_ITERATORHASMORE, VALUE, true), _defineProperty2(_PROP_ITERATORHASMORE, WRITABLE, true), _PROP_ITERATORHASMORE)), _defineProperty2(_defineProperties2, PROP_SET, _defineProperty2({}, VALUE, assert_is_object_x_esm(context))), _defineProperty2(_defineProperties2, PROP_SETITERATIONKIND, _defineProperty2({}, VALUE, iteratorKind || KIND_VALUE)), _defineProperty2(_defineProperties2, PROP_SETNEXTINDEX, (_PROP_SETNEXTINDEX = {}, _defineProperty2(_PROP_SETNEXTINDEX, VALUE, 0), _defineProperty2(_PROP_SETNEXTINDEX, WRITABLE, true), _PROP_SETNEXTINDEX)), _defineProperties2));
+  object_define_properties_x_esm(this, (_defineProperties2 = {}, _defineProperty(_defineProperties2, PROP_ITERATORHASMORE, (_PROP_ITERATORHASMORE = {}, _defineProperty(_PROP_ITERATORHASMORE, VALUE, true), _defineProperty(_PROP_ITERATORHASMORE, WRITABLE, true), _PROP_ITERATORHASMORE)), _defineProperty(_defineProperties2, PROP_SET, _defineProperty({}, VALUE, assert_is_object_x_esm(context))), _defineProperty(_defineProperties2, PROP_SETITERATIONKIND, _defineProperty({}, VALUE, iteratorKind || KIND_VALUE)), _defineProperty(_defineProperties2, PROP_SETNEXTINDEX, (_PROP_SETNEXTINDEX = {}, _defineProperty(_PROP_SETNEXTINDEX, VALUE, 0), _defineProperty(_PROP_SETNEXTINDEX, WRITABLE, true), _PROP_SETNEXTINDEX)), _defineProperties2));
 };
 /**
  * Once initialized, the next() method can be called to access key-value
@@ -5145,7 +5144,7 @@ var SetIt = function SetIterator(context, iteratorKind) {
  */
 
 
-object_define_property_x_esm(SetIt.prototype, NEXT, _defineProperty2({}, VALUE, function next() {
+object_define_property_x_esm(SetIt.prototype, NEXT, _defineProperty({}, VALUE, function next() {
   var _ref2;
 
   var context = assert_is_object_x_esm(this[PROP_SET]);
@@ -5157,11 +5156,11 @@ object_define_property_x_esm(SetIt.prototype, NEXT, _defineProperty2({}, VALUE, 
     var _ref;
 
     this[PROP_SETNEXTINDEX] += 1;
-    return _ref = {}, _defineProperty2(_ref, DONE, false), _defineProperty2(_ref, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index]), _ref;
+    return _ref = {}, _defineProperty(_ref, DONE, false), _defineProperty(_ref, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index]), _ref;
   }
 
   this[PROP_ITERATORHASMORE] = false;
-  return _ref2 = {}, _defineProperty2(_ref2, DONE, true), _defineProperty2(_ref2, VALUE, collections_x_esm_UNDEFINED), _ref2;
+  return _ref2 = {}, _defineProperty(_ref2, DONE, true), _defineProperty(_ref2, VALUE, collections_x_esm_UNDEFINED), _ref2;
 }));
 /**
  * The @@iterator property is the same Iterator object.
@@ -5172,7 +5171,7 @@ object_define_property_x_esm(SetIt.prototype, NEXT, _defineProperty2({}, VALUE, 
  * @returns {object} This Iterator object.
  */
 
-object_define_property_x_esm(SetIt.prototype, symIt, _defineProperty2({}, VALUE, function iterator() {
+object_define_property_x_esm(SetIt.prototype, symIt, _defineProperty({}, VALUE, function iterator() {
   return this;
 }));
 /**
@@ -5208,7 +5207,7 @@ var SetImplementation = function Set() {
   /* eslint-disable-next-line prefer-rest-params */
 
 
-  collections_x_esm_parse(SET, this, arguments.length ? arguments[0] : collections_x_esm_UNDEFINED);
+  collections_x_esm_parse([SET, this, arguments.length ? arguments[0] : collections_x_esm_UNDEFINED]);
 }; // noinspection JSValidateTypes
 
 object_define_properties_x_esm(SetImplementation.prototype,
@@ -5222,8 +5221,8 @@ object_define_properties_x_esm(SetImplementation.prototype,
    *  object.
    * @returns {object} The Set object.
    */
-  add: _defineProperty2({}, VALUE, function add(value) {
-    return collections_x_esm_baseAddSet(SET, this, value);
+  add: _defineProperty({}, VALUE, function add(value) {
+    return collections_x_esm_baseAddSet([SET, this, value]);
   }),
 
   /**
@@ -5231,7 +5230,7 @@ object_define_properties_x_esm(SetImplementation.prototype,
    *
    * @returns {object} The Set object.
    */
-  clear: _defineProperty2({}, VALUE, function clear() {
+  clear: _defineProperty({}, VALUE, function clear() {
     return collections_x_esm_baseClear(SET, this);
   }),
 
@@ -5242,8 +5241,8 @@ object_define_properties_x_esm(SetImplementation.prototype,
    * @returns {boolean} Returns true if an element in the Set object has been
    *  removed successfully; otherwise false.
    */
-  delete: _defineProperty2({}, VALUE, function de1ete(value) {
-    return collections_x_esm_baseDelete(SET, this, value);
+  delete: _defineProperty({}, VALUE, function de1ete(value) {
+    return collections_x_esm_baseDelete([SET, this, value]);
   }),
 
   /**
@@ -5257,7 +5256,7 @@ object_define_properties_x_esm(SetImplementation.prototype,
    * @function
    * @returns {object} A new Iterator object.
    */
-  entries: _defineProperty2({}, VALUE, function entries() {
+  entries: _defineProperty({}, VALUE, function entries() {
     return new SetIt(this, KIND_KEY_VALUE);
   }),
 
@@ -5269,8 +5268,8 @@ object_define_properties_x_esm(SetImplementation.prototype,
    * @param {*} [thisArg] - Value to use as this when executing callback.
    * @returns {object} The Set object.
    */
-  forEach: _defineProperty2({}, VALUE, function forEach(callback, thisArg) {
-    return collections_x_esm_baseForEach(SET, this, callback, thisArg);
+  forEach: _defineProperty({}, VALUE, function forEach(callback, thisArg) {
+    return collections_x_esm_baseForEach([SET, this, callback, thisArg]);
   }),
 
   /**
@@ -5282,7 +5281,7 @@ object_define_properties_x_esm(SetImplementation.prototype,
    * @returns {boolean} Returns true if an element with the specified value
    *  exists in the Set object; otherwise false.
    */
-  has: _defineProperty2({}, VALUE, baseHas),
+  has: _defineProperty({}, VALUE, baseHas),
 
   /**
    * The keys() method is an alias for the `values` method (for similarity
@@ -5291,7 +5290,7 @@ object_define_properties_x_esm(SetImplementation.prototype,
    * @function
    * @returns {object} A new Iterator object.
    */
-  keys: _defineProperty2({}, VALUE, setValuesIterator),
+  keys: _defineProperty({}, VALUE, setValuesIterator),
 
   /**
    * The value of size is an integer representing how many entries the Set
@@ -5302,7 +5301,7 @@ object_define_properties_x_esm(SetImplementation.prototype,
    * @instance
    * @type {number}
    */
-  size: (_size = {}, _defineProperty2(_size, VALUE, 0), _defineProperty2(_size, WRITABLE, true), _size),
+  size: (_size = {}, _defineProperty(_size, VALUE, 0), _defineProperty(_size, WRITABLE, true), _size),
 
   /**
    * The values() method returns a new Iterator object that contains the
@@ -5311,7 +5310,7 @@ object_define_properties_x_esm(SetImplementation.prototype,
    * @function
    * @returns {object} A new Iterator object.
    */
-  values: _defineProperty2({}, VALUE, setValuesIterator)
+  values: _defineProperty({}, VALUE, setValuesIterator)
 });
 /**
  * The initial value of the @@iterator property is the same function object
@@ -5322,7 +5321,7 @@ object_define_properties_x_esm(SetImplementation.prototype,
  * @returns {object} A new Iterator object.
  */
 
-object_define_property_x_esm(SetImplementation.prototype, symIt, _defineProperty2({}, VALUE, setValuesIterator));
+object_define_property_x_esm(SetImplementation.prototype, symIt, _defineProperty({}, VALUE, setValuesIterator));
 /**
  * An object is an iterator when it knows how to access items from a
  * collection one at a time, while keeping track of its current position
@@ -5340,7 +5339,7 @@ object_define_property_x_esm(SetImplementation.prototype, symIt, _defineProperty
 var MapIt = function MapIterator(context, iteratorKind) {
   var _PROP_ITERATORHASMORE2, _PROP_MAPNEXTINDEX, _defineProperties3;
 
-  object_define_properties_x_esm(this, (_defineProperties3 = {}, _defineProperty2(_defineProperties3, PROP_ITERATORHASMORE, (_PROP_ITERATORHASMORE2 = {}, _defineProperty2(_PROP_ITERATORHASMORE2, VALUE, true), _defineProperty2(_PROP_ITERATORHASMORE2, WRITABLE, true), _PROP_ITERATORHASMORE2)), _defineProperty2(_defineProperties3, PROP_MAP, _defineProperty2({}, VALUE, assert_is_object_x_esm(context))), _defineProperty2(_defineProperties3, PROP_MAPITERATIONKIND, _defineProperty2({}, VALUE, iteratorKind)), _defineProperty2(_defineProperties3, PROP_MAPNEXTINDEX, (_PROP_MAPNEXTINDEX = {}, _defineProperty2(_PROP_MAPNEXTINDEX, VALUE, 0), _defineProperty2(_PROP_MAPNEXTINDEX, WRITABLE, true), _PROP_MAPNEXTINDEX)), _defineProperties3));
+  object_define_properties_x_esm(this, (_defineProperties3 = {}, _defineProperty(_defineProperties3, PROP_ITERATORHASMORE, (_PROP_ITERATORHASMORE2 = {}, _defineProperty(_PROP_ITERATORHASMORE2, VALUE, true), _defineProperty(_PROP_ITERATORHASMORE2, WRITABLE, true), _PROP_ITERATORHASMORE2)), _defineProperty(_defineProperties3, PROP_MAP, _defineProperty({}, VALUE, assert_is_object_x_esm(context))), _defineProperty(_defineProperties3, PROP_MAPITERATIONKIND, _defineProperty({}, VALUE, iteratorKind)), _defineProperty(_defineProperties3, PROP_MAPNEXTINDEX, (_PROP_MAPNEXTINDEX = {}, _defineProperty(_PROP_MAPNEXTINDEX, VALUE, 0), _defineProperty(_PROP_MAPNEXTINDEX, WRITABLE, true), _PROP_MAPNEXTINDEX)), _defineProperties3));
 };
 /**
  * Once initialized, the next() method can be called to access key-value
@@ -5352,7 +5351,7 @@ var MapIt = function MapIterator(context, iteratorKind) {
  */
 
 
-object_define_property_x_esm(MapIt.prototype, NEXT, _defineProperty2({}, VALUE, function next() {
+object_define_property_x_esm(MapIt.prototype, NEXT, _defineProperty({}, VALUE, function next() {
   var _ref4;
 
   var context = assert_is_object_x_esm(this[PROP_MAP]);
@@ -5364,11 +5363,11 @@ object_define_property_x_esm(MapIt.prototype, NEXT, _defineProperty2({}, VALUE, 
     var _ref3;
 
     this[PROP_MAPNEXTINDEX] += 1;
-    return _ref3 = {}, _defineProperty2(_ref3, DONE, false), _defineProperty2(_ref3, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_VALUE][index]] : context["[[".concat(iteratorKind, "]]")][index]), _ref3;
+    return _ref3 = {}, _defineProperty(_ref3, DONE, false), _defineProperty(_ref3, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_VALUE][index]] : context["[[".concat(iteratorKind, "]]")][index]), _ref3;
   }
 
   this[PROP_ITERATORHASMORE] = false;
-  return _ref4 = {}, _defineProperty2(_ref4, DONE, true), _defineProperty2(_ref4, VALUE, collections_x_esm_UNDEFINED), _ref4;
+  return _ref4 = {}, _defineProperty(_ref4, DONE, true), _defineProperty(_ref4, VALUE, collections_x_esm_UNDEFINED), _ref4;
 }));
 /**
  * The @@iterator property is the same Iterator object.
@@ -5379,7 +5378,7 @@ object_define_property_x_esm(MapIt.prototype, NEXT, _defineProperty2({}, VALUE, 
  * @returns {object} This Iterator object.
  */
 
-object_define_property_x_esm(MapIt.prototype, symIt, _defineProperty2({}, VALUE, function iterator() {
+object_define_property_x_esm(MapIt.prototype, symIt, _defineProperty({}, VALUE, function iterator() {
   return this;
 })); // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
@@ -5403,7 +5402,7 @@ var MapImplementation = function Map() {
   /* eslint-disable-next-line prefer-rest-params */
 
 
-  collections_x_esm_parse(MAP, this, arguments.length ? arguments[0] : collections_x_esm_UNDEFINED);
+  collections_x_esm_parse([MAP, this, arguments.length ? arguments[0] : collections_x_esm_UNDEFINED]);
 }; // noinspection JSValidateTypes
 
 object_define_properties_x_esm(MapImplementation.prototype,
@@ -5414,7 +5413,7 @@ object_define_properties_x_esm(MapImplementation.prototype,
    *
    * @returns {object} The Map object.
    */
-  clear: _defineProperty2({}, VALUE, function clear() {
+  clear: _defineProperty({}, VALUE, function clear() {
     return collections_x_esm_baseClear(MAP, this);
   }),
 
@@ -5425,8 +5424,8 @@ object_define_properties_x_esm(MapImplementation.prototype,
    * @returns {boolean} Returns true if an element in the Map object has been
    *  removed successfully.
    */
-  delete: _defineProperty2({}, VALUE, function de1ete(key) {
-    return collections_x_esm_baseDelete(MAP, this, key);
+  delete: _defineProperty({}, VALUE, function de1ete(key) {
+    return collections_x_esm_baseDelete([MAP, this, key]);
   }),
 
   /**
@@ -5435,7 +5434,7 @@ object_define_properties_x_esm(MapImplementation.prototype,
    *
    * @returns {object} A new Iterator object.
    */
-  entries: _defineProperty2({}, VALUE, function entries() {
+  entries: _defineProperty({}, VALUE, function entries() {
     return new MapIt(this, KIND_KEY_VALUE);
   }),
 
@@ -5447,8 +5446,8 @@ object_define_properties_x_esm(MapImplementation.prototype,
    * @param {*} [thisArg] - Value to use as this when executing callback.
    * @returns {object} The Map object.
    */
-  forEach: _defineProperty2({}, VALUE, function forEach(callback, thisArg) {
-    return collections_x_esm_baseForEach(MAP, this, callback, thisArg);
+  forEach: _defineProperty({}, VALUE, function forEach(callback, thisArg) {
+    return collections_x_esm_baseForEach([MAP, this, callback, thisArg]);
   }),
 
   /**
@@ -5458,7 +5457,7 @@ object_define_properties_x_esm(MapImplementation.prototype,
    * @returns {*} Returns the element associated with the specified key or
    *  undefined if the key can't be found in the Map object.
    */
-  get: _defineProperty2({}, VALUE, function get(key) {
+  get: _defineProperty({}, VALUE, function get(key) {
     var index = index_of_x_esm(assert_is_object_x_esm(this)[PROP_KEY], key, SAMEVALUEZERO);
     return index > -1 ? this[PROP_VALUE][index] : collections_x_esm_UNDEFINED;
   }),
@@ -5472,7 +5471,7 @@ object_define_properties_x_esm(MapImplementation.prototype,
    * @returns {boolean} Returns true if an element with the specified key
    *  exists in the Map object; otherwise false.
    */
-  has: _defineProperty2({}, VALUE, baseHas),
+  has: _defineProperty({}, VALUE, baseHas),
 
   /**
    * The keys() method returns a new Iterator object that contains the keys
@@ -5480,7 +5479,7 @@ object_define_properties_x_esm(MapImplementation.prototype,
    *
    * @returns {object} A new Iterator object.
    */
-  keys: _defineProperty2({}, VALUE, function keys() {
+  keys: _defineProperty({}, VALUE, function keys() {
     return new MapIt(this, KIND_KEY);
   }),
 
@@ -5492,8 +5491,8 @@ object_define_properties_x_esm(MapImplementation.prototype,
    * @param {*} value - The value of the element to add to the Map object.
    * @returns {object} The Map object.
    */
-  set: _defineProperty2({}, VALUE, function set(key, value) {
-    return collections_x_esm_baseAddSet(MAP, this, key, value);
+  set: _defineProperty({}, VALUE, function set(key, value) {
+    return collections_x_esm_baseAddSet([MAP, this, key, value]);
   }),
 
   /**
@@ -5505,7 +5504,7 @@ object_define_properties_x_esm(MapImplementation.prototype,
    * @instance
    * @type {number}
    */
-  size: (_size2 = {}, _defineProperty2(_size2, VALUE, 0), _defineProperty2(_size2, WRITABLE, true), _size2),
+  size: (_size2 = {}, _defineProperty(_size2, VALUE, 0), _defineProperty(_size2, WRITABLE, true), _size2),
 
   /**
    * The values() method returns a new Iterator object that contains the
@@ -5513,7 +5512,7 @@ object_define_properties_x_esm(MapImplementation.prototype,
    *
    * @returns {object} A new Iterator object.
    */
-  values: _defineProperty2({}, VALUE, function values() {
+  values: _defineProperty({}, VALUE, function values() {
     return new MapIt(this, KIND_VALUE);
   })
 });
@@ -5526,7 +5525,7 @@ object_define_properties_x_esm(MapImplementation.prototype,
  * @returns {object} A new Iterator object.
  */
 
-object_define_property_x_esm(MapImplementation.prototype, symIt, _defineProperty2({}, VALUE, MapImplementation.prototype.entries));
+object_define_property_x_esm(MapImplementation.prototype, symIt, _defineProperty({}, VALUE, MapImplementation.prototype.entries));
 /*
  * Determine whether to use shim or native.
  */
@@ -5620,7 +5619,7 @@ if (ExportMap !== MapImplementation) {
 
     setPrototypeOf(MyMap, ExportMap);
     MyMap.prototype = object_create_x_esm(ExportMap.prototype, {
-      constructor: _defineProperty2({}, VALUE, MyMap)
+      constructor: _defineProperty({}, VALUE, MyMap)
     });
     var mapSupportsSubclassing = false;
 
@@ -5746,7 +5745,7 @@ if (ExportSet !== SetImplementation) {
 
     setPrototypeOf(MySet, ExportSet);
     MySet.prototype = object_create_x_esm(ExportSet.prototype, {
-      constructor: _defineProperty2({}, VALUE, MySet)
+      constructor: _defineProperty({}, VALUE, MySet)
     });
     var setSupportsSubclassing = false;
 

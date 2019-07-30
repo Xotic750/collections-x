@@ -4,7 +4,7 @@ var _size,
 
 function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
-function _defineProperty2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
@@ -39,7 +39,6 @@ import getPrototypeOf from 'get-prototype-of-x';
 import hasSymbolSupport from 'has-symbol-support-x';
 import create from 'object-create-x';
 import toBoolean from 'to-boolean-x';
-import slice from 'array-slice-x';
 /* eslint-disable-next-line no-void */
 
 var UNDEFINED = void 0;
@@ -70,6 +69,8 @@ var KIND_KEY_VALUE = "".concat(KIND_KEY, "+").concat(KIND_VALUE);
 var SAMEVALUEZERO = 'SameValueZero';
 var ES6_SHIM_ITERATOR = '_es6-shim iterator_';
 var AT_AT_ITERATOR = '@@iterator';
+var push = [].push;
+var charAt = KEY.charAt;
 var setPrototypeOf = {}.constructor.setPrototypeOf;
 /* eslint-disable-next-line compat/compat */
 
@@ -125,14 +126,12 @@ var getSymbolIterator = function getSymbolIterator(iterable) {
   return UNDEFINED;
 };
 
-var parseIterable = function parseIterable() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice = slice(arguments),
-      _slice2 = _slicedToArray(_slice, 4),
-      kind = _slice2[0],
-      iterable = _slice2[1],
-      context = _slice2[2],
-      symbolIterator = _slice2[3];
+var parseIterable = function parseIterable(args) {
+  var _args = _slicedToArray(args, 4),
+      kind = _args[0],
+      iterable = _args[1],
+      context = _args[2],
+      symbolIterator = _args[3];
 
   var iterator = iterable[symbolIterator]();
   var next = iterator[NEXT]();
@@ -149,11 +148,11 @@ var parseIterable = function parseIterable() {
 
     if (indexof < 0) {
       if (kind === MAP) {
-        context[PROP_VALUE].push(next[VALUE][1]);
+        push.call(context[PROP_VALUE], next[VALUE][1]);
       }
 
-      context[PROP_KEY].push(key);
-      context[PROP_ORDER].push(context[PROP_ID].get());
+      push.call(context[PROP_KEY], key);
+      push.call(context[PROP_ORDER], context[PROP_ID].get());
       context[PROP_ID][NEXT]();
     } else if (kind === MAP) {
       /* eslint-disable-next-line prefer-destructuring */
@@ -164,23 +163,21 @@ var parseIterable = function parseIterable() {
   }
 };
 
-var parseString = function parseString() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice3 = slice(arguments),
-      _slice4 = _slicedToArray(_slice3, 3),
-      kind = _slice4[0],
-      iterable = _slice4[1],
-      context = _slice4[2];
+var parseString = function parseString(args) {
+  var _args2 = _slicedToArray(args, 3),
+      kind = _args2[0],
+      iterable = _args2[1],
+      context = _args2[2];
 
   if (kind === MAP) {
-    throw new TypeError("Iterator value ".concat(iterable.charAt(0), " is not an entry object"));
+    throw new TypeError("Iterator value ".concat(charAt.call(iterable, 0), " is not an entry object"));
   }
 
   var next = 0;
 
   while (next < iterable.length) {
-    var char1 = iterable.charAt(next);
-    var char2 = iterable.charAt(next + 1);
+    var char1 = charAt.call(iterable, next);
+    var char2 = charAt.call(iterable, next + 1);
     var key = void 0;
 
     if (isSurrogatePair(char1, char2)) {
@@ -193,8 +190,8 @@ var parseString = function parseString() {
     var indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
 
     if (indexof < 0) {
-      context[PROP_KEY].push(key);
-      context[PROP_ORDER].push(context[PROP_ID].get());
+      push.call(context[PROP_KEY], key);
+      push.call(context[PROP_ORDER], context[PROP_ID].get());
       context[PROP_ID][NEXT]();
     }
 
@@ -202,13 +199,11 @@ var parseString = function parseString() {
   }
 };
 
-var parseArrayLike = function parseArrayLike() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice5 = slice(arguments),
-      _slice6 = _slicedToArray(_slice5, 3),
-      kind = _slice6[0],
-      iterable = _slice6[1],
-      context = _slice6[2];
+var parseArrayLike = function parseArrayLike(args) {
+  var _args3 = _slicedToArray(args, 3),
+      kind = _args3[0],
+      iterable = _args3[1],
+      context = _args3[2];
 
   var next = 0;
 
@@ -231,11 +226,11 @@ var parseArrayLike = function parseArrayLike() {
 
     if (indexof < 0) {
       if (kind === MAP) {
-        context[PROP_VALUE].push(iterable[next][1]);
+        push.call(context[PROP_VALUE], iterable[next][1]);
       }
 
-      context[PROP_KEY].push(key);
-      context[PROP_ORDER].push(context[PROP_ID].get());
+      push.call(context[PROP_KEY], key);
+      push.call(context[PROP_ORDER], context[PROP_ID].get());
       context[PROP_ID][NEXT]();
     } else if (kind === MAP) {
       /* eslint-disable-next-line prefer-destructuring */
@@ -243,6 +238,26 @@ var parseArrayLike = function parseArrayLike() {
     }
 
     next += 1;
+  }
+};
+
+var defineDefaultProps = function defineDefaultProps(context) {
+  var _defineProperties;
+
+  defineProperties(context, (_defineProperties = {}, _defineProperty(_defineProperties, PROP_CHANGED, _defineProperty({}, VALUE, false)), _defineProperty(_defineProperties, PROP_ID, _defineProperty({}, VALUE, new IdGenerator())), _defineProperty(_defineProperties, PROP_KEY, _defineProperty({}, VALUE, [])), _defineProperty(_defineProperties, PROP_ORDER, _defineProperty({}, VALUE, [])), _defineProperties));
+};
+
+var performParsing = function performParsing(args) {
+  var _args4 = _slicedToArray(args, 4),
+      iterable = _args4[1],
+      symbolIterator = _args4[3];
+
+  if (iterable && isFunction(iterable[symbolIterator])) {
+    parseIterable(args);
+  } else if (isString(iterable)) {
+    parseString(args);
+  } else if (isArrayLike(iterable)) {
+    parseArrayLike(args);
   }
 }; // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
@@ -259,33 +274,23 @@ var parseArrayLike = function parseArrayLike() {
 // eslint-enable jsdoc/check-param-names
 
 
-var parse = function parse() {
-  var _defineProperties, _defineProperty3;
+var parse = function parse(args) {
+  var _defineProperty3;
 
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice7 = slice(arguments),
-      _slice8 = _slicedToArray(_slice7, 3),
-      kind = _slice8[0],
-      context = _slice8[1],
-      iterable = _slice8[2];
+  var _args5 = _slicedToArray(args, 3),
+      kind = _args5[0],
+      context = _args5[1],
+      iterable = _args5[2];
 
   var symbolIterator = getSymbolIterator(iterable);
 
   if (kind === MAP) {
-    defineProperty(context, PROP_VALUE, _defineProperty2({}, VALUE, []));
+    defineProperty(context, PROP_VALUE, _defineProperty({}, VALUE, []));
   }
 
-  defineProperties(context, (_defineProperties = {}, _defineProperty2(_defineProperties, PROP_CHANGED, _defineProperty2({}, VALUE, false)), _defineProperty2(_defineProperties, PROP_ID, _defineProperty2({}, VALUE, new IdGenerator())), _defineProperty2(_defineProperties, PROP_KEY, _defineProperty2({}, VALUE, [])), _defineProperty2(_defineProperties, PROP_ORDER, _defineProperty2({}, VALUE, [])), _defineProperties));
-
-  if (iterable && isFunction(iterable[symbolIterator])) {
-    parseIterable(kind, iterable, context, symbolIterator);
-  } else if (isString(iterable)) {
-    parseString(kind, iterable, context);
-  } else if (isArrayLike(iterable)) {
-    parseArrayLike(kind, iterable, context);
-  }
-
-  defineProperty(context, SIZE, (_defineProperty3 = {}, _defineProperty2(_defineProperty3, VALUE, context[PROP_KEY].length), _defineProperty2(_defineProperty3, WRITABLE, true), _defineProperty3));
+  defineDefaultProps(context);
+  performParsing([kind, iterable, context, symbolIterator]);
+  defineProperty(context, SIZE, (_defineProperty3 = {}, _defineProperty(_defineProperty3, VALUE, context[PROP_KEY].length), _defineProperty(_defineProperty3, WRITABLE, true), _defineProperty3));
 }; // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
 
@@ -303,14 +308,12 @@ var parse = function parse() {
 // eslint-enable jsdoc/check-param-names
 
 
-var baseForEach = function baseForEach() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice9 = slice(arguments),
-      _slice10 = _slicedToArray(_slice9, 4),
-      kind = _slice10[0],
-      context = _slice10[1],
-      callback = _slice10[2],
-      thisArg = _slice10[3];
+var baseForEach = function baseForEach(args) {
+  var _args6 = _slicedToArray(args, 4),
+      kind = _args6[0],
+      context = _args6[1],
+      callback = _args6[2],
+      thisArg = _args6[3];
 
   assertIsObject(context);
   assertIsFunction(callback);
@@ -398,13 +401,11 @@ var baseClear = function baseClear(kind, context) {
 // eslint-enable jsdoc/check-param-names
 
 
-var baseDelete = function baseDelete() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice11 = slice(arguments),
-      _slice12 = _slicedToArray(_slice11, 3),
-      kind = _slice12[0],
-      context = _slice12[1],
-      key = _slice12[2];
+var baseDelete = function baseDelete(args) {
+  var _args7 = _slicedToArray(args, 3),
+      kind = _args7[0],
+      context = _args7[1],
+      key = _args7[2];
 
   var indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
   var result = false;
@@ -438,14 +439,12 @@ var baseDelete = function baseDelete() {
 // eslint-enable jsdoc/check-param-names
 
 
-var baseAddSet = function baseAddSet() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice13 = slice(arguments),
-      _slice14 = _slicedToArray(_slice13, 4),
-      kind = _slice14[0],
-      context = _slice14[1],
-      key = _slice14[2],
-      value = _slice14[3];
+var baseAddSet = function baseAddSet(args) {
+  var _args8 = _slicedToArray(args, 4),
+      kind = _args8[0],
+      context = _args8[1],
+      key = _args8[2],
+      value = _args8[3];
 
   var index = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
 
@@ -455,11 +454,11 @@ var baseAddSet = function baseAddSet() {
     }
   } else {
     if (kind === MAP) {
-      context[PROP_VALUE].push(value);
+      push.call(context[PROP_VALUE], value);
     }
 
-    context[PROP_KEY].push(key);
-    context[PROP_ORDER].push(context[PROP_ID].get());
+    push.call(context[PROP_KEY], key);
+    push.call(context[PROP_ORDER], context[PROP_ID].get());
     context[PROP_ID][NEXT]();
     context[PROP_CHANGE] = true;
     context[SIZE] = context[PROP_KEY].length;
@@ -485,7 +484,7 @@ var baseAddSet = function baseAddSet() {
 var SetIt = function SetIterator(context, iteratorKind) {
   var _PROP_ITERATORHASMORE, _PROP_SETNEXTINDEX, _defineProperties2;
 
-  defineProperties(this, (_defineProperties2 = {}, _defineProperty2(_defineProperties2, PROP_ITERATORHASMORE, (_PROP_ITERATORHASMORE = {}, _defineProperty2(_PROP_ITERATORHASMORE, VALUE, true), _defineProperty2(_PROP_ITERATORHASMORE, WRITABLE, true), _PROP_ITERATORHASMORE)), _defineProperty2(_defineProperties2, PROP_SET, _defineProperty2({}, VALUE, assertIsObject(context))), _defineProperty2(_defineProperties2, PROP_SETITERATIONKIND, _defineProperty2({}, VALUE, iteratorKind || KIND_VALUE)), _defineProperty2(_defineProperties2, PROP_SETNEXTINDEX, (_PROP_SETNEXTINDEX = {}, _defineProperty2(_PROP_SETNEXTINDEX, VALUE, 0), _defineProperty2(_PROP_SETNEXTINDEX, WRITABLE, true), _PROP_SETNEXTINDEX)), _defineProperties2));
+  defineProperties(this, (_defineProperties2 = {}, _defineProperty(_defineProperties2, PROP_ITERATORHASMORE, (_PROP_ITERATORHASMORE = {}, _defineProperty(_PROP_ITERATORHASMORE, VALUE, true), _defineProperty(_PROP_ITERATORHASMORE, WRITABLE, true), _PROP_ITERATORHASMORE)), _defineProperty(_defineProperties2, PROP_SET, _defineProperty({}, VALUE, assertIsObject(context))), _defineProperty(_defineProperties2, PROP_SETITERATIONKIND, _defineProperty({}, VALUE, iteratorKind || KIND_VALUE)), _defineProperty(_defineProperties2, PROP_SETNEXTINDEX, (_PROP_SETNEXTINDEX = {}, _defineProperty(_PROP_SETNEXTINDEX, VALUE, 0), _defineProperty(_PROP_SETNEXTINDEX, WRITABLE, true), _PROP_SETNEXTINDEX)), _defineProperties2));
 };
 /**
  * Once initialized, the next() method can be called to access key-value
@@ -497,7 +496,7 @@ var SetIt = function SetIterator(context, iteratorKind) {
  */
 
 
-defineProperty(SetIt.prototype, NEXT, _defineProperty2({}, VALUE, function next() {
+defineProperty(SetIt.prototype, NEXT, _defineProperty({}, VALUE, function next() {
   var _ref2;
 
   var context = assertIsObject(this[PROP_SET]);
@@ -509,11 +508,11 @@ defineProperty(SetIt.prototype, NEXT, _defineProperty2({}, VALUE, function next(
     var _ref;
 
     this[PROP_SETNEXTINDEX] += 1;
-    return _ref = {}, _defineProperty2(_ref, DONE, false), _defineProperty2(_ref, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index]), _ref;
+    return _ref = {}, _defineProperty(_ref, DONE, false), _defineProperty(_ref, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index]), _ref;
   }
 
   this[PROP_ITERATORHASMORE] = false;
-  return _ref2 = {}, _defineProperty2(_ref2, DONE, true), _defineProperty2(_ref2, VALUE, UNDEFINED), _ref2;
+  return _ref2 = {}, _defineProperty(_ref2, DONE, true), _defineProperty(_ref2, VALUE, UNDEFINED), _ref2;
 }));
 /**
  * The @@iterator property is the same Iterator object.
@@ -524,7 +523,7 @@ defineProperty(SetIt.prototype, NEXT, _defineProperty2({}, VALUE, function next(
  * @returns {object} This Iterator object.
  */
 
-defineProperty(SetIt.prototype, symIt, _defineProperty2({}, VALUE, function iterator() {
+defineProperty(SetIt.prototype, symIt, _defineProperty({}, VALUE, function iterator() {
   return this;
 }));
 /**
@@ -560,7 +559,7 @@ export var SetImplementation = function Set() {
   /* eslint-disable-next-line prefer-rest-params */
 
 
-  parse(SET, this, arguments.length ? arguments[0] : UNDEFINED);
+  parse([SET, this, arguments.length ? arguments[0] : UNDEFINED]);
 }; // noinspection JSValidateTypes
 
 defineProperties(SetImplementation.prototype,
@@ -574,8 +573,8 @@ defineProperties(SetImplementation.prototype,
    *  object.
    * @returns {object} The Set object.
    */
-  add: _defineProperty2({}, VALUE, function add(value) {
-    return baseAddSet(SET, this, value);
+  add: _defineProperty({}, VALUE, function add(value) {
+    return baseAddSet([SET, this, value]);
   }),
 
   /**
@@ -583,7 +582,7 @@ defineProperties(SetImplementation.prototype,
    *
    * @returns {object} The Set object.
    */
-  clear: _defineProperty2({}, VALUE, function clear() {
+  clear: _defineProperty({}, VALUE, function clear() {
     return baseClear(SET, this);
   }),
 
@@ -594,8 +593,8 @@ defineProperties(SetImplementation.prototype,
    * @returns {boolean} Returns true if an element in the Set object has been
    *  removed successfully; otherwise false.
    */
-  delete: _defineProperty2({}, VALUE, function de1ete(value) {
-    return baseDelete(SET, this, value);
+  delete: _defineProperty({}, VALUE, function de1ete(value) {
+    return baseDelete([SET, this, value]);
   }),
 
   /**
@@ -609,7 +608,7 @@ defineProperties(SetImplementation.prototype,
    * @function
    * @returns {object} A new Iterator object.
    */
-  entries: _defineProperty2({}, VALUE, function entries() {
+  entries: _defineProperty({}, VALUE, function entries() {
     return new SetIt(this, KIND_KEY_VALUE);
   }),
 
@@ -621,8 +620,8 @@ defineProperties(SetImplementation.prototype,
    * @param {*} [thisArg] - Value to use as this when executing callback.
    * @returns {object} The Set object.
    */
-  forEach: _defineProperty2({}, VALUE, function forEach(callback, thisArg) {
-    return baseForEach(SET, this, callback, thisArg);
+  forEach: _defineProperty({}, VALUE, function forEach(callback, thisArg) {
+    return baseForEach([SET, this, callback, thisArg]);
   }),
 
   /**
@@ -634,7 +633,7 @@ defineProperties(SetImplementation.prototype,
    * @returns {boolean} Returns true if an element with the specified value
    *  exists in the Set object; otherwise false.
    */
-  has: _defineProperty2({}, VALUE, baseHas),
+  has: _defineProperty({}, VALUE, baseHas),
 
   /**
    * The keys() method is an alias for the `values` method (for similarity
@@ -643,7 +642,7 @@ defineProperties(SetImplementation.prototype,
    * @function
    * @returns {object} A new Iterator object.
    */
-  keys: _defineProperty2({}, VALUE, setValuesIterator),
+  keys: _defineProperty({}, VALUE, setValuesIterator),
 
   /**
    * The value of size is an integer representing how many entries the Set
@@ -654,7 +653,7 @@ defineProperties(SetImplementation.prototype,
    * @instance
    * @type {number}
    */
-  size: (_size = {}, _defineProperty2(_size, VALUE, 0), _defineProperty2(_size, WRITABLE, true), _size),
+  size: (_size = {}, _defineProperty(_size, VALUE, 0), _defineProperty(_size, WRITABLE, true), _size),
 
   /**
    * The values() method returns a new Iterator object that contains the
@@ -663,7 +662,7 @@ defineProperties(SetImplementation.prototype,
    * @function
    * @returns {object} A new Iterator object.
    */
-  values: _defineProperty2({}, VALUE, setValuesIterator)
+  values: _defineProperty({}, VALUE, setValuesIterator)
 });
 /**
  * The initial value of the @@iterator property is the same function object
@@ -674,7 +673,7 @@ defineProperties(SetImplementation.prototype,
  * @returns {object} A new Iterator object.
  */
 
-defineProperty(SetImplementation.prototype, symIt, _defineProperty2({}, VALUE, setValuesIterator));
+defineProperty(SetImplementation.prototype, symIt, _defineProperty({}, VALUE, setValuesIterator));
 /**
  * An object is an iterator when it knows how to access items from a
  * collection one at a time, while keeping track of its current position
@@ -692,7 +691,7 @@ defineProperty(SetImplementation.prototype, symIt, _defineProperty2({}, VALUE, s
 var MapIt = function MapIterator(context, iteratorKind) {
   var _PROP_ITERATORHASMORE2, _PROP_MAPNEXTINDEX, _defineProperties3;
 
-  defineProperties(this, (_defineProperties3 = {}, _defineProperty2(_defineProperties3, PROP_ITERATORHASMORE, (_PROP_ITERATORHASMORE2 = {}, _defineProperty2(_PROP_ITERATORHASMORE2, VALUE, true), _defineProperty2(_PROP_ITERATORHASMORE2, WRITABLE, true), _PROP_ITERATORHASMORE2)), _defineProperty2(_defineProperties3, PROP_MAP, _defineProperty2({}, VALUE, assertIsObject(context))), _defineProperty2(_defineProperties3, PROP_MAPITERATIONKIND, _defineProperty2({}, VALUE, iteratorKind)), _defineProperty2(_defineProperties3, PROP_MAPNEXTINDEX, (_PROP_MAPNEXTINDEX = {}, _defineProperty2(_PROP_MAPNEXTINDEX, VALUE, 0), _defineProperty2(_PROP_MAPNEXTINDEX, WRITABLE, true), _PROP_MAPNEXTINDEX)), _defineProperties3));
+  defineProperties(this, (_defineProperties3 = {}, _defineProperty(_defineProperties3, PROP_ITERATORHASMORE, (_PROP_ITERATORHASMORE2 = {}, _defineProperty(_PROP_ITERATORHASMORE2, VALUE, true), _defineProperty(_PROP_ITERATORHASMORE2, WRITABLE, true), _PROP_ITERATORHASMORE2)), _defineProperty(_defineProperties3, PROP_MAP, _defineProperty({}, VALUE, assertIsObject(context))), _defineProperty(_defineProperties3, PROP_MAPITERATIONKIND, _defineProperty({}, VALUE, iteratorKind)), _defineProperty(_defineProperties3, PROP_MAPNEXTINDEX, (_PROP_MAPNEXTINDEX = {}, _defineProperty(_PROP_MAPNEXTINDEX, VALUE, 0), _defineProperty(_PROP_MAPNEXTINDEX, WRITABLE, true), _PROP_MAPNEXTINDEX)), _defineProperties3));
 };
 /**
  * Once initialized, the next() method can be called to access key-value
@@ -704,7 +703,7 @@ var MapIt = function MapIterator(context, iteratorKind) {
  */
 
 
-defineProperty(MapIt.prototype, NEXT, _defineProperty2({}, VALUE, function next() {
+defineProperty(MapIt.prototype, NEXT, _defineProperty({}, VALUE, function next() {
   var _ref4;
 
   var context = assertIsObject(this[PROP_MAP]);
@@ -716,11 +715,11 @@ defineProperty(MapIt.prototype, NEXT, _defineProperty2({}, VALUE, function next(
     var _ref3;
 
     this[PROP_MAPNEXTINDEX] += 1;
-    return _ref3 = {}, _defineProperty2(_ref3, DONE, false), _defineProperty2(_ref3, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_VALUE][index]] : context["[[".concat(iteratorKind, "]]")][index]), _ref3;
+    return _ref3 = {}, _defineProperty(_ref3, DONE, false), _defineProperty(_ref3, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_VALUE][index]] : context["[[".concat(iteratorKind, "]]")][index]), _ref3;
   }
 
   this[PROP_ITERATORHASMORE] = false;
-  return _ref4 = {}, _defineProperty2(_ref4, DONE, true), _defineProperty2(_ref4, VALUE, UNDEFINED), _ref4;
+  return _ref4 = {}, _defineProperty(_ref4, DONE, true), _defineProperty(_ref4, VALUE, UNDEFINED), _ref4;
 }));
 /**
  * The @@iterator property is the same Iterator object.
@@ -731,7 +730,7 @@ defineProperty(MapIt.prototype, NEXT, _defineProperty2({}, VALUE, function next(
  * @returns {object} This Iterator object.
  */
 
-defineProperty(MapIt.prototype, symIt, _defineProperty2({}, VALUE, function iterator() {
+defineProperty(MapIt.prototype, symIt, _defineProperty({}, VALUE, function iterator() {
   return this;
 })); // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
@@ -755,7 +754,7 @@ export var MapImplementation = function Map() {
   /* eslint-disable-next-line prefer-rest-params */
 
 
-  parse(MAP, this, arguments.length ? arguments[0] : UNDEFINED);
+  parse([MAP, this, arguments.length ? arguments[0] : UNDEFINED]);
 }; // noinspection JSValidateTypes
 
 defineProperties(MapImplementation.prototype,
@@ -766,7 +765,7 @@ defineProperties(MapImplementation.prototype,
    *
    * @returns {object} The Map object.
    */
-  clear: _defineProperty2({}, VALUE, function clear() {
+  clear: _defineProperty({}, VALUE, function clear() {
     return baseClear(MAP, this);
   }),
 
@@ -777,8 +776,8 @@ defineProperties(MapImplementation.prototype,
    * @returns {boolean} Returns true if an element in the Map object has been
    *  removed successfully.
    */
-  delete: _defineProperty2({}, VALUE, function de1ete(key) {
-    return baseDelete(MAP, this, key);
+  delete: _defineProperty({}, VALUE, function de1ete(key) {
+    return baseDelete([MAP, this, key]);
   }),
 
   /**
@@ -787,7 +786,7 @@ defineProperties(MapImplementation.prototype,
    *
    * @returns {object} A new Iterator object.
    */
-  entries: _defineProperty2({}, VALUE, function entries() {
+  entries: _defineProperty({}, VALUE, function entries() {
     return new MapIt(this, KIND_KEY_VALUE);
   }),
 
@@ -799,8 +798,8 @@ defineProperties(MapImplementation.prototype,
    * @param {*} [thisArg] - Value to use as this when executing callback.
    * @returns {object} The Map object.
    */
-  forEach: _defineProperty2({}, VALUE, function forEach(callback, thisArg) {
-    return baseForEach(MAP, this, callback, thisArg);
+  forEach: _defineProperty({}, VALUE, function forEach(callback, thisArg) {
+    return baseForEach([MAP, this, callback, thisArg]);
   }),
 
   /**
@@ -810,7 +809,7 @@ defineProperties(MapImplementation.prototype,
    * @returns {*} Returns the element associated with the specified key or
    *  undefined if the key can't be found in the Map object.
    */
-  get: _defineProperty2({}, VALUE, function get(key) {
+  get: _defineProperty({}, VALUE, function get(key) {
     var index = indexOf(assertIsObject(this)[PROP_KEY], key, SAMEVALUEZERO);
     return index > -1 ? this[PROP_VALUE][index] : UNDEFINED;
   }),
@@ -824,7 +823,7 @@ defineProperties(MapImplementation.prototype,
    * @returns {boolean} Returns true if an element with the specified key
    *  exists in the Map object; otherwise false.
    */
-  has: _defineProperty2({}, VALUE, baseHas),
+  has: _defineProperty({}, VALUE, baseHas),
 
   /**
    * The keys() method returns a new Iterator object that contains the keys
@@ -832,7 +831,7 @@ defineProperties(MapImplementation.prototype,
    *
    * @returns {object} A new Iterator object.
    */
-  keys: _defineProperty2({}, VALUE, function keys() {
+  keys: _defineProperty({}, VALUE, function keys() {
     return new MapIt(this, KIND_KEY);
   }),
 
@@ -844,8 +843,8 @@ defineProperties(MapImplementation.prototype,
    * @param {*} value - The value of the element to add to the Map object.
    * @returns {object} The Map object.
    */
-  set: _defineProperty2({}, VALUE, function set(key, value) {
-    return baseAddSet(MAP, this, key, value);
+  set: _defineProperty({}, VALUE, function set(key, value) {
+    return baseAddSet([MAP, this, key, value]);
   }),
 
   /**
@@ -857,7 +856,7 @@ defineProperties(MapImplementation.prototype,
    * @instance
    * @type {number}
    */
-  size: (_size2 = {}, _defineProperty2(_size2, VALUE, 0), _defineProperty2(_size2, WRITABLE, true), _size2),
+  size: (_size2 = {}, _defineProperty(_size2, VALUE, 0), _defineProperty(_size2, WRITABLE, true), _size2),
 
   /**
    * The values() method returns a new Iterator object that contains the
@@ -865,7 +864,7 @@ defineProperties(MapImplementation.prototype,
    *
    * @returns {object} A new Iterator object.
    */
-  values: _defineProperty2({}, VALUE, function values() {
+  values: _defineProperty({}, VALUE, function values() {
     return new MapIt(this, KIND_VALUE);
   })
 });
@@ -878,7 +877,7 @@ defineProperties(MapImplementation.prototype,
  * @returns {object} A new Iterator object.
  */
 
-defineProperty(MapImplementation.prototype, symIt, _defineProperty2({}, VALUE, MapImplementation.prototype.entries));
+defineProperty(MapImplementation.prototype, symIt, _defineProperty({}, VALUE, MapImplementation.prototype.entries));
 /*
  * Determine whether to use shim or native.
  */
@@ -972,7 +971,7 @@ if (ExportMap !== MapImplementation) {
 
     setPrototypeOf(MyMap, ExportMap);
     MyMap.prototype = create(ExportMap.prototype, {
-      constructor: _defineProperty2({}, VALUE, MyMap)
+      constructor: _defineProperty({}, VALUE, MyMap)
     });
     var mapSupportsSubclassing = false;
 
@@ -1098,7 +1097,7 @@ if (ExportSet !== SetImplementation) {
 
     setPrototypeOf(MySet, ExportSet);
     MySet.prototype = create(ExportSet.prototype, {
-      constructor: _defineProperty2({}, VALUE, MySet)
+      constructor: _defineProperty({}, VALUE, MySet)
     });
     var setSupportsSubclassing = false;
 
