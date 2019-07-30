@@ -36,6 +36,7 @@ import hasSymbolSupport from 'has-symbol-support-x';
 import create from 'object-create-x';
 import toBoolean from 'to-boolean-x';
 import attempt from 'attempt-x';
+import arrayForEach from 'array-for-each-x';
 /* eslint-disable-next-line no-void */
 
 var UNDEFINED = void 0;
@@ -988,14 +989,13 @@ var performMapFixes = function performMapFixes() {
     }
   };
 
-  peformMapFix(function fixee(Subject) {
+  var fixees = [function fixee(Subject) {
     var res = attempt(function attemptee() {
       /* eslint-disable-next-line babel/new-cap */
       return Subject();
     });
     return res.threw === false;
-  });
-  peformMapFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     var testMap = new Subject();
 
     if (typeof testMap[SIZE] !== 'number' || testMap[SIZE] !== 0) {
@@ -1006,27 +1006,23 @@ var performMapFixes = function performMapFixes() {
     return some(propsMap, function predicate(method) {
       return isFunction(testMap[method]) === false;
     });
-  });
-  peformMapFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     // Safari 8, for example, doesn't accept an iterable.
     var res = attempt(function attemptee() {
       return new Subject([[1, 2]]).get(1) !== 2;
     });
     return res.threw || res.result;
-  });
-  peformMapFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     var testMap = new Subject();
     return testMap.set(1, 2) !== testMap;
-  });
-  peformMapFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     // Chrome 38-42, node 0.11/0.12, iojs 1/2 also have a bug when the Map has a size > 4
     var testMap = new Subject([[1, 0], [2, 0], [3, 0], [4, 0]]);
     testMap.set(-0, testMap);
     var gets = testMap.get(0) === testMap && testMap.get(-0) === testMap;
     var mapUsesSameValueZero = gets && testMap.has(0) && testMap.has(-0);
     return mapUsesSameValueZero === false;
-  });
-  peformMapFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     if (setPrototypeOf) {
       return false;
     }
@@ -1036,20 +1032,20 @@ var performMapFixes = function performMapFixes() {
       return toBoolean(new MyMap([]).set(42, 42) instanceof MyMap) === false;
     });
     return res.threw || res.value;
-  });
-  peformMapFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     var res = attempt(function attemptee() {
       return new Subject().keys()[NEXT]()[DONE] === false;
     });
     return res.threw || res.value;
-  });
-  peformMapFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     // Safari 8
     return isFunction(new Subject().keys()[NEXT]) === false;
-  });
-  peformMapFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     var testMapProto = hasRealSymbolIterator && getPrototypeOf(new Subject().keys());
     return toBoolean(testMapProto) && isFunction(testMapProto[symIt]) === false;
+  }];
+  arrayForEach(fixees, function iteratee(fixee) {
+    peformMapFix(fixee);
   });
   return Export;
 };
@@ -1071,14 +1067,13 @@ var performSetFixes = function performSetFixes() {
     }
   };
 
-  peformSetFix(function fixee(Subject) {
+  var fixees = [function fixee(Subject) {
     var res = attempt(function attemptee() {
       /* eslint-disable-next-line babel/new-cap */
       return Subject();
     });
     return res.threw === false;
-  });
-  peformSetFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     var testSet = new Subject();
 
     if (typeof testSet[SIZE] !== 'number' || testSet[SIZE] !== 0) {
@@ -1090,18 +1085,15 @@ var performSetFixes = function performSetFixes() {
     return some(propsSet, function predicate(method) {
       return isFunction(testSet[method]) === false;
     });
-  });
-  peformSetFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     var testSet = new Subject();
     testSet.delete(0);
     testSet.add(-0);
     return testSet.has(0) === false || testSet.has(-0) === false;
-  });
-  peformSetFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     var testSet = new Subject();
     return testSet.add(1) !== testSet;
-  });
-  peformSetFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     if (setPrototypeOf) {
       return false;
     }
@@ -1111,27 +1103,26 @@ var performSetFixes = function performSetFixes() {
       return toBoolean(new MySet([]).add(42) instanceof MySet) === false;
     });
     return res.threw || res.value;
-  });
-  peformSetFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     var res = attempt(function attemptee() {
       /* eslint-disable-next-line babel/new-cap */
       return Subject();
     });
     return res.threw === false;
-  });
-  peformSetFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     var res = attempt(function attemptee() {
       return new Subject().keys()[NEXT]()[DONE] === false;
     });
     return res.threw || res.value;
-  });
-  peformSetFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     // Safari 8
     return isFunction(new Subject().keys()[NEXT]) === false;
-  });
-  peformSetFix(function fixee(Subject) {
+  }, function fixee(Subject) {
     var testSetProto = hasRealSymbolIterator && getPrototypeOf(new Subject().keys());
     return toBoolean(testSetProto) && isFunction(testSetProto[symIt]) === false;
+  }];
+  arrayForEach(fixees, function iteratee(fixee) {
+    peformSetFix(fixee);
   });
   return Export;
 };
