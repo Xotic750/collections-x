@@ -21,6 +21,7 @@ import getPrototypeOf from 'get-prototype-of-x';
 import hasSymbolSupport from 'has-symbol-support-x';
 import create from 'object-create-x';
 import toBoolean from 'to-boolean-x';
+import attempt from 'attempt-x';
 
 /* eslint-disable-next-line no-void */
 const UNDEFINED = void 0;
@@ -479,6 +480,15 @@ const SetIt = function SetIterator(context, iteratorKind) {
   });
 };
 
+const getSetNextObject = function getSetNextObject(args) {
+  const [iteratorKind, context, index] = args;
+
+  return {
+    [DONE]: false,
+    [VALUE]: iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index],
+  };
+};
+
 /**
  * Once initialized, the next() method can be called to access key-value
  * pairs from the object in turn.
@@ -497,11 +507,7 @@ defineProperty(SetIt.prototype, NEXT, {
     if (index < context[PROP_KEY].length && more) {
       this[PROP_SETNEXTINDEX] += 1;
 
-      return {
-        [DONE]: false,
-        [VALUE]:
-          iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index],
-      };
+      return getSetNextObject([iteratorKind, context, index]);
     }
 
     this[PROP_ITERATORHASMORE] = false;
@@ -707,6 +713,18 @@ const MapIt = function MapIterator(context, iteratorKind) {
   });
 };
 
+const getMapNextObject = function getMapNextObject(args) {
+  const [iteratorKind, context, index] = args;
+
+  return {
+    [DONE]: false,
+    [VALUE]:
+      iteratorKind === KIND_KEY_VALUE
+        ? [context[PROP_KEY][index], context[PROP_VALUE][index]]
+        : context[`[[${iteratorKind}]]`][index],
+  };
+};
+
 /**
  * Once initialized, the next() method can be called to access key-value
  * pairs from the object in turn.
@@ -725,13 +743,7 @@ defineProperty(MapIt.prototype, NEXT, {
     if (index < context[PROP_KEY].length && more) {
       this[PROP_MAPNEXTINDEX] += 1;
 
-      return {
-        [DONE]: false,
-        [VALUE]:
-          iteratorKind === KIND_KEY_VALUE
-            ? [context[PROP_KEY][index], context[PROP_VALUE][index]]
-            : context[`[[${iteratorKind}]]`][index],
-      };
+      return getMapNextObject([iteratorKind, context, index]);
     }
 
     this[PROP_ITERATORHASMORE] = false;
@@ -919,313 +931,213 @@ defineProperty(MapImplementation.prototype, symIt, {
  * Determine whether to use shim or native.
  */
 
+/* istanbul ignore next */
+const getMyClass = function getMyClass(Subject) {
+  const MyClass = function MyClass(arg) {
+    const testObject = new Subject(arg);
+    setPrototypeOf(testObject, MyClass.prototype);
+
+    return testObject;
+  };
+
+  setPrototypeOf(MyClass, Subject);
+  MyClass.prototype = create(Subject.prototype, {constructor: {[VALUE]: MyClass}});
+
+  return MyClass;
+};
+
 /* Map fixes */
+/* istanbul ignore next */
 const performMapFixes = function performMapFixes() {
-  let Export = null;
+  const result = attempt(function attemptee() {
+    /* eslint-disable-next-line compat/compat */
+    return toBoolean(new Map() instanceof Map) === false;
+  });
+
+  let Export = result.threw || result.value ? MapImplementation : Map;
 
   const peformMapFix = function peformMapFix(fixee) {
-    if (Export !== MapImplementation) {
-      fixee();
+    if (Export !== MapImplementation && fixee(Export)) {
+      Export = MapImplementation;
     }
   };
 
-  peformMapFix(function fixee() {
-    try {
-      /* eslint-disable-next-line compat/compat */
-      Export = new Map() ? Map : MapImplementation;
-    } catch (ignore) {
-      // empty
-    }
+  peformMapFix(function fixee(Subject) {
+    const res = attempt(function attemptee() {
+      /* eslint-disable-next-line babel/new-cap */
+      return Subject();
+    });
+
+    return res.threw === false;
   });
 
-  peformMapFix(function fixee() {
-    const testMap = new Export();
+  peformMapFix(function fixee(Subject) {
+    const testMap = new Subject();
 
     if (typeof testMap[SIZE] !== 'number' || testMap[SIZE] !== 0) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    } else {
-      const propsMap = ['has', 'set', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
-
-      const failedMap = some(propsMap, function predicate(method) {
-        return isFunction(testMap[method]) === false;
-      });
-
-      if (failedMap) {
-        /* istanbul ignore next */
-        Export = MapImplementation;
-      }
+      return true;
     }
+
+    const propsMap = ['has', 'set', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
+
+    return some(propsMap, function predicate(method) {
+      return isFunction(testMap[method]) === false;
+    });
   });
 
-  peformMapFix(function fixee() {
+  peformMapFix(function fixee(Subject) {
     // Safari 8, for example, doesn't accept an iterable.
-    let mapAcceptsArguments = false;
-    try {
-      mapAcceptsArguments = new Export([[1, 2]]).get(1) === 2;
-    } catch (ignore) {
-      // empty
-    }
+    const res = attempt(function attemptee() {
+      return new Subject([[1, 2]]).get(1) !== 2;
+    });
 
-    if (mapAcceptsArguments === false) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    }
+    return res.threw || res.result;
   });
 
-  peformMapFix(function fixee() {
-    const testMap = new Export();
-    const mapSupportsChaining = testMap.set(1, 2) === testMap;
+  peformMapFix(function fixee(Subject) {
+    const testMap = new Subject();
 
-    if (mapSupportsChaining === false) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    }
+    return testMap.set(1, 2) !== testMap;
   });
 
-  peformMapFix(function fixee() {
+  peformMapFix(function fixee(Subject) {
     // Chrome 38-42, node 0.11/0.12, iojs 1/2 also have a bug when the Map has a size > 4
-    const testMap = new Export([[1, 0], [2, 0], [3, 0], [4, 0]]);
+    const testMap = new Subject([[1, 0], [2, 0], [3, 0], [4, 0]]);
     testMap.set(-0, testMap);
     const gets = testMap.get(0) === testMap && testMap.get(-0) === testMap;
     const mapUsesSameValueZero = gets && testMap.has(0) && testMap.has(-0);
 
-    if (mapUsesSameValueZero === false) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    }
+    return mapUsesSameValueZero === false;
   });
 
-  peformMapFix(function fixee() {
+  peformMapFix(function fixee(Subject) {
     if (setPrototypeOf) {
-      const MyMap = function MyMap(arg) {
-        const testMap = new Export(arg);
-        setPrototypeOf(testMap, MyMap.prototype);
-
-        return testMap;
-      };
-
-      setPrototypeOf(MyMap, Export);
-      MyMap.prototype = create(Export.prototype, {constructor: {[VALUE]: MyMap}});
-
-      let mapSupportsSubclassing = false;
-      try {
-        const testMap = new MyMap([]);
-        // Firefox 32 is ok with the instantiating the subclass but will
-        // throw when the map is used.
-        testMap.set(42, 42);
-        mapSupportsSubclassing = testMap instanceof MyMap;
-      } catch (ignore) {
-        // empty
-      }
-
-      if (mapSupportsSubclassing === false) {
-        /* istanbul ignore next */
-        Export = MapImplementation;
-      }
+      return false;
     }
+
+    const MyMap = getMyClass(Subject);
+    const res = attempt(function attemptee() {
+      return toBoolean(new MyMap([]).set(42, 42) instanceof MyMap) === false;
+    });
+
+    return res.threw || res.value;
   });
 
-  peformMapFix(function fixee() {
-    let mapRequiresNew;
-    try {
-      /* eslint-disable-next-line babel/new-cap */
-      mapRequiresNew = !(Export() instanceof Export);
-    } catch (e) {
-      mapRequiresNew = e instanceof TypeError;
-    }
+  peformMapFix(function fixee(Subject) {
+    const res = attempt(function attemptee() {
+      return new Subject().keys()[NEXT]()[DONE] === false;
+    });
 
-    if (mapRequiresNew === false) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    }
+    return res.threw || res.value;
   });
 
-  peformMapFix(function fixee() {
-    const testMap = new Export();
-    let mapIterationThrowsStopIterator;
-    try {
-      mapIterationThrowsStopIterator = testMap.keys()[NEXT]()[DONE] === false;
-    } catch (ignore) {
-      /* istanbul ignore next */
-      mapIterationThrowsStopIterator = true;
-    }
-
-    if (mapIterationThrowsStopIterator) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    }
-  });
-
-  peformMapFix(function fixee() {
+  peformMapFix(function fixee(Subject) {
     // Safari 8
-    if (isFunction(new Export().keys()[NEXT]) === false) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    }
+    return isFunction(new Subject().keys()[NEXT]) === false;
   });
 
-  peformMapFix(function fixee() {
-    if (hasRealSymbolIterator) {
-      const testMapProto = getPrototypeOf(new Export().keys());
-      let hasBuggyMapIterator = true;
+  peformMapFix(function fixee(Subject) {
+    const testMapProto = hasRealSymbolIterator && getPrototypeOf(new Subject().keys());
 
-      if (testMapProto) {
-        hasBuggyMapIterator = isFunction(testMapProto[symIt]) === false;
-      }
-
-      if (hasBuggyMapIterator) {
-        /* istanbul ignore next */
-        Export = MapImplementation;
-      }
-    }
+    return toBoolean(testMapProto) && isFunction(testMapProto[symIt]) === false;
   });
 
   return Export;
 };
 
 /* Set fixes */
+/* istanbul ignore next */
 const performSetFixes = function performSetFixes() {
-  let Export = null;
+  const result = attempt(function attemptee() {
+    /* eslint-disable-next-line compat/compat */
+    return toBoolean(new Set() instanceof Set) === false;
+  });
+
+  let Export = result.threw || result.value ? SetImplementation : Set;
 
   const peformSetFix = function peformSetFix(fixee) {
-    if (Export !== SetImplementation) {
-      fixee();
+    if (Export !== SetImplementation && fixee(Export)) {
+      Export = SetImplementation;
     }
   };
 
-  peformSetFix(function fixee() {
-    try {
-      /* eslint-disable-next-line compat/compat */
-      Export = new Set() ? Set : SetImplementation;
-    } catch (ignore) {
-      // empty
-    }
+  peformSetFix(function fixee(Subject) {
+    const res = attempt(function attemptee() {
+      /* eslint-disable-next-line babel/new-cap */
+      return Subject();
+    });
+
+    return res.threw === false;
   });
 
-  peformSetFix(function fixee() {
-    const testSet = new Export();
+  peformSetFix(function fixee(Subject) {
+    const testSet = new Subject();
 
     if (typeof testSet[SIZE] !== 'number' || testSet[SIZE] !== 0) {
       /* istanbul ignore next */
-      Export = SetImplementation;
-    } else {
-      const propsSet = ['has', 'add', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
-
-      const failedSet = some(propsSet, function predicate(method) {
-        return isFunction(testSet[method]) === false;
-      });
-
-      if (failedSet) {
-        /* istanbul ignore next */
-        Export = SetImplementation;
-      }
+      return true;
     }
+
+    const propsSet = ['has', 'add', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
+
+    return some(propsSet, function predicate(method) {
+      return isFunction(testSet[method]) === false;
+    });
   });
 
-  peformSetFix(function fixee() {
-    const testSet = new Export();
+  peformSetFix(function fixee(Subject) {
+    const testSet = new Subject();
     testSet.delete(0);
     testSet.add(-0);
-    const setUsesSameValueZero = testSet.has(0) && testSet.has(-0);
 
-    if (setUsesSameValueZero === false) {
-      /* istanbul ignore next */
-      Export = SetImplementation;
-    }
+    return testSet.has(0) === false || testSet.has(-0) === false;
   });
 
-  peformSetFix(function fixee() {
-    const testSet = new Export();
-    const setSupportsChaining = testSet.add(1) === testSet;
+  peformSetFix(function fixee(Subject) {
+    const testSet = new Subject();
 
-    if (setSupportsChaining === false) {
-      /* istanbul ignore next */
-      Export = SetImplementation;
-    }
+    return testSet.add(1) !== testSet;
   });
 
-  peformSetFix(function fixee() {
+  peformSetFix(function fixee(Subject) {
     if (setPrototypeOf) {
-      const MySet = function MySet(arg) {
-        const testSet = new Export(arg);
-        setPrototypeOf(testSet, MySet.prototype);
-
-        return testSet;
-      };
-
-      setPrototypeOf(MySet, Export);
-      MySet.prototype = create(Export.prototype, {constructor: {[VALUE]: MySet}});
-
-      let setSupportsSubclassing = false;
-      try {
-        const testSet = new MySet([]);
-        testSet.add(42, 42);
-        setSupportsSubclassing = testSet instanceof MySet;
-      } catch (ignore) {
-        // empty
-      }
-
-      if (setSupportsSubclassing === false) {
-        /* istanbul ignore next */
-        Export = SetImplementation;
-      }
+      return false;
     }
+
+    const MySet = getMyClass(Subject);
+    const res = attempt(function attemptee() {
+      return toBoolean(new MySet([]).add(42) instanceof MySet) === false;
+    });
+
+    return res.threw || res.value;
   });
 
-  peformSetFix(function fixee() {
-    let setRequiresNew;
-    try {
+  peformSetFix(function fixee(Subject) {
+    const res = attempt(function attemptee() {
       /* eslint-disable-next-line babel/new-cap */
-      setRequiresNew = !(Export() instanceof Export);
-    } catch (e) {
-      setRequiresNew = e instanceof TypeError;
-    }
+      return Subject();
+    });
 
-    if (setRequiresNew === false) {
-      /* istanbul ignore next */
-      Export = SetImplementation;
-    }
+    return res.threw === false;
   });
 
-  peformSetFix(function fixee() {
-    const testSet = new Export();
-    let setIterationThrowsStopIterator;
-    try {
-      setIterationThrowsStopIterator = testSet.keys()[NEXT]()[DONE] === false;
-    } catch (ignore) {
-      /* istanbul ignore next */
-      setIterationThrowsStopIterator = true;
-    }
+  peformSetFix(function fixee(Subject) {
+    const res = attempt(function attemptee() {
+      return new Subject().keys()[NEXT]()[DONE] === false;
+    });
 
-    if (setIterationThrowsStopIterator) {
-      /* istanbul ignore next */
-      Export = SetImplementation;
-    }
+    return res.threw || res.value;
   });
 
-  peformSetFix(function fixee() {
+  peformSetFix(function fixee(Subject) {
     // Safari 8
-    if (isFunction(new Export().keys()[NEXT]) === false) {
-      /* istanbul ignore next */
-      Export = SetImplementation;
-    }
+    return isFunction(new Subject().keys()[NEXT]) === false;
   });
 
-  peformSetFix(function fixee() {
-    if (hasRealSymbolIterator) {
-      const testSetProto = getPrototypeOf(new Export().keys());
-      let hasBuggySetIterator = true;
+  peformSetFix(function fixee(Subject) {
+    const testSetProto = hasRealSymbolIterator && getPrototypeOf(new Subject().keys());
 
-      if (testSetProto) {
-        hasBuggySetIterator = isFunction(testSetProto[symIt]) === false;
-      }
-
-      if (hasBuggySetIterator) {
-        /* istanbul ignore next */
-        Export = SetImplementation;
-      }
-    }
+    return toBoolean(testSetProto) && isFunction(testSetProto[symIt]) === false;
   });
 
   return Export;

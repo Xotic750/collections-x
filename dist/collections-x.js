@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-30T15:17:25.611Z",
+  "date": "2019-07-30T18:31:43.106Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
-  "hash": "b0ba077e8406f95ae9eb",
+  "hash": "5bfde626576b134ccbf3",
   "license": "MIT",
   "version": "3.0.12"
 }
@@ -1825,8 +1825,8 @@ var nativeParseInt = parseInt;
 
 var castNumber = 0 .constructor; // noinspection JSPotentiallyInvalidConstructorUsage
 
-var parse_int_x_esm_ref = '',
-    charAt = parse_int_x_esm_ref.charAt;
+var _ref = '',
+    charAt = _ref.charAt;
 var hexRegex = /^[-+]?0[xX]/;
 var parse_int_x_esm_test = hexRegex.test;
 /**
@@ -4683,6 +4683,7 @@ function collections_x_esm_typeof(obj) { if (typeof Symbol === "function" && typ
 
 
 
+
 /* eslint-disable-next-line no-void */
 
 var collections_x_esm_UNDEFINED = void 0;
@@ -5188,6 +5189,17 @@ var SetIt = function SetIterator(context, iteratorKind) {
 
   object_define_properties_x_esm(this, (_defineProperties2 = {}, _defineProperty(_defineProperties2, PROP_ITERATORHASMORE, (_PROP_ITERATORHASMORE = {}, _defineProperty(_PROP_ITERATORHASMORE, VALUE, true), _defineProperty(_PROP_ITERATORHASMORE, WRITABLE, true), _PROP_ITERATORHASMORE)), _defineProperty(_defineProperties2, PROP_SET, _defineProperty({}, VALUE, assert_is_object_x_esm(context))), _defineProperty(_defineProperties2, PROP_SETITERATIONKIND, _defineProperty({}, VALUE, iteratorKind || KIND_VALUE)), _defineProperty(_defineProperties2, PROP_SETNEXTINDEX, (_PROP_SETNEXTINDEX = {}, _defineProperty(_PROP_SETNEXTINDEX, VALUE, 0), _defineProperty(_PROP_SETNEXTINDEX, WRITABLE, true), _PROP_SETNEXTINDEX)), _defineProperties2));
 };
+
+var getSetNextObject = function getSetNextObject(args) {
+  var _ref;
+
+  var _args11 = _slicedToArray(args, 3),
+      iteratorKind = _args11[0],
+      context = _args11[1],
+      index = _args11[2];
+
+  return _ref = {}, _defineProperty(_ref, DONE, false), _defineProperty(_ref, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index]), _ref;
+};
 /**
  * Once initialized, the next() method can be called to access key-value
  * pairs from the object in turn.
@@ -5207,10 +5219,8 @@ object_define_property_x_esm(SetIt.prototype, NEXT, _defineProperty({}, VALUE, f
   var more = this[PROP_ITERATORHASMORE];
 
   if (index < context[PROP_KEY].length && more) {
-    var _ref;
-
     this[PROP_SETNEXTINDEX] += 1;
-    return _ref = {}, _defineProperty(_ref, DONE, false), _defineProperty(_ref, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index]), _ref;
+    return getSetNextObject([iteratorKind, context, index]);
   }
 
   this[PROP_ITERATORHASMORE] = false;
@@ -5395,6 +5405,17 @@ var MapIt = function MapIterator(context, iteratorKind) {
 
   object_define_properties_x_esm(this, (_defineProperties3 = {}, _defineProperty(_defineProperties3, PROP_ITERATORHASMORE, (_PROP_ITERATORHASMORE2 = {}, _defineProperty(_PROP_ITERATORHASMORE2, VALUE, true), _defineProperty(_PROP_ITERATORHASMORE2, WRITABLE, true), _PROP_ITERATORHASMORE2)), _defineProperty(_defineProperties3, PROP_MAP, _defineProperty({}, VALUE, assert_is_object_x_esm(context))), _defineProperty(_defineProperties3, PROP_MAPITERATIONKIND, _defineProperty({}, VALUE, iteratorKind)), _defineProperty(_defineProperties3, PROP_MAPNEXTINDEX, (_PROP_MAPNEXTINDEX = {}, _defineProperty(_PROP_MAPNEXTINDEX, VALUE, 0), _defineProperty(_PROP_MAPNEXTINDEX, WRITABLE, true), _PROP_MAPNEXTINDEX)), _defineProperties3));
 };
+
+var getMapNextObject = function getMapNextObject(args) {
+  var _ref3;
+
+  var _args12 = _slicedToArray(args, 3),
+      iteratorKind = _args12[0],
+      context = _args12[1],
+      index = _args12[2];
+
+  return _ref3 = {}, _defineProperty(_ref3, DONE, false), _defineProperty(_ref3, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_VALUE][index]] : context["[[".concat(iteratorKind, "]]")][index]), _ref3;
+};
 /**
  * Once initialized, the next() method can be called to access key-value
  * pairs from the object in turn.
@@ -5414,10 +5435,8 @@ object_define_property_x_esm(MapIt.prototype, NEXT, _defineProperty({}, VALUE, f
   var more = this[PROP_ITERATORHASMORE];
 
   if (index < context[PROP_KEY].length && more) {
-    var _ref3;
-
     this[PROP_MAPNEXTINDEX] += 1;
-    return _ref3 = {}, _defineProperty(_ref3, DONE, false), _defineProperty(_ref3, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_VALUE][index]] : context["[[".concat(iteratorKind, "]]")][index]), _ref3;
+    return getMapNextObject([iteratorKind, context, index]);
   }
 
   this[PROP_ITERATORHASMORE] = false;
@@ -5584,297 +5603,183 @@ object_define_property_x_esm(MapImplementation.prototype, symIt, _defineProperty
  * Determine whether to use shim or native.
  */
 
+/* istanbul ignore next */
+
+var collections_x_esm_getMyClass = function getMyClass(Subject) {
+  var MyClass = function MyClass(arg) {
+    var testObject = new Subject(arg);
+    setPrototypeOf(testObject, MyClass.prototype);
+    return testObject;
+  };
+
+  setPrototypeOf(MyClass, Subject);
+  MyClass.prototype = object_create_x_esm(Subject.prototype, {
+    constructor: _defineProperty({}, VALUE, MyClass)
+  });
+  return MyClass;
+};
 /* Map fixes */
 
+/* istanbul ignore next */
+
+
 var collections_x_esm_performMapFixes = function performMapFixes() {
-  var Export = null;
+  var result = attempt_x_esm(function attemptee() {
+    /* eslint-disable-next-line compat/compat */
+    return to_boolean_x_esm(new Map() instanceof Map) === false;
+  });
+  var Export = result.threw || result.value ? MapImplementation : Map;
 
   var peformMapFix = function peformMapFix(fixee) {
-    if (Export !== MapImplementation) {
-      fixee();
+    if (Export !== MapImplementation && fixee(Export)) {
+      Export = MapImplementation;
     }
   };
 
-  peformMapFix(function fixee() {
-    try {
-      /* eslint-disable-next-line compat/compat */
-      Export = new Map() ? Map : MapImplementation;
-    } catch (ignore) {// empty
-    }
+  peformMapFix(function fixee(Subject) {
+    var res = attempt_x_esm(function attemptee() {
+      /* eslint-disable-next-line babel/new-cap */
+      return Subject();
+    });
+    return res.threw === false;
   });
-  peformMapFix(function fixee() {
-    var testMap = new Export();
+  peformMapFix(function fixee(Subject) {
+    var testMap = new Subject();
 
     if (typeof testMap[SIZE] !== 'number' || testMap[SIZE] !== 0) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    } else {
-      var propsMap = ['has', 'set', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
-      var failedMap = array_some_x_esm(propsMap, function predicate(method) {
-        return is_function_x_esm(testMap[method]) === false;
-      });
-
-      if (failedMap) {
-        /* istanbul ignore next */
-        Export = MapImplementation;
-      }
+      return true;
     }
+
+    var propsMap = ['has', 'set', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
+    return array_some_x_esm(propsMap, function predicate(method) {
+      return is_function_x_esm(testMap[method]) === false;
+    });
   });
-  peformMapFix(function fixee() {
+  peformMapFix(function fixee(Subject) {
     // Safari 8, for example, doesn't accept an iterable.
-    var mapAcceptsArguments = false;
-
-    try {
-      mapAcceptsArguments = new Export([[1, 2]]).get(1) === 2;
-    } catch (ignore) {// empty
-    }
-
-    if (mapAcceptsArguments === false) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    }
+    var res = attempt_x_esm(function attemptee() {
+      return new Subject([[1, 2]]).get(1) !== 2;
+    });
+    return res.threw || res.result;
   });
-  peformMapFix(function fixee() {
-    var testMap = new Export();
-    var mapSupportsChaining = testMap.set(1, 2) === testMap;
-
-    if (mapSupportsChaining === false) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    }
+  peformMapFix(function fixee(Subject) {
+    var testMap = new Subject();
+    return testMap.set(1, 2) !== testMap;
   });
-  peformMapFix(function fixee() {
+  peformMapFix(function fixee(Subject) {
     // Chrome 38-42, node 0.11/0.12, iojs 1/2 also have a bug when the Map has a size > 4
-    var testMap = new Export([[1, 0], [2, 0], [3, 0], [4, 0]]);
+    var testMap = new Subject([[1, 0], [2, 0], [3, 0], [4, 0]]);
     testMap.set(-0, testMap);
     var gets = testMap.get(0) === testMap && testMap.get(-0) === testMap;
     var mapUsesSameValueZero = gets && testMap.has(0) && testMap.has(-0);
-
-    if (mapUsesSameValueZero === false) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    }
+    return mapUsesSameValueZero === false;
   });
-  peformMapFix(function fixee() {
+  peformMapFix(function fixee(Subject) {
     if (setPrototypeOf) {
-      var MyMap = function MyMap(arg) {
-        var testMap = new Export(arg);
-        setPrototypeOf(testMap, MyMap.prototype);
-        return testMap;
-      };
-
-      setPrototypeOf(MyMap, Export);
-      MyMap.prototype = object_create_x_esm(Export.prototype, {
-        constructor: _defineProperty({}, VALUE, MyMap)
-      });
-      var mapSupportsSubclassing = false;
-
-      try {
-        var testMap = new MyMap([]); // Firefox 32 is ok with the instantiating the subclass but will
-        // throw when the map is used.
-
-        testMap.set(42, 42);
-        mapSupportsSubclassing = testMap instanceof MyMap;
-      } catch (ignore) {// empty
-      }
-
-      if (mapSupportsSubclassing === false) {
-        /* istanbul ignore next */
-        Export = MapImplementation;
-      }
+      return false;
     }
+
+    var MyMap = collections_x_esm_getMyClass(Subject);
+    var res = attempt_x_esm(function attemptee() {
+      return to_boolean_x_esm(new MyMap([]).set(42, 42) instanceof MyMap) === false;
+    });
+    return res.threw || res.value;
   });
-  peformMapFix(function fixee() {
-    var mapRequiresNew;
-
-    try {
-      /* eslint-disable-next-line babel/new-cap */
-      mapRequiresNew = !(Export() instanceof Export);
-    } catch (e) {
-      mapRequiresNew = e instanceof TypeError;
-    }
-
-    if (mapRequiresNew === false) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    }
+  peformMapFix(function fixee(Subject) {
+    var res = attempt_x_esm(function attemptee() {
+      return new Subject().keys()[NEXT]()[DONE] === false;
+    });
+    return res.threw || res.value;
   });
-  peformMapFix(function fixee() {
-    var testMap = new Export();
-    var mapIterationThrowsStopIterator;
-
-    try {
-      mapIterationThrowsStopIterator = testMap.keys()[NEXT]()[DONE] === false;
-    } catch (ignore) {
-      /* istanbul ignore next */
-      mapIterationThrowsStopIterator = true;
-    }
-
-    if (mapIterationThrowsStopIterator) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    }
-  });
-  peformMapFix(function fixee() {
+  peformMapFix(function fixee(Subject) {
     // Safari 8
-    if (is_function_x_esm(new Export().keys()[NEXT]) === false) {
-      /* istanbul ignore next */
-      Export = MapImplementation;
-    }
+    return is_function_x_esm(new Subject().keys()[NEXT]) === false;
   });
-  peformMapFix(function fixee() {
-    if (hasRealSymbolIterator) {
-      var testMapProto = get_prototype_of_x_esm(new Export().keys());
-      var hasBuggyMapIterator = true;
-
-      if (testMapProto) {
-        hasBuggyMapIterator = is_function_x_esm(testMapProto[symIt]) === false;
-      }
-
-      if (hasBuggyMapIterator) {
-        /* istanbul ignore next */
-        Export = MapImplementation;
-      }
-    }
+  peformMapFix(function fixee(Subject) {
+    var testMapProto = hasRealSymbolIterator && get_prototype_of_x_esm(new Subject().keys());
+    return to_boolean_x_esm(testMapProto) && is_function_x_esm(testMapProto[symIt]) === false;
   });
   return Export;
 };
 /* Set fixes */
 
+/* istanbul ignore next */
+
 
 var collections_x_esm_performSetFixes = function performSetFixes() {
-  var Export = null;
+  var result = attempt_x_esm(function attemptee() {
+    /* eslint-disable-next-line compat/compat */
+    return to_boolean_x_esm(new Set() instanceof Set) === false;
+  });
+  var Export = result.threw || result.value ? SetImplementation : Set;
 
   var peformSetFix = function peformSetFix(fixee) {
-    if (Export !== SetImplementation) {
-      fixee();
+    if (Export !== SetImplementation && fixee(Export)) {
+      Export = SetImplementation;
     }
   };
 
-  peformSetFix(function fixee() {
-    try {
-      /* eslint-disable-next-line compat/compat */
-      Export = new Set() ? Set : SetImplementation;
-    } catch (ignore) {// empty
-    }
+  peformSetFix(function fixee(Subject) {
+    var res = attempt_x_esm(function attemptee() {
+      /* eslint-disable-next-line babel/new-cap */
+      return Subject();
+    });
+    return res.threw === false;
   });
-  peformSetFix(function fixee() {
-    var testSet = new Export();
+  peformSetFix(function fixee(Subject) {
+    var testSet = new Subject();
 
     if (typeof testSet[SIZE] !== 'number' || testSet[SIZE] !== 0) {
       /* istanbul ignore next */
-      Export = SetImplementation;
-    } else {
-      var propsSet = ['has', 'add', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
-      var failedSet = array_some_x_esm(propsSet, function predicate(method) {
-        return is_function_x_esm(testSet[method]) === false;
-      });
-
-      if (failedSet) {
-        /* istanbul ignore next */
-        Export = SetImplementation;
-      }
+      return true;
     }
+
+    var propsSet = ['has', 'add', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
+    return array_some_x_esm(propsSet, function predicate(method) {
+      return is_function_x_esm(testSet[method]) === false;
+    });
   });
-  peformSetFix(function fixee() {
-    var testSet = new Export();
+  peformSetFix(function fixee(Subject) {
+    var testSet = new Subject();
     testSet.delete(0);
     testSet.add(-0);
-    var setUsesSameValueZero = testSet.has(0) && testSet.has(-0);
-
-    if (setUsesSameValueZero === false) {
-      /* istanbul ignore next */
-      Export = SetImplementation;
-    }
+    return testSet.has(0) === false || testSet.has(-0) === false;
   });
-  peformSetFix(function fixee() {
-    var testSet = new Export();
-    var setSupportsChaining = testSet.add(1) === testSet;
-
-    if (setSupportsChaining === false) {
-      /* istanbul ignore next */
-      Export = SetImplementation;
-    }
+  peformSetFix(function fixee(Subject) {
+    var testSet = new Subject();
+    return testSet.add(1) !== testSet;
   });
-  peformSetFix(function fixee() {
+  peformSetFix(function fixee(Subject) {
     if (setPrototypeOf) {
-      var MySet = function MySet(arg) {
-        var testSet = new Export(arg);
-        setPrototypeOf(testSet, MySet.prototype);
-        return testSet;
-      };
-
-      setPrototypeOf(MySet, Export);
-      MySet.prototype = object_create_x_esm(Export.prototype, {
-        constructor: _defineProperty({}, VALUE, MySet)
-      });
-      var setSupportsSubclassing = false;
-
-      try {
-        var testSet = new MySet([]);
-        testSet.add(42, 42);
-        setSupportsSubclassing = testSet instanceof MySet;
-      } catch (ignore) {// empty
-      }
-
-      if (setSupportsSubclassing === false) {
-        /* istanbul ignore next */
-        Export = SetImplementation;
-      }
+      return false;
     }
-  });
-  peformSetFix(function fixee() {
-    var setRequiresNew;
 
-    try {
+    var MySet = collections_x_esm_getMyClass(Subject);
+    var res = attempt_x_esm(function attemptee() {
+      return to_boolean_x_esm(new MySet([]).add(42) instanceof MySet) === false;
+    });
+    return res.threw || res.value;
+  });
+  peformSetFix(function fixee(Subject) {
+    var res = attempt_x_esm(function attemptee() {
       /* eslint-disable-next-line babel/new-cap */
-      setRequiresNew = !(Export() instanceof Export);
-    } catch (e) {
-      setRequiresNew = e instanceof TypeError;
-    }
-
-    if (setRequiresNew === false) {
-      /* istanbul ignore next */
-      Export = SetImplementation;
-    }
+      return Subject();
+    });
+    return res.threw === false;
   });
-  peformSetFix(function fixee() {
-    var testSet = new Export();
-    var setIterationThrowsStopIterator;
-
-    try {
-      setIterationThrowsStopIterator = testSet.keys()[NEXT]()[DONE] === false;
-    } catch (ignore) {
-      /* istanbul ignore next */
-      setIterationThrowsStopIterator = true;
-    }
-
-    if (setIterationThrowsStopIterator) {
-      /* istanbul ignore next */
-      Export = SetImplementation;
-    }
+  peformSetFix(function fixee(Subject) {
+    var res = attempt_x_esm(function attemptee() {
+      return new Subject().keys()[NEXT]()[DONE] === false;
+    });
+    return res.threw || res.value;
   });
-  peformSetFix(function fixee() {
+  peformSetFix(function fixee(Subject) {
     // Safari 8
-    if (is_function_x_esm(new Export().keys()[NEXT]) === false) {
-      /* istanbul ignore next */
-      Export = SetImplementation;
-    }
+    return is_function_x_esm(new Subject().keys()[NEXT]) === false;
   });
-  peformSetFix(function fixee() {
-    if (hasRealSymbolIterator) {
-      var testSetProto = get_prototype_of_x_esm(new Export().keys());
-      var hasBuggySetIterator = true;
-
-      if (testSetProto) {
-        hasBuggySetIterator = is_function_x_esm(testSetProto[symIt]) === false;
-      }
-
-      if (hasBuggySetIterator) {
-        /* istanbul ignore next */
-        Export = SetImplementation;
-      }
-    }
+  peformSetFix(function fixee(Subject) {
+    var testSetProto = hasRealSymbolIterator && get_prototype_of_x_esm(new Subject().keys());
+    return to_boolean_x_esm(testSetProto) && is_function_x_esm(testSetProto[symIt]) === false;
   });
   return Export;
 };

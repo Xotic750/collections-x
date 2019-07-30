@@ -54,6 +54,7 @@
     "array-some-x": "^3.0.12",
     "assert-is-function-x": "^3.0.18",
     "assert-is-object-x": "^3.0.17",
+    "attempt-x": "^2.0.22",
     "big-counter-x": "^4.0.13",
     "get-prototype-of-x": "^2.0.17",
     "has-own-property-x": "^4.0.16",
