@@ -21,34 +21,64 @@ import getPrototypeOf from 'get-prototype-of-x';
 import hasSymbolSupport from 'has-symbol-support-x';
 import create from 'object-create-x';
 import toBoolean from 'to-boolean-x';
+import slice from 'array-slice-x';
+
+/* eslint-disable-next-line no-void */
+const UNDEFINED = void 0;
+const SIZE = 'size';
+const NEXT = 'next';
+const KEY = 'key';
+const VALUE = 'value';
+const DONE = 'done';
+const WRITABLE = 'writable';
+const MAP = 'map';
+const SET = 'set';
+const PROP_CHANGED = '[[changed]]';
+const PROP_CHANGE = '[[change]]';
+const PROP_ID = '[[id]]';
+const PROP_KEY = `[[${KEY}]]`;
+const PROP_ORDER = '[[order]]';
+const PROP_VALUE = `[[${VALUE}]]`;
+const PROP_ITERATORHASMORE = '[[IteratorHasMore]]';
+const PROP_MAP = '[[Map]]';
+const PROP_MAPITERATIONKIND = '[[MapIterationKind]]';
+const PROP_MAPNEXTINDEX = '[[MapNextIndex]]';
+const PROP_SET = '[[Set]]';
+const PROP_SETITERATIONKIND = '[[SetIterationKind]]';
+const PROP_SETNEXTINDEX = '[[SetNextIndex]]';
+const KIND_VALUE = VALUE;
+const KIND_KEY = KEY;
+const KIND_KEY_VALUE = `${KIND_KEY}+${KIND_VALUE}`;
+const SAMEVALUEZERO = 'SameValueZero';
+const ES6_SHIM_ITERATOR = '_es6-shim iterator_';
+const AT_AT_ITERATOR = '@@iterator';
 
 const {setPrototypeOf} = {}.constructor;
 /* eslint-disable-next-line compat/compat */
 const hasRealSymbolIterator = hasSymbolSupport && typeof Symbol.iterator === 'symbol';
 /* eslint-disable-next-line compat/compat */
 const hasFakeSymbolIterator = typeof Symbol === 'object' && typeof Symbol.iterator === 'string';
+const hasSymbolIterator = hasRealSymbolIterator || hasFakeSymbolIterator;
+
+const getSymIt = function getSymIt() {
+  if (hasSymbolIterator) {
+    /* eslint-disable-next-line compat/compat */
+    return Symbol.iterator;
+  }
+
+  if (isFunction([][ES6_SHIM_ITERATOR])) {
+    return ES6_SHIM_ITERATOR;
+  }
+
+  return AT_AT_ITERATOR;
+};
+
 /**
  * The iterator identifier that is in use.
  *
  * Type {Symbol|string}.
  */
-let $symIt;
-
-if (hasRealSymbolIterator || hasFakeSymbolIterator) {
-  /* eslint-disable-next-line compat/compat */
-  $symIt = Symbol.iterator;
-  /* eslint-disable-next-line no-use-extend-native/no-use-extend-native */
-} else if (isFunction([]['_es6-shim iterator_'])) {
-  $symIt = '_es6-shim iterator_';
-} else {
-  $symIt = '@@iterator';
-}
-
-export const symIt = $symIt;
-
-const isNumberType = function isNumberType(value) {
-  return typeof value === 'number';
-};
+export const symIt = getSymIt();
 
 /**
  * Detect an iterator function.
@@ -59,201 +89,209 @@ const isNumberType = function isNumberType(value) {
  */
 const getSymbolIterator = function getSymbolIterator(iterable) {
   if (isNil(iterable) === false) {
-    if ((hasRealSymbolIterator || hasFakeSymbolIterator) && iterable[$symIt]) {
-      return $symIt;
+    if (hasSymbolIterator && iterable[symIt]) {
+      return symIt;
     }
 
-    if (iterable['_es6-shim iterator_']) {
-      return '_es6-shim iterator_';
+    if (iterable[ES6_SHIM_ITERATOR]) {
+      return ES6_SHIM_ITERATOR;
     }
 
-    if (iterable['@@iterator']) {
-      return '@@iterator';
+    if (iterable[AT_AT_ITERATOR]) {
+      return AT_AT_ITERATOR;
     }
   }
 
-  /* eslint-disable-next-line no-void */
-  return void 0;
+  return UNDEFINED;
 };
 
+const parseIterable = function parseIterable() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [kind, iterable, context, symbolIterator] = slice(arguments);
+  const iterator = iterable[symbolIterator]();
+  let next = iterator[NEXT]();
+
+  if (kind === MAP) {
+    if (isArrayLike(next[VALUE]) === false || next[VALUE].length < 2) {
+      throw new TypeError(`Iterator value ${isArrayLike(next[VALUE])} is not an entry object`);
+    }
+  }
+
+  while (next[DONE] === false) {
+    const key = kind === MAP ? next[VALUE][0] : next[VALUE];
+    const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
+
+    if (indexof < 0) {
+      if (kind === MAP) {
+        context[PROP_VALUE].push(next[VALUE][1]);
+      }
+
+      context[PROP_KEY].push(key);
+      context[PROP_ORDER].push(context[PROP_ID].get());
+      context[PROP_ID][NEXT]();
+    } else if (kind === MAP) {
+      /* eslint-disable-next-line prefer-destructuring */
+      context[PROP_VALUE][indexof] = next[VALUE][1];
+    }
+
+    next = iterator[NEXT]();
+  }
+};
+
+const parseString = function parseString() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [kind, iterable, context] = slice(arguments);
+
+  if (kind === MAP) {
+    throw new TypeError(`Iterator value ${iterable.charAt(0)} is not an entry object`);
+  }
+
+  let next = 0;
+  while (next < iterable.length) {
+    const char1 = iterable.charAt(next);
+    const char2 = iterable.charAt(next + 1);
+    let key;
+
+    if (isSurrogatePair(char1, char2)) {
+      key = char1 + char2;
+      next += 1;
+    } else {
+      key = char1;
+    }
+
+    const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
+
+    if (indexof < 0) {
+      context[PROP_KEY].push(key);
+      context[PROP_ORDER].push(context[PROP_ID].get());
+      context[PROP_ID][NEXT]();
+    }
+
+    next += 1;
+  }
+};
+
+const parseArrayLike = function parseArrayLike() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [kind, iterable, context] = slice(arguments);
+  let next = 0;
+  while (next < iterable.length) {
+    let key;
+
+    if (kind === MAP) {
+      if (isPrimitive(iterable[next])) {
+        throw new TypeError(`Iterator value ${isArrayLike(next[VALUE])} is not an entry object`);
+      }
+
+      /* eslint-disable-next-line prefer-destructuring */
+      key = iterable[next][0];
+    } else {
+      key = iterable[next];
+    }
+
+    const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
+
+    if (indexof < 0) {
+      if (kind === MAP) {
+        context[PROP_VALUE].push(iterable[next][1]);
+      }
+
+      context[PROP_KEY].push(key);
+      context[PROP_ORDER].push(context[PROP_ID].get());
+      context[PROP_ID][NEXT]();
+    } else if (kind === MAP) {
+      /* eslint-disable-next-line prefer-destructuring */
+      context[PROP_VALUE][indexof] = iterable[next][1];
+    }
+
+    next += 1;
+  }
+};
+
+// eslint-disable jsdoc/check-param-names
+// noinspection JSCommentMatchesSignature
 /**
  * If an iterable object is passed, all of its elements will be added to the
  * new Map/Set, null is treated as undefined.
  *
  * @private
- * @param {string} kind - Either 'map' or 'set'.
+ * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
  * @param {*} iterable - Value to parsed.
  */
-const parseIterable = function parseIterable(kind, context, iterable) {
+// eslint-enable jsdoc/check-param-names
+const parse = function parse() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [kind, context, iterable] = slice(arguments);
   const symbolIterator = getSymbolIterator(iterable);
 
-  if (kind === 'map') {
-    defineProperty(context, '[[value]]', {
-      value: [],
-    });
+  if (kind === MAP) {
+    defineProperty(context, PROP_VALUE, {[VALUE]: []});
   }
 
   defineProperties(context, {
-    '[[changed]]': {
-      value: false,
-    },
-    '[[id]]': {
-      value: new IdGenerator(),
-    },
-    '[[key]]': {
-      value: [],
-    },
-    '[[order]]': {
-      value: [],
-    },
+    [PROP_CHANGED]: {[VALUE]: false},
+    [PROP_ID]: {[VALUE]: new IdGenerator()},
+    [PROP_KEY]: {[VALUE]: []},
+    [PROP_ORDER]: {[VALUE]: []},
   });
-
-  let next;
-  let key;
-  let indexof;
 
   if (iterable && isFunction(iterable[symbolIterator])) {
-    const iterator = iterable[symbolIterator]();
-    next = iterator.next();
-
-    if (kind === 'map') {
-      if (isArrayLike(next.value) === false || next.value.length < 2) {
-        throw new TypeError(`Iterator value ${isArrayLike(next.value)} is not an entry object`);
-      }
-    }
-
-    while (next.done === false) {
-      key = kind === 'map' ? next.value[0] : next.value;
-      indexof = indexOf(assertIsObject(context)['[[key]]'], key, 'SameValueZero');
-
-      if (indexof < 0) {
-        if (kind === 'map') {
-          context['[[value]]'].push(next.value[1]);
-        }
-
-        context['[[key]]'].push(key);
-        context['[[order]]'].push(context['[[id]]'].get());
-        context['[[id]]'].next();
-      } else if (kind === 'map') {
-        /* eslint-disable-next-line prefer-destructuring */
-        context['[[value]]'][indexof] = next.value[1];
-      }
-
-      next = iterator.next();
-    }
-  }
-
-  if (isString(iterable)) {
-    if (kind === 'map') {
-      throw new TypeError(`Iterator value ${iterable.charAt(0)} is not an entry object`);
-    }
-
-    next = 0;
-    while (next < iterable.length) {
-      const char1 = iterable.charAt(next);
-      const char2 = iterable.charAt(next + 1);
-
-      if (isSurrogatePair(char1, char2)) {
-        key = char1 + char2;
-        next += 1;
-      } else {
-        key = char1;
-      }
-
-      indexof = indexOf(assertIsObject(context)['[[key]]'], key, 'SameValueZero');
-
-      if (indexof < 0) {
-        context['[[key]]'].push(key);
-        context['[[order]]'].push(context['[[id]]'].get());
-        context['[[id]]'].next();
-      }
-
-      next += 1;
-    }
+    parseIterable(kind, iterable, context, symbolIterator);
+  } else if (isString(iterable)) {
+    parseString(kind, iterable, context);
   } else if (isArrayLike(iterable)) {
-    next = 0;
-    while (next < iterable.length) {
-      if (kind === 'map') {
-        if (isPrimitive(iterable[next])) {
-          throw new TypeError(`Iterator value ${isArrayLike(next.value)} is not an entry object`);
-        }
-
-        /* eslint-disable-next-line prefer-destructuring */
-        key = iterable[next][0];
-      } else {
-        key = iterable[next];
-      }
-
-      key = kind === 'map' ? iterable[next][0] : iterable[next];
-      indexof = indexOf(assertIsObject(context)['[[key]]'], key, 'SameValueZero');
-
-      if (indexof < 0) {
-        if (kind === 'map') {
-          context['[[value]]'].push(iterable[next][1]);
-        }
-
-        context['[[key]]'].push(key);
-        context['[[order]]'].push(context['[[id]]'].get());
-        context['[[id]]'].next();
-      } else if (kind === 'map') {
-        /* eslint-disable-next-line prefer-destructuring */
-        context['[[value]]'][indexof] = iterable[next][1];
-      }
-
-      next += 1;
-    }
+    parseArrayLike(kind, iterable, context);
   }
 
-  defineProperty(context, 'size', {
-    value: context['[[key]]'].length,
-    writable: true,
-  });
+  defineProperty(context, SIZE, {[VALUE]: context[PROP_KEY].length, [WRITABLE]: true});
 };
 
+// eslint-disable jsdoc/check-param-names
+// noinspection JSCommentMatchesSignature
 /**
  * The base forEach method executes a provided function once per each value
  * in the Map/Set object, in insertion order.
  *
  * @private
- * @param {string} kind - Either 'map' or 'set'.
+ * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
  * @param {Function} callback - Function to execute for each element.
  * @param {*} [thisArg] - Value to use as this when executing callback.
  * @returns {object} The Map/Set object.
  */
-const baseForEach = function baseForEach(kind, context, callback, thisArg) {
+// eslint-enable jsdoc/check-param-names
+const baseForEach = function baseForEach() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [kind, context, callback, thisArg] = slice(arguments);
   assertIsObject(context);
   assertIsFunction(callback);
-  const pointers = {
-    index: 0,
-    order: context['[[order]]'][0],
-  };
+  const pointers = {index: 0, order: context[PROP_ORDER][0]};
 
-  context['[[change]]'] = false;
-  let {length} = context['[[key]]'];
+  context[PROP_CHANGE] = false;
+  let {length} = context[PROP_KEY];
   while (pointers.index < length) {
-    if (hasOwn(context['[[key]]'], pointers.index)) {
-      const key = context['[[key]]'][pointers.index];
-      const value = kind === 'map' ? context['[[value]]'][pointers.index] : key;
+    if (hasOwn(context[PROP_KEY], pointers.index)) {
+      const key = context[PROP_KEY][pointers.index];
+      const value = kind === MAP ? context[PROP_VALUE][pointers.index] : key;
       callback.call(thisArg, value, key, context);
     }
 
-    if (context['[[change]]']) {
+    if (context[PROP_CHANGE]) {
       /* eslint-disable-next-line prefer-destructuring */
-      length = context['[[key]]'].length;
-      some(context['[[order]]'], function _some1(id, count) {
+      length = context[PROP_KEY].length;
+      some(context[PROP_ORDER], function predicate(id, count) {
         pointers.index = count;
 
         return id > pointers.order;
       });
 
-      context['[[change]]'] = false;
+      context[PROP_CHANGE] = false;
     } else {
       pointers.index += 1;
     }
 
-    pointers.order = context['[[order]]'][pointers.index];
+    pointers.order = context[PROP_ORDER][pointers.index];
   }
 
   return context;
@@ -270,88 +308,97 @@ const baseForEach = function baseForEach(kind, context, callback, thisArg) {
  */
 const baseHas = function has(key) {
   /* eslint-disable-next-line babel/no-invalid-this */
-  return indexOf(assertIsObject(this)['[[key]]'], key, 'SameValueZero') > -1;
+  return indexOf(assertIsObject(this)[PROP_KEY], key, SAMEVALUEZERO) > -1;
 };
 
 /**
  * The base clear method removes all elements from a Map/Set object.
  *
  * @private
- * @param {string} kind - Either 'map' or 'set'.
+ * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
  * @returns {object} The Map/Set object.
  */
 const baseClear = function baseClear(kind, context) {
   assertIsObject(context);
-  context['[[id]]'].reset();
-  context['[[change]]'] = true;
-  context.size = 0;
-  context['[[order]]'].length = 0;
-  context['[[key]]'].length = 0;
+  context[PROP_ID].reset();
+  context[PROP_CHANGE] = true;
+  context[SIZE] = 0;
+  context[PROP_ORDER].length = 0;
+  context[PROP_KEY].length = 0;
 
-  if (kind === 'map') {
-    context['[[value]]'].length = 0;
+  if (kind === MAP) {
+    context[PROP_VALUE].length = 0;
   }
 
   return context;
 };
 
+// eslint-disable jsdoc/check-param-names
+// noinspection JSCommentMatchesSignature
 /**
  * The base delete method removes the specified element from a Map/Set object.
  *
  * @private
- * @param {string} kind - Either 'map' or 'set'.
+ * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
  * @param {*} key - The key/value of the element to remove from Map/Set object.
  * @returns {object} The Map/Set object.
  */
-const baseDelete = function baseDelete(kind, context, key) {
-  const indexof = indexOf(assertIsObject(context)['[[key]]'], key, 'SameValueZero');
-
+// eslint-enable jsdoc/check-param-names
+const baseDelete = function baseDelete() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [kind, context, key] = slice(arguments);
+  const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
   let result = false;
 
   if (indexof > -1) {
-    if (kind === 'map') {
-      context['[[value]]'].splice(indexof, 1);
+    if (kind === MAP) {
+      context[PROP_VALUE].splice(indexof, 1);
     }
 
-    context['[[key]]'].splice(indexof, 1);
-    context['[[order]]'].splice(indexof, 1);
-    context['[[change]]'] = true;
-    context.size = context['[[key]]'].length;
+    context[PROP_KEY].splice(indexof, 1);
+    context[PROP_ORDER].splice(indexof, 1);
+    context[PROP_CHANGE] = true;
+    context[SIZE] = context[PROP_KEY].length;
     result = true;
   }
 
   return result;
 };
 
+// eslint-disable jsdoc/check-param-names
+// noinspection JSCommentMatchesSignature
 /**
  * The base set and add method.
  *
  * @private
- * @param {string} kind - Either 'map' or 'set'.
+ * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
  * @param {*} key - The key or value of the element to add/set on the object.
  * @param {*} [value] - The value of the element to add to the Map object.
  * @returns {object} The Map/Set object.
  */
-const baseAddSet = function _baseAddSet(kind, context, key, value) {
-  const index = indexOf(assertIsObject(context)['[[key]]'], key, 'SameValueZero');
+// eslint-enable jsdoc/check-param-names
+const baseAddSet = function baseAddSet() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [kind, context, key, value] = slice(arguments);
+  const index = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
 
   if (index > -1) {
-    if (kind === 'map') {
-      context['[[value]]'][index] = value;
+    if (kind === MAP) {
+      context[PROP_VALUE][index] = value;
     }
   } else {
-    if (kind === 'map') {
-      context['[[value]]'].push(value);
+    if (kind === MAP) {
+      context[PROP_VALUE].push(value);
     }
 
-    context['[[key]]'].push(key);
-    context['[[order]]'].push(context['[[id]]'].get());
-    context['[[id]]'].next();
-    context['[[change]]'] = true;
-    context.size = context['[[key]]'].length;
+    context[PROP_KEY].push(key);
+    context[PROP_ORDER].push(context[PROP_ID].get());
+    context[PROP_ID][NEXT]();
+    context[PROP_CHANGE] = true;
+    context[SIZE] = context[PROP_KEY].length;
   }
 
   return context;
@@ -372,20 +419,10 @@ const baseAddSet = function _baseAddSet(kind, context, key, value) {
  */
 const SetIt = function SetIterator(context, iteratorKind) {
   defineProperties(this, {
-    '[[IteratorHasMore]]': {
-      value: true,
-      writable: true,
-    },
-    '[[Set]]': {
-      value: assertIsObject(context),
-    },
-    '[[SetIterationKind]]': {
-      value: iteratorKind || 'value',
-    },
-    '[[SetNextIndex]]': {
-      value: 0,
-      writable: true,
-    },
+    [PROP_ITERATORHASMORE]: {[VALUE]: true, [WRITABLE]: true},
+    [PROP_SET]: {[VALUE]: assertIsObject(context)},
+    [PROP_SETITERATIONKIND]: {[VALUE]: iteratorKind || KIND_VALUE},
+    [PROP_SETNEXTINDEX]: {[VALUE]: 0, [WRITABLE]: true},
   });
 };
 
@@ -397,34 +434,26 @@ const SetIt = function SetIterator(context, iteratorKind) {
  * @function next
  * @returns {object} Returns an object with two properties: done and value.
  */
-defineProperty(SetIt.prototype, 'next', {
-  value: function next() {
-    const context = assertIsObject(this['[[Set]]']);
-    const index = this['[[SetNextIndex]]'];
-    const iteratorKind = this['[[SetIterationKind]]'];
-    const more = this['[[IteratorHasMore]]'];
-    let object;
+defineProperty(SetIt.prototype, NEXT, {
+  [VALUE]: function next() {
+    const context = assertIsObject(this[PROP_SET]);
+    const index = this[PROP_SETNEXTINDEX];
+    const iteratorKind = this[PROP_SETITERATIONKIND];
+    const more = this[PROP_ITERATORHASMORE];
 
-    if (index < context['[[key]]'].length && more) {
-      object = {done: false};
+    if (index < context[PROP_KEY].length && more) {
+      this[PROP_SETNEXTINDEX] += 1;
 
-      if (iteratorKind === 'key+value') {
-        object.value = [context['[[key]]'][index], context['[[key]]'][index]];
-      } else {
-        object.value = context['[[key]]'][index];
-      }
-
-      this['[[SetNextIndex]]'] += 1;
-    } else {
-      this['[[IteratorHasMore]]'] = false;
-      object = {
-        done: true,
-        /* eslint-disable-next-line no-void */
-        value: void 0,
+      return {
+        [DONE]: false,
+        [VALUE]:
+          iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index],
       };
     }
 
-    return object;
+    this[PROP_ITERATORHASMORE] = false;
+
+    return {[DONE]: true, [VALUE]: UNDEFINED};
   },
 });
 
@@ -436,8 +465,8 @@ defineProperty(SetIt.prototype, 'next', {
  * @memberof SetIterator.prototype
  * @returns {object} This Iterator object.
  */
-defineProperty(SetIt.prototype, $symIt, {
-  value: function iterator() {
+defineProperty(SetIt.prototype, symIt, {
+  [VALUE]: function iterator() {
     return this;
   },
 });
@@ -466,19 +495,19 @@ const setValuesIterator = function values() {
  * will be added to the new Set. A null is treated as undefined.
  */
 // eslint-enable jsdoc/check-param-names
-const $SetObject = function Set() {
-  if (toBoolean(this) === false || !(this instanceof $SetObject)) {
+export const SetImplementation = function Set() {
+  if (toBoolean(this) === false || !(this instanceof SetImplementation)) {
     throw new TypeError("Constructor Set requires 'new'");
   }
 
-  /* eslint-disable-next-line prefer-rest-params,no-void */
-  parseIterable('set', this, arguments.length ? arguments[0] : void 0);
+  /* eslint-disable-next-line prefer-rest-params */
+  parse(SET, this, arguments.length ? arguments[0] : UNDEFINED);
 };
 
 // noinspection JSValidateTypes
 defineProperties(
-  $SetObject.prototype,
-  /** @lends $SetObject.prototype */ {
+  SetImplementation.prototype,
+  /** @lends SetImplementation.prototype */ {
     /**
      * The add() method appends a new element with a specified value to the end
      * of a Set object.
@@ -488,8 +517,8 @@ defineProperties(
      * @returns {object} The Set object.
      */
     add: {
-      value: function add(value) {
-        return baseAddSet('set', this, value);
+      [VALUE]: function add(value) {
+        return baseAddSet(SET, this, value);
       },
     },
     /**
@@ -498,8 +527,8 @@ defineProperties(
      * @returns {object} The Set object.
      */
     clear: {
-      value: function clear() {
-        return baseClear('set', this);
+      [VALUE]: function clear() {
+        return baseClear(SET, this);
       },
     },
     /**
@@ -510,8 +539,8 @@ defineProperties(
      *  removed successfully; otherwise false.
      */
     delete: {
-      value: function de1ete(value) {
-        return baseDelete('set', this, value);
+      [VALUE]: function de1ete(value) {
+        return baseDelete(SET, this, value);
       },
     },
     /**
@@ -526,8 +555,8 @@ defineProperties(
      * @returns {object} A new Iterator object.
      */
     entries: {
-      value: function entries() {
-        return new SetIt(this, 'key+value');
+      [VALUE]: function entries() {
+        return new SetIt(this, KIND_KEY_VALUE);
       },
     },
     /**
@@ -539,8 +568,8 @@ defineProperties(
      * @returns {object} The Set object.
      */
     forEach: {
-      value: function forEach(callback, thisArg) {
-        return baseForEach('set', this, callback, thisArg);
+      [VALUE]: function forEach(callback, thisArg) {
+        return baseForEach(SET, this, callback, thisArg);
       },
     },
     /**
@@ -553,7 +582,7 @@ defineProperties(
      *  exists in the Set object; otherwise false.
      */
     has: {
-      value: baseHas,
+      [VALUE]: baseHas,
     },
     /**
      * The keys() method is an alias for the `values` method (for similarity
@@ -563,7 +592,7 @@ defineProperties(
      * @returns {object} A new Iterator object.
      */
     keys: {
-      value: setValuesIterator,
+      [VALUE]: setValuesIterator,
     },
     /**
      * The value of size is an integer representing how many entries the Set
@@ -575,8 +604,8 @@ defineProperties(
      * @type {number}
      */
     size: {
-      value: 0,
-      writable: true,
+      [VALUE]: 0,
+      [WRITABLE]: true,
     },
     /**
      * The values() method returns a new Iterator object that contains the
@@ -586,7 +615,7 @@ defineProperties(
      * @returns {object} A new Iterator object.
      */
     values: {
-      value: setValuesIterator,
+      [VALUE]: setValuesIterator,
     },
   },
 );
@@ -599,8 +628,8 @@ defineProperties(
  * @memberof $SetObject.prototype
  * @returns {object} A new Iterator object.
  */
-defineProperty($SetObject.prototype, $symIt, {
-  value: setValuesIterator,
+defineProperty(SetImplementation.prototype, symIt, {
+  [VALUE]: setValuesIterator,
 });
 
 /**
@@ -618,20 +647,10 @@ defineProperty($SetObject.prototype, $symIt, {
  */
 const MapIt = function MapIterator(context, iteratorKind) {
   defineProperties(this, {
-    '[[IteratorHasMore]]': {
-      value: true,
-      writable: true,
-    },
-    '[[Map]]': {
-      value: assertIsObject(context),
-    },
-    '[[MapIterationKind]]': {
-      value: iteratorKind,
-    },
-    '[[MapNextIndex]]': {
-      value: 0,
-      writable: true,
-    },
+    [PROP_ITERATORHASMORE]: {[VALUE]: true, [WRITABLE]: true},
+    [PROP_MAP]: {[VALUE]: assertIsObject(context)},
+    [PROP_MAPITERATIONKIND]: {[VALUE]: iteratorKind},
+    [PROP_MAPNEXTINDEX]: {[VALUE]: 0, [WRITABLE]: true},
   });
 };
 
@@ -643,35 +662,28 @@ const MapIt = function MapIterator(context, iteratorKind) {
  * @function next
  * @returns {object} Returns an object with two properties: done and value.
  */
-defineProperty(MapIt.prototype, 'next', {
-  value: function next() {
-    const context = assertIsObject(this['[[Map]]']);
-    const index = this['[[MapNextIndex]]'];
-    const iteratorKind = this['[[MapIterationKind]]'];
-    const more = this['[[IteratorHasMore]]'];
-    let object;
-    assertIsObject(context);
+defineProperty(MapIt.prototype, NEXT, {
+  [VALUE]: function next() {
+    const context = assertIsObject(this[PROP_MAP]);
+    const index = this[PROP_MAPNEXTINDEX];
+    const iteratorKind = this[PROP_MAPITERATIONKIND];
+    const more = this[PROP_ITERATORHASMORE];
 
-    if (index < context['[[key]]'].length && more) {
-      object = {done: false};
+    if (index < context[PROP_KEY].length && more) {
+      this[PROP_MAPNEXTINDEX] += 1;
 
-      if (iteratorKind === 'key+value') {
-        object.value = [context['[[key]]'][index], context['[[value]]'][index]];
-      } else {
-        object.value = context[`[[${iteratorKind}]]`][index];
-      }
-
-      this['[[MapNextIndex]]'] += 1;
-    } else {
-      this['[[IteratorHasMore]]'] = false;
-      object = {
-        done: true,
-        /* eslint-disable-next-line no-void */
-        value: void 0,
+      return {
+        [DONE]: false,
+        [VALUE]:
+          iteratorKind === KIND_KEY_VALUE
+            ? [context[PROP_KEY][index], context[PROP_VALUE][index]]
+            : context[`[[${iteratorKind}]]`][index],
       };
     }
 
-    return object;
+    this[PROP_ITERATORHASMORE] = false;
+
+    return {[DONE]: true, [VALUE]: UNDEFINED};
   },
 });
 
@@ -683,8 +695,8 @@ defineProperty(MapIt.prototype, 'next', {
  * @memberof MapIterator.prototype
  * @returns {object} This Iterator object.
  */
-defineProperty(MapIt.prototype, $symIt, {
-  value: function iterator() {
+defineProperty(MapIt.prototype, symIt, {
+  [VALUE]: function iterator() {
     return this;
   },
 });
@@ -702,27 +714,27 @@ defineProperty(MapIt.prototype, $symIt, {
  *  added to the new Map. A null is treated as undefined.
  */
 // eslint-enable jsdoc/check-param-names
-const $MapObject = function Map() {
-  if (toBoolean(this) === false || !(this instanceof $MapObject)) {
+export const MapImplementation = function Map() {
+  if (toBoolean(this) === false || !(this instanceof MapImplementation)) {
     throw new TypeError("Constructor Map requires 'new'");
   }
 
-  /* eslint-disable-next-line prefer-rest-params,no-void */
-  parseIterable('map', this, arguments.length ? arguments[0] : void 0);
+  /* eslint-disable-next-line prefer-rest-params */
+  parse(MAP, this, arguments.length ? arguments[0] : UNDEFINED);
 };
 
 // noinspection JSValidateTypes
 defineProperties(
-  $MapObject.prototype,
-  /** @lends $MapObject.prototype */ {
+  MapImplementation.prototype,
+  /** @lends MapImplementation.prototype */ {
     /**
      * The clear() method removes all elements from a Map object.
      *
      * @returns {object} The Map object.
      */
     clear: {
-      value: function clear() {
-        return baseClear('map', this);
+      [VALUE]: function clear() {
+        return baseClear(MAP, this);
       },
     },
     /**
@@ -733,8 +745,8 @@ defineProperties(
      *  removed successfully.
      */
     delete: {
-      value: function de1ete(key) {
-        return baseDelete('map', this, key);
+      [VALUE]: function de1ete(key) {
+        return baseDelete(MAP, this, key);
       },
     },
     /**
@@ -744,8 +756,8 @@ defineProperties(
      * @returns {object} A new Iterator object.
      */
     entries: {
-      value: function entries() {
-        return new MapIt(this, 'key+value');
+      [VALUE]: function entries() {
+        return new MapIt(this, KIND_KEY_VALUE);
       },
     },
     /**
@@ -757,8 +769,8 @@ defineProperties(
      * @returns {object} The Map object.
      */
     forEach: {
-      value: function forEach(callback, thisArg) {
-        return baseForEach('map', this, callback, thisArg);
+      [VALUE]: function forEach(callback, thisArg) {
+        return baseForEach(MAP, this, callback, thisArg);
       },
     },
     /**
@@ -769,11 +781,10 @@ defineProperties(
      *  undefined if the key can't be found in the Map object.
      */
     get: {
-      value: function get(key) {
-        const index = indexOf(assertIsObject(this)['[[key]]'], key, 'SameValueZero');
+      [VALUE]: function get(key) {
+        const index = indexOf(assertIsObject(this)[PROP_KEY], key, SAMEVALUEZERO);
 
-        /* eslint-disable-next-line no-void */
-        return index > -1 ? this['[[value]]'][index] : void 0;
+        return index > -1 ? this[PROP_VALUE][index] : UNDEFINED;
       },
     },
     /**
@@ -786,7 +797,7 @@ defineProperties(
      *  exists in the Map object; otherwise false.
      */
     has: {
-      value: baseHas,
+      [VALUE]: baseHas,
     },
     /**
      * The keys() method returns a new Iterator object that contains the keys
@@ -795,8 +806,8 @@ defineProperties(
      * @returns {object} A new Iterator object.
      */
     keys: {
-      value: function keys() {
-        return new MapIt(this, 'key');
+      [VALUE]: function keys() {
+        return new MapIt(this, KIND_KEY);
       },
     },
     /**
@@ -808,8 +819,8 @@ defineProperties(
      * @returns {object} The Map object.
      */
     set: {
-      value: function set(key, value) {
-        return baseAddSet('map', this, key, value);
+      [VALUE]: function set(key, value) {
+        return baseAddSet(MAP, this, key, value);
       },
     },
     /**
@@ -822,8 +833,8 @@ defineProperties(
      * @type {number}
      */
     size: {
-      value: 0,
-      writable: true,
+      [VALUE]: 0,
+      [WRITABLE]: true,
     },
     /**
      * The values() method returns a new Iterator object that contains the
@@ -832,8 +843,8 @@ defineProperties(
      * @returns {object} A new Iterator object.
      */
     values: {
-      value: function values() {
-        return new MapIt(this, 'value');
+      [VALUE]: function values() {
+        return new MapIt(this, KIND_VALUE);
       },
     },
   },
@@ -847,28 +858,28 @@ defineProperties(
  * @memberof module:collections-x.Map.prototype
  * @returns {object} A new Iterator object.
  */
-defineProperty($MapObject.prototype, $symIt, {
-  value: $MapObject.prototype.entries,
+defineProperty(MapImplementation.prototype, symIt, {
+  [VALUE]: MapImplementation.prototype.entries,
 });
 
 /*
  * Determine whether to use shim or native.
  */
 
-let ExportMap = $MapObject;
+let ExportMap = MapImplementation;
 try {
   /* eslint-disable-next-line compat/compat */
-  ExportMap = new Map() ? Map : $MapObject;
+  ExportMap = new Map() ? Map : MapImplementation;
 } catch (ignore) {
   // empty
 }
 
 export const MapConstructor = ExportMap;
 
-let ExportSet = $SetObject;
+let ExportSet = SetImplementation;
 try {
   /* eslint-disable-next-line compat/compat */
-  ExportSet = new Set() ? Set : $SetObject;
+  ExportSet = new Set() ? Set : SetImplementation;
 } catch (ignore) {
   // empty
 }
@@ -877,25 +888,27 @@ export const SetConstructor = ExportSet;
 
 let testMap;
 
-if (ExportMap !== $MapObject) {
+if (ExportMap !== MapImplementation) {
   testMap = new ExportMap();
 
-  if (isNumberType(testMap.size) === false || testMap.size !== 0) {
-    ExportMap = $MapObject;
+  if (typeof testMap[SIZE] !== 'number' || testMap[SIZE] !== 0) {
+    /* istanbul ignore next */
+    ExportMap = MapImplementation;
   } else {
-    const propsMap = ['has', 'set', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', $symIt];
+    const propsMap = ['has', 'set', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
 
     const failedMap = some(propsMap, (method) => {
       return isFunction(testMap[method]) === false;
     });
 
     if (failedMap) {
-      ExportMap = $MapObject;
+      /* istanbul ignore next */
+      ExportMap = MapImplementation;
     }
   }
 }
 
-if (ExportMap !== $MapObject) {
+if (ExportMap !== MapImplementation) {
   // Safari 8, for example, doesn't accept an iterable.
   let mapAcceptsArguments = false;
   try {
@@ -905,20 +918,22 @@ if (ExportMap !== $MapObject) {
   }
 
   if (mapAcceptsArguments === false) {
-    ExportMap = $MapObject;
+    /* istanbul ignore next */
+    ExportMap = MapImplementation;
   }
 }
 
-if (ExportMap !== $MapObject) {
+if (ExportMap !== MapImplementation) {
   testMap = new ExportMap();
   const mapSupportsChaining = testMap.set(1, 2) === testMap;
 
   if (mapSupportsChaining === false) {
-    ExportMap = $MapObject;
+    /* istanbul ignore next */
+    ExportMap = MapImplementation;
   }
 }
 
-if (ExportMap !== $MapObject) {
+if (ExportMap !== MapImplementation) {
   // Chrome 38-42, node 0.11/0.12, iojs 1/2 also have a bug when the Map has a size > 4
   testMap = new ExportMap([[1, 0], [2, 0], [3, 0], [4, 0]]);
   testMap.set(-0, testMap);
@@ -926,11 +941,12 @@ if (ExportMap !== $MapObject) {
   const mapUsesSameValueZero = gets && testMap.has(0) && testMap.has(-0);
 
   if (mapUsesSameValueZero === false) {
-    ExportMap = $MapObject;
+    /* istanbul ignore next */
+    ExportMap = MapImplementation;
   }
 }
 
-if (ExportMap !== $MapObject) {
+if (ExportMap !== MapImplementation) {
   if (setPrototypeOf) {
     const MyMap = function MyMap(arg) {
       testMap = new ExportMap(arg);
@@ -940,7 +956,7 @@ if (ExportMap !== $MapObject) {
     };
 
     setPrototypeOf(MyMap, ExportMap);
-    MyMap.prototype = create(ExportMap.prototype, {constructor: {value: MyMap}});
+    MyMap.prototype = create(ExportMap.prototype, {constructor: {[VALUE]: MyMap}});
 
     let mapSupportsSubclassing = false;
     try {
@@ -954,12 +970,13 @@ if (ExportMap !== $MapObject) {
     }
 
     if (mapSupportsSubclassing === false) {
-      ExportMap = $MapObject;
+      /* istanbul ignore next */
+      ExportMap = MapImplementation;
     }
   }
 }
 
-if (ExportMap !== $MapObject) {
+if (ExportMap !== MapImplementation) {
   let mapRequiresNew;
   try {
     /* eslint-disable-next-line babel/new-cap */
@@ -969,83 +986,92 @@ if (ExportMap !== $MapObject) {
   }
 
   if (mapRequiresNew === false) {
-    ExportMap = $MapObject;
+    /* istanbul ignore next */
+    ExportMap = MapImplementation;
   }
 }
 
-if (ExportMap !== $MapObject) {
+if (ExportMap !== MapImplementation) {
   testMap = new ExportMap();
   let mapIterationThrowsStopIterator;
   try {
-    mapIterationThrowsStopIterator = testMap.keys().next().done === false;
+    mapIterationThrowsStopIterator = testMap.keys()[NEXT]()[DONE] === false;
   } catch (ignore) {
+    /* istanbul ignore next */
     mapIterationThrowsStopIterator = true;
   }
 
   if (mapIterationThrowsStopIterator) {
-    ExportMap = $MapObject;
+    /* istanbul ignore next */
+    ExportMap = MapImplementation;
   }
 }
 
 // Safari 8
-if (ExportMap !== $MapObject && isFunction(new ExportMap().keys().next) === false) {
-  ExportMap = $MapObject;
+if (ExportMap !== MapImplementation && isFunction(new ExportMap().keys()[NEXT]) === false) {
+  /* istanbul ignore next */
+  ExportMap = MapImplementation;
 }
 
-if (hasRealSymbolIterator && ExportMap !== $MapObject) {
+if (hasRealSymbolIterator && ExportMap !== MapImplementation) {
   const testMapProto = getPrototypeOf(new ExportMap().keys());
   let hasBuggyMapIterator = true;
 
   if (testMapProto) {
-    hasBuggyMapIterator = isFunction(testMapProto[$symIt]) === false;
+    hasBuggyMapIterator = isFunction(testMapProto[symIt]) === false;
   }
 
   if (hasBuggyMapIterator) {
-    ExportMap = $MapObject;
+    /* istanbul ignore next */
+    ExportMap = MapImplementation;
   }
 }
 
 let testSet;
 
-if (ExportSet !== $SetObject) {
+if (ExportSet !== SetImplementation) {
   testSet = new ExportSet();
 
-  if (isNumberType(testSet.size) === false || testSet.size !== 0) {
-    ExportMap = $MapObject;
+  if (typeof testSet[SIZE] !== 'number' || testSet[SIZE] !== 0) {
+    /* istanbul ignore next */
+    ExportMap = MapImplementation;
   } else {
-    const propsSet = ['has', 'add', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', $symIt];
+    const propsSet = ['has', 'add', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
 
-    const failedSet = some(propsSet, (method) => {
+    const failedSet = some(propsSet, function predicate(method) {
       return isFunction(testSet[method]) === false;
     });
 
     if (failedSet) {
-      ExportSet = $SetObject;
+      /* istanbul ignore next */
+      ExportSet = SetImplementation;
     }
   }
 }
 
-if (ExportSet !== $SetObject) {
+if (ExportSet !== SetImplementation) {
   testSet = new ExportSet();
   testSet.delete(0);
   testSet.add(-0);
   const setUsesSameValueZero = testSet.has(0) && testSet.has(-0);
 
   if (setUsesSameValueZero === false) {
-    ExportSet = $SetObject;
+    /* istanbul ignore next */
+    ExportSet = SetImplementation;
   }
 }
 
-if (ExportSet !== $SetObject) {
+if (ExportSet !== SetImplementation) {
   testSet = new ExportSet();
   const setSupportsChaining = testSet.add(1) === testSet;
 
   if (setSupportsChaining === false) {
-    ExportSet = $SetObject;
+    /* istanbul ignore next */
+    ExportSet = SetImplementation;
   }
 }
 
-if (ExportSet !== $SetObject) {
+if (ExportSet !== SetImplementation) {
   if (setPrototypeOf) {
     const MySet = function MySet(arg) {
       testSet = new ExportSet(arg);
@@ -1055,7 +1081,7 @@ if (ExportSet !== $SetObject) {
     };
 
     setPrototypeOf(MySet, ExportSet);
-    MySet.prototype = create(ExportSet.prototype, {constructor: {value: MySet}});
+    MySet.prototype = create(ExportSet.prototype, {constructor: {[VALUE]: MySet}});
 
     let setSupportsSubclassing = false;
     try {
@@ -1067,12 +1093,13 @@ if (ExportSet !== $SetObject) {
     }
 
     if (setSupportsSubclassing === false) {
-      ExportSet = $SetObject;
+      /* istanbul ignore next */
+      ExportSet = SetImplementation;
     }
   }
 }
 
-if (ExportSet !== $SetObject) {
+if (ExportSet !== SetImplementation) {
   let setRequiresNew;
   try {
     /* eslint-disable-next-line babel/new-cap */
@@ -1082,52 +1109,61 @@ if (ExportSet !== $SetObject) {
   }
 
   if (setRequiresNew === false) {
-    ExportSet = $SetObject;
+    /* istanbul ignore next */
+    ExportSet = SetImplementation;
   }
 }
 
-if (ExportSet !== $SetObject) {
+if (ExportSet !== SetImplementation) {
   testSet = new ExportSet();
   let setIterationThrowsStopIterator;
   try {
-    setIterationThrowsStopIterator = testSet.keys().next().done === false;
+    setIterationThrowsStopIterator = testSet.keys()[NEXT]()[DONE] === false;
   } catch (ignore) {
+    /* istanbul ignore next */
     setIterationThrowsStopIterator = true;
   }
 
   if (setIterationThrowsStopIterator) {
-    ExportSet = $SetObject;
+    /* istanbul ignore next */
+    ExportSet = SetImplementation;
   }
 }
 
 // Safari 8
-if (ExportSet !== $SetObject && isFunction(new ExportSet().keys().next) === false) {
-  ExportSet = $SetObject;
+if (ExportSet !== SetImplementation && isFunction(new ExportSet().keys()[NEXT]) === false) {
+  /* istanbul ignore next */
+  ExportSet = SetImplementation;
 }
 
-if (hasRealSymbolIterator && ExportSet !== $SetObject) {
+if (hasRealSymbolIterator && ExportSet !== SetImplementation) {
   const testSetProto = getPrototypeOf(new ExportSet().keys());
   let hasBuggySetIterator = true;
 
   if (testSetProto) {
-    hasBuggySetIterator = isFunction(testSetProto[$symIt]) === false;
+    hasBuggySetIterator = isFunction(testSetProto[symIt]) === false;
   }
 
   if (hasBuggySetIterator) {
-    ExportSet = $SetObject;
+    /* istanbul ignore next */
+    ExportSet = SetImplementation;
   }
 }
 
 const hasCommon = function hasCommon(object) {
   return (
     isObjectLike(object) &&
-    isFunction(object[$symIt]) &&
-    isBoolean(object['[[changed]]']) &&
-    isObjectLike(object['[[id]]']) &&
-    isArray(object['[[key]]']) &&
-    isArray(object['[[order]]']) &&
-    isNumberType(object.size)
+    isFunction(object[symIt]) &&
+    isBoolean(object[PROP_CHANGED]) &&
+    isObjectLike(object[PROP_ID]) &&
+    isArray(object[PROP_KEY]) &&
+    isArray(object[PROP_ORDER]) &&
+    typeof object[SIZE] === 'number'
   );
+};
+
+export const isMapImplementation = function isMapImplementation(object) {
+  return $isMap(object) || (hasCommon(object) && isArray(object[PROP_VALUE]));
 };
 
 /**
@@ -1137,21 +1173,11 @@ const hasCommon = function hasCommon(object) {
  * @returns {boolean} `true` if the `object` is a `Map`,
  *  else `false`.
  */
-let $$isMap;
+export const isMap = ExportMap === MapImplementation ? isMapImplementation : $isMap;
 
-if (ExportMap === $MapObject) {
-  $$isMap = function isMap(object) {
-    if ($isMap(object)) {
-      return true;
-    }
-
-    return hasCommon(object) && isArray(object['[[value]]']);
-  };
-} else {
-  $$isMap = $isMap;
-}
-
-export const isMap = $$isMap;
+export const isSetImplementation = function isSetImplementation(object) {
+  return $isSet(object) || (hasCommon(object) && typeof object[PROP_VALUE] === 'undefined');
+};
 
 /**
  * Determine if an `object` is a `Set`.
@@ -1160,18 +1186,4 @@ export const isMap = $$isMap;
  * @returns {boolean} `true` if the `object` is a `Set`,
  *  else `false`.
  */
-let $$isSet;
-
-if (ExportSet === $SetObject) {
-  $$isSet = function isSet(object) {
-    if (isSet(object)) {
-      return true;
-    }
-
-    return hasCommon(object) && typeof object['[[value]]'] === 'undefined';
-  };
-} else {
-  $$isSet = $isSet;
-}
-
-export const isSet = $$isSet;
+export const isSet = ExportSet === SetImplementation ? isSetImplementation : $isSet;
