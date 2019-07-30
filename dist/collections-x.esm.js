@@ -1,7 +1,5 @@
 var _size, _size2;
 
-function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
-
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
@@ -938,105 +936,87 @@ defineProperty(MapImplementation.prototype, symIt, _defineProperty({}, VALUE, Ma
  * Determine whether to use shim or native.
  */
 
-var ExportMap = MapImplementation;
-var ExportSet = SetImplementation;
+/* Map fixes */
 
-(function fix1() {
-  try {
-    /* eslint-disable-next-line compat/compat */
-    ExportMap = new Map() ? Map : MapImplementation;
-  } catch (ignore) {// empty
-  }
-})();
+var performMapFixes = function performMapFixes() {
+  var Export = null;
 
-(function fix2() {
-  try {
-    /* eslint-disable-next-line compat/compat */
-    ExportSet = new Set() ? Set : SetImplementation;
-  } catch (ignore) {// empty
-  }
-})();
+  var peformMapFix = function peformMapFix(fixee) {
+    if (Export !== MapImplementation) {
+      fixee();
+    }
+  };
 
-(function fix3() {
-  var _this = this;
-
-  if (ExportMap !== MapImplementation) {
-    var testMap = new ExportMap();
+  peformMapFix(function fixee() {
+    try {
+      /* eslint-disable-next-line compat/compat */
+      Export = new Map() ? Map : MapImplementation;
+    } catch (ignore) {// empty
+    }
+  });
+  peformMapFix(function fixee() {
+    var testMap = new Export();
 
     if (typeof testMap[SIZE] !== 'number' || testMap[SIZE] !== 0) {
       /* istanbul ignore next */
-      ExportMap = MapImplementation;
+      Export = MapImplementation;
     } else {
       var propsMap = ['has', 'set', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
-      var failedMap = some(propsMap, function (method) {
-        _newArrowCheck(this, _this);
-
+      var failedMap = some(propsMap, function predicate(method) {
         return isFunction(testMap[method]) === false;
-      }.bind(this));
+      });
 
       if (failedMap) {
         /* istanbul ignore next */
-        ExportMap = MapImplementation;
+        Export = MapImplementation;
       }
     }
-  }
-})();
-
-(function fix4() {
-  if (ExportMap !== MapImplementation) {
+  });
+  peformMapFix(function fixee() {
     // Safari 8, for example, doesn't accept an iterable.
     var mapAcceptsArguments = false;
 
     try {
-      mapAcceptsArguments = new ExportMap([[1, 2]]).get(1) === 2;
+      mapAcceptsArguments = new Export([[1, 2]]).get(1) === 2;
     } catch (ignore) {// empty
     }
 
     if (mapAcceptsArguments === false) {
       /* istanbul ignore next */
-      ExportMap = MapImplementation;
+      Export = MapImplementation;
     }
-  }
-})();
-
-(function fix5() {
-  if (ExportMap !== MapImplementation) {
-    var testMap = new ExportMap();
+  });
+  peformMapFix(function fixee() {
+    var testMap = new Export();
     var mapSupportsChaining = testMap.set(1, 2) === testMap;
 
     if (mapSupportsChaining === false) {
       /* istanbul ignore next */
-      ExportMap = MapImplementation;
+      Export = MapImplementation;
     }
-  }
-})();
-
-(function fix6() {
-  if (ExportMap !== MapImplementation) {
+  });
+  peformMapFix(function fixee() {
     // Chrome 38-42, node 0.11/0.12, iojs 1/2 also have a bug when the Map has a size > 4
-    var testMap = new ExportMap([[1, 0], [2, 0], [3, 0], [4, 0]]);
+    var testMap = new Export([[1, 0], [2, 0], [3, 0], [4, 0]]);
     testMap.set(-0, testMap);
     var gets = testMap.get(0) === testMap && testMap.get(-0) === testMap;
     var mapUsesSameValueZero = gets && testMap.has(0) && testMap.has(-0);
 
     if (mapUsesSameValueZero === false) {
       /* istanbul ignore next */
-      ExportMap = MapImplementation;
+      Export = MapImplementation;
     }
-  }
-})();
-
-(function fix7() {
-  if (ExportMap !== MapImplementation) {
+  });
+  peformMapFix(function fixee() {
     if (setPrototypeOf) {
       var MyMap = function MyMap(arg) {
-        var testMap = new ExportMap(arg);
+        var testMap = new Export(arg);
         setPrototypeOf(testMap, MyMap.prototype);
         return testMap;
       };
 
-      setPrototypeOf(MyMap, ExportMap);
-      MyMap.prototype = create(ExportMap.prototype, {
+      setPrototypeOf(MyMap, Export);
+      MyMap.prototype = create(Export.prototype, {
         constructor: _defineProperty({}, VALUE, MyMap)
       });
       var mapSupportsSubclassing = false;
@@ -1052,33 +1032,27 @@ var ExportSet = SetImplementation;
 
       if (mapSupportsSubclassing === false) {
         /* istanbul ignore next */
-        ExportMap = MapImplementation;
+        Export = MapImplementation;
       }
     }
-  }
-})();
-
-(function fix8() {
-  if (ExportMap !== MapImplementation) {
+  });
+  peformMapFix(function fixee() {
     var mapRequiresNew;
 
     try {
       /* eslint-disable-next-line babel/new-cap */
-      mapRequiresNew = !(ExportMap() instanceof ExportMap);
+      mapRequiresNew = !(Export() instanceof Export);
     } catch (e) {
       mapRequiresNew = e instanceof TypeError;
     }
 
     if (mapRequiresNew === false) {
       /* istanbul ignore next */
-      ExportMap = MapImplementation;
+      Export = MapImplementation;
     }
-  }
-})();
-
-(function fix9() {
-  if (ExportMap !== MapImplementation) {
-    var testMap = new ExportMap();
+  });
+  peformMapFix(function fixee() {
+    var testMap = new Export();
     var mapIterationThrowsStopIterator;
 
     try {
@@ -1090,42 +1064,58 @@ var ExportSet = SetImplementation;
 
     if (mapIterationThrowsStopIterator) {
       /* istanbul ignore next */
-      ExportMap = MapImplementation;
+      Export = MapImplementation;
     }
-  }
-})();
-
-(function fix10() {
-  // Safari 8
-  if (ExportMap !== MapImplementation && isFunction(new ExportMap().keys()[NEXT]) === false) {
-    /* istanbul ignore next */
-    ExportMap = MapImplementation;
-  }
-})();
-
-(function fix11() {
-  if (hasRealSymbolIterator && ExportMap !== MapImplementation) {
-    var testMapProto = getPrototypeOf(new ExportMap().keys());
-    var hasBuggyMapIterator = true;
-
-    if (testMapProto) {
-      hasBuggyMapIterator = isFunction(testMapProto[symIt]) === false;
-    }
-
-    if (hasBuggyMapIterator) {
+  });
+  peformMapFix(function fixee() {
+    // Safari 8
+    if (isFunction(new Export().keys()[NEXT]) === false) {
       /* istanbul ignore next */
-      ExportMap = MapImplementation;
+      Export = MapImplementation;
     }
-  }
-})();
+  });
+  peformMapFix(function fixee() {
+    if (hasRealSymbolIterator) {
+      var testMapProto = getPrototypeOf(new Export().keys());
+      var hasBuggyMapIterator = true;
 
-(function fix12() {
-  if (ExportSet !== SetImplementation) {
-    var testSet = new ExportSet();
+      if (testMapProto) {
+        hasBuggyMapIterator = isFunction(testMapProto[symIt]) === false;
+      }
+
+      if (hasBuggyMapIterator) {
+        /* istanbul ignore next */
+        Export = MapImplementation;
+      }
+    }
+  });
+  return Export;
+};
+/* Set fixes */
+
+
+var performSetFixes = function performSetFixes() {
+  var Export = null;
+
+  var peformSetFix = function peformSetFix(fixee) {
+    if (Export !== SetImplementation) {
+      fixee();
+    }
+  };
+
+  peformSetFix(function fixee() {
+    try {
+      /* eslint-disable-next-line compat/compat */
+      Export = new Set() ? Set : SetImplementation;
+    } catch (ignore) {// empty
+    }
+  });
+  peformSetFix(function fixee() {
+    var testSet = new Export();
 
     if (typeof testSet[SIZE] !== 'number' || testSet[SIZE] !== 0) {
       /* istanbul ignore next */
-      ExportMap = MapImplementation;
+      Export = SetImplementation;
     } else {
       var propsSet = ['has', 'add', 'clear', 'delete', 'forEach', 'values', 'entries', 'keys', symIt];
       var failedSet = some(propsSet, function predicate(method) {
@@ -1134,49 +1124,40 @@ var ExportSet = SetImplementation;
 
       if (failedSet) {
         /* istanbul ignore next */
-        ExportSet = SetImplementation;
+        Export = SetImplementation;
       }
     }
-  }
-})();
-
-(function fix13() {
-  if (ExportSet !== SetImplementation) {
-    var testSet = new ExportSet();
+  });
+  peformSetFix(function fixee() {
+    var testSet = new Export();
     testSet.delete(0);
     testSet.add(-0);
     var setUsesSameValueZero = testSet.has(0) && testSet.has(-0);
 
     if (setUsesSameValueZero === false) {
       /* istanbul ignore next */
-      ExportSet = SetImplementation;
+      Export = SetImplementation;
     }
-  }
-})();
-
-(function fix14() {
-  if (ExportSet !== SetImplementation) {
-    var testSet = new ExportSet();
+  });
+  peformSetFix(function fixee() {
+    var testSet = new Export();
     var setSupportsChaining = testSet.add(1) === testSet;
 
     if (setSupportsChaining === false) {
       /* istanbul ignore next */
-      ExportSet = SetImplementation;
+      Export = SetImplementation;
     }
-  }
-})();
-
-(function fix15() {
-  if (ExportSet !== SetImplementation) {
+  });
+  peformSetFix(function fixee() {
     if (setPrototypeOf) {
       var MySet = function MySet(arg) {
-        var testSet = new ExportSet(arg);
+        var testSet = new Export(arg);
         setPrototypeOf(testSet, MySet.prototype);
         return testSet;
       };
 
-      setPrototypeOf(MySet, ExportSet);
-      MySet.prototype = create(ExportSet.prototype, {
+      setPrototypeOf(MySet, Export);
+      MySet.prototype = create(Export.prototype, {
         constructor: _defineProperty({}, VALUE, MySet)
       });
       var setSupportsSubclassing = false;
@@ -1190,33 +1171,27 @@ var ExportSet = SetImplementation;
 
       if (setSupportsSubclassing === false) {
         /* istanbul ignore next */
-        ExportSet = SetImplementation;
+        Export = SetImplementation;
       }
     }
-  }
-})();
-
-(function fix16() {
-  if (ExportSet !== SetImplementation) {
+  });
+  peformSetFix(function fixee() {
     var setRequiresNew;
 
     try {
       /* eslint-disable-next-line babel/new-cap */
-      setRequiresNew = !(ExportSet() instanceof ExportSet);
+      setRequiresNew = !(Export() instanceof Export);
     } catch (e) {
       setRequiresNew = e instanceof TypeError;
     }
 
     if (setRequiresNew === false) {
       /* istanbul ignore next */
-      ExportSet = SetImplementation;
+      Export = SetImplementation;
     }
-  }
-})();
-
-(function fix17() {
-  if (ExportSet !== SetImplementation) {
-    var testSet = new ExportSet();
+  });
+  peformSetFix(function fixee() {
+    var testSet = new Export();
     var setIterationThrowsStopIterator;
 
     try {
@@ -1228,37 +1203,36 @@ var ExportSet = SetImplementation;
 
     if (setIterationThrowsStopIterator) {
       /* istanbul ignore next */
-      ExportSet = SetImplementation;
+      Export = SetImplementation;
     }
-  }
-})();
-
-(function fix18() {
-  // Safari 8
-  if (ExportSet !== SetImplementation && isFunction(new ExportSet().keys()[NEXT]) === false) {
-    /* istanbul ignore next */
-    ExportSet = SetImplementation;
-  }
-})();
-
-(function fix19() {
-  if (hasRealSymbolIterator && ExportSet !== SetImplementation) {
-    var testSetProto = getPrototypeOf(new ExportSet().keys());
-    var hasBuggySetIterator = true;
-
-    if (testSetProto) {
-      hasBuggySetIterator = isFunction(testSetProto[symIt]) === false;
-    }
-
-    if (hasBuggySetIterator) {
+  });
+  peformSetFix(function fixee() {
+    // Safari 8
+    if (isFunction(new Export().keys()[NEXT]) === false) {
       /* istanbul ignore next */
-      ExportSet = SetImplementation;
+      Export = SetImplementation;
     }
-  }
-})();
+  });
+  peformSetFix(function fixee() {
+    if (hasRealSymbolIterator) {
+      var testSetProto = getPrototypeOf(new Export().keys());
+      var hasBuggySetIterator = true;
 
-export var MapConstructor = ExportMap;
-export var SetConstructor = ExportSet;
+      if (testSetProto) {
+        hasBuggySetIterator = isFunction(testSetProto[symIt]) === false;
+      }
+
+      if (hasBuggySetIterator) {
+        /* istanbul ignore next */
+        Export = SetImplementation;
+      }
+    }
+  });
+  return Export;
+};
+
+export var MapConstructor = performMapFixes();
+export var SetConstructor = performSetFixes();
 
 var hasImplementationProps = function hasImplementationProps(object) {
   return isBoolean(object[PROP_CHANGED]) && isObjectLike(object[PROP_ID]) && isArray(object[PROP_KEY]) && isArray(object[PROP_ORDER]) && typeof object[SIZE] === 'number';
@@ -1279,7 +1253,7 @@ export var isMapImplementation = function isMapImplementation(object) {
  *  else `false`.
  */
 
-export var isMap = ExportMap === MapImplementation ? isMapImplementation : $isMap;
+export var isMap = MapConstructor === MapImplementation ? isMapImplementation : $isMap;
 export var isSetImplementation = function isSetImplementation(object) {
   return $isSet(object) || hasCommon(object) && typeof object[PROP_VALUE] === 'undefined';
 };
@@ -1291,6 +1265,6 @@ export var isSetImplementation = function isSetImplementation(object) {
  *  else `false`.
  */
 
-export var isSet = ExportSet === SetImplementation ? isSetImplementation : $isSet;
+export var isSet = SetConstructor === SetImplementation ? isSetImplementation : $isSet;
 
 //# sourceMappingURL=collections-x.esm.js.map
