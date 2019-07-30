@@ -61,14 +61,28 @@ const hasRealSymbolIterator = hasSymbolSupport && typeof Symbol.iterator === 'sy
 const hasFakeSymbolIterator = typeof Symbol === 'object' && typeof Symbol.iterator === 'string';
 const hasSymbolIterator = hasRealSymbolIterator || hasFakeSymbolIterator;
 
+const getOtherSymbolIterator = function getOtherSymbolIterator(iterable) {
+  if (iterable[ES6_SHIM_ITERATOR]) {
+    return ES6_SHIM_ITERATOR;
+  }
+
+  if (iterable[AT_AT_ITERATOR]) {
+    return AT_AT_ITERATOR;
+  }
+
+  return null;
+};
+
 const getSymIt = function getSymIt() {
   if (hasSymbolIterator) {
     /* eslint-disable-next-line compat/compat */
     return Symbol.iterator;
   }
 
-  if (isFunction([][ES6_SHIM_ITERATOR])) {
-    return ES6_SHIM_ITERATOR;
+  const result = getOtherSymbolIterator([]);
+
+  if (typeof result === 'string' && isFunction([][result])) {
+    return result;
   }
 
   return AT_AT_ITERATOR;
@@ -94,16 +108,22 @@ const getSymbolIterator = function getSymbolIterator(iterable) {
       return symIt;
     }
 
-    if (iterable[ES6_SHIM_ITERATOR]) {
-      return ES6_SHIM_ITERATOR;
-    }
+    const result = getOtherSymbolIterator(iterable);
 
-    if (iterable[AT_AT_ITERATOR]) {
-      return AT_AT_ITERATOR;
+    if (typeof result === 'string') {
+      return result;
     }
   }
 
   return UNDEFINED;
+};
+
+const assertIterableEntryObject = function assertIterableEntryObject(kind, next) {
+  if (kind === MAP) {
+    if (isArrayLike(next[VALUE]) === false || next[VALUE].length < 2) {
+      throw new TypeError(`Iterator value ${isArrayLike(next[VALUE])} is not an entry object`);
+    }
+  }
 };
 
 const parseIterable = function parseIterable(args) {
@@ -111,11 +131,7 @@ const parseIterable = function parseIterable(args) {
   const iterator = iterable[symbolIterator]();
   let next = iterator[NEXT]();
 
-  if (kind === MAP) {
-    if (isArrayLike(next[VALUE]) === false || next[VALUE].length < 2) {
-      throw new TypeError(`Iterator value ${isArrayLike(next[VALUE])} is not an entry object`);
-    }
-  }
+  assertIterableEntryObject(kind, next);
 
   while (next[DONE] === false) {
     const key = kind === MAP ? next[VALUE][0] : next[VALUE];
@@ -138,12 +154,16 @@ const parseIterable = function parseIterable(args) {
   }
 };
 
-const parseString = function parseString(args) {
-  const [kind, iterable, context] = args;
-
+const assertStringEntryObject = function assertStringEntryObject(kind, iterable) {
   if (kind === MAP) {
     throw new TypeError(`Iterator value ${charAt.call(iterable, 0)} is not an entry object`);
   }
+};
+
+const parseString = function parseString(args) {
+  const [kind, iterable, context] = args;
+
+  assertStringEntryObject(kind, iterable);
 
   let next = 0;
   while (next < iterable.length) {
@@ -1153,16 +1173,18 @@ if (hasRealSymbolIterator && ExportSet !== SetImplementation) {
   }
 }
 
-const hasCommon = function hasCommon(object) {
+const hasImplementationProps = function hasImplementationProps(object) {
   return (
-    isObjectLike(object) &&
-    isFunction(object[symIt]) &&
     isBoolean(object[PROP_CHANGED]) &&
     isObjectLike(object[PROP_ID]) &&
     isArray(object[PROP_KEY]) &&
     isArray(object[PROP_ORDER]) &&
     typeof object[SIZE] === 'number'
   );
+};
+
+const hasCommon = function hasCommon(object) {
+  return isObjectLike(object) && isFunction(object[symIt]) && hasImplementationProps(object);
 };
 
 export const isMapImplementation = function isMapImplementation(object) {

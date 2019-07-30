@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-30T13:10:32.934Z",
+  "date": "2019-07-30T13:30:56.139Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
-  "hash": "e4d58f95e47cbe5854b3",
+  "hash": "e52a21586d1755f96ee8",
   "license": "MIT",
   "version": "3.0.12"
 }
@@ -4728,14 +4728,28 @@ var hasRealSymbolIterator = has_symbol_support_x_esm && collections_x_esm_typeof
 var hasFakeSymbolIterator = (typeof Symbol === "undefined" ? "undefined" : collections_x_esm_typeof(Symbol)) === 'object' && typeof Symbol.iterator === 'string';
 var hasSymbolIterator = hasRealSymbolIterator || hasFakeSymbolIterator;
 
+var getOtherSymbolIterator = function getOtherSymbolIterator(iterable) {
+  if (iterable[ES6_SHIM_ITERATOR]) {
+    return ES6_SHIM_ITERATOR;
+  }
+
+  if (iterable[AT_AT_ITERATOR]) {
+    return AT_AT_ITERATOR;
+  }
+
+  return null;
+};
+
 var collections_x_esm_getSymIt = function getSymIt() {
   if (hasSymbolIterator) {
     /* eslint-disable-next-line compat/compat */
     return Symbol.iterator;
   }
 
-  if (is_function_x_esm([][ES6_SHIM_ITERATOR])) {
-    return ES6_SHIM_ITERATOR;
+  var result = getOtherSymbolIterator([]);
+
+  if (typeof result === 'string' && is_function_x_esm([][result])) {
+    return result;
   }
 
   return AT_AT_ITERATOR;
@@ -4762,16 +4776,22 @@ var collections_x_esm_getSymbolIterator = function getSymbolIterator(iterable) {
       return symIt;
     }
 
-    if (iterable[ES6_SHIM_ITERATOR]) {
-      return ES6_SHIM_ITERATOR;
-    }
+    var result = getOtherSymbolIterator(iterable);
 
-    if (iterable[AT_AT_ITERATOR]) {
-      return AT_AT_ITERATOR;
+    if (typeof result === 'string') {
+      return result;
     }
   }
 
   return collections_x_esm_UNDEFINED;
+};
+
+var collections_x_esm_assertIterableEntryObject = function assertIterableEntryObject(kind, next) {
+  if (kind === MAP) {
+    if (is_array_like_x_esm(next[VALUE]) === false || next[VALUE].length < 2) {
+      throw new TypeError("Iterator value ".concat(is_array_like_x_esm(next[VALUE]), " is not an entry object"));
+    }
+  }
 };
 
 var collections_x_esm_parseIterable = function parseIterable(args) {
@@ -4783,12 +4803,7 @@ var collections_x_esm_parseIterable = function parseIterable(args) {
 
   var iterator = iterable[symbolIterator]();
   var next = iterator[NEXT]();
-
-  if (kind === MAP) {
-    if (is_array_like_x_esm(next[VALUE]) === false || next[VALUE].length < 2) {
-      throw new TypeError("Iterator value ".concat(is_array_like_x_esm(next[VALUE]), " is not an entry object"));
-    }
-  }
+  collections_x_esm_assertIterableEntryObject(kind, next);
 
   while (next[DONE] === false) {
     var key = kind === MAP ? next[VALUE][0] : next[VALUE];
@@ -4811,16 +4826,19 @@ var collections_x_esm_parseIterable = function parseIterable(args) {
   }
 };
 
+var assertStringEntryObject = function assertStringEntryObject(kind, iterable) {
+  if (kind === MAP) {
+    throw new TypeError("Iterator value ".concat(collections_x_esm_charAt.call(iterable, 0), " is not an entry object"));
+  }
+};
+
 var collections_x_esm_parseString = function parseString(args) {
   var _args2 = _slicedToArray(args, 3),
       kind = _args2[0],
       iterable = _args2[1],
       context = _args2[2];
 
-  if (kind === MAP) {
-    throw new TypeError("Iterator value ".concat(collections_x_esm_charAt.call(iterable, 0), " is not an entry object"));
-  }
-
+  assertStringEntryObject(kind, iterable);
   var next = 0;
 
   while (next < iterable.length) {
@@ -5816,8 +5834,12 @@ if (hasRealSymbolIterator && ExportSet !== SetImplementation) {
   }
 }
 
+var collections_x_esm_hasImplementationProps = function hasImplementationProps(object) {
+  return is_boolean_object_default()(object[PROP_CHANGED]) && is_object_like_x_esm(object[PROP_ID]) && is_array_x_esm(object[PROP_KEY]) && is_array_x_esm(object[PROP_ORDER]) && typeof object[SIZE] === 'number';
+};
+
 var collections_x_esm_hasCommon = function hasCommon(object) {
-  return is_object_like_x_esm(object) && is_function_x_esm(object[symIt]) && is_boolean_object_default()(object[PROP_CHANGED]) && is_object_like_x_esm(object[PROP_ID]) && is_array_x_esm(object[PROP_KEY]) && is_array_x_esm(object[PROP_ORDER]) && typeof object[SIZE] === 'number';
+  return is_object_like_x_esm(object) && is_function_x_esm(object[symIt]) && collections_x_esm_hasImplementationProps(object);
 };
 
 var collections_x_esm_isMapImplementation = function isMapImplementation(object) {

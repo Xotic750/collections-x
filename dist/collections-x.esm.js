@@ -80,14 +80,28 @@ var hasRealSymbolIterator = hasSymbolSupport && _typeof(Symbol.iterator) === 'sy
 var hasFakeSymbolIterator = (typeof Symbol === "undefined" ? "undefined" : _typeof(Symbol)) === 'object' && typeof Symbol.iterator === 'string';
 var hasSymbolIterator = hasRealSymbolIterator || hasFakeSymbolIterator;
 
+var getOtherSymbolIterator = function getOtherSymbolIterator(iterable) {
+  if (iterable[ES6_SHIM_ITERATOR]) {
+    return ES6_SHIM_ITERATOR;
+  }
+
+  if (iterable[AT_AT_ITERATOR]) {
+    return AT_AT_ITERATOR;
+  }
+
+  return null;
+};
+
 var getSymIt = function getSymIt() {
   if (hasSymbolIterator) {
     /* eslint-disable-next-line compat/compat */
     return Symbol.iterator;
   }
 
-  if (isFunction([][ES6_SHIM_ITERATOR])) {
-    return ES6_SHIM_ITERATOR;
+  var result = getOtherSymbolIterator([]);
+
+  if (typeof result === 'string' && isFunction([][result])) {
+    return result;
   }
 
   return AT_AT_ITERATOR;
@@ -114,16 +128,22 @@ var getSymbolIterator = function getSymbolIterator(iterable) {
       return symIt;
     }
 
-    if (iterable[ES6_SHIM_ITERATOR]) {
-      return ES6_SHIM_ITERATOR;
-    }
+    var result = getOtherSymbolIterator(iterable);
 
-    if (iterable[AT_AT_ITERATOR]) {
-      return AT_AT_ITERATOR;
+    if (typeof result === 'string') {
+      return result;
     }
   }
 
   return UNDEFINED;
+};
+
+var assertIterableEntryObject = function assertIterableEntryObject(kind, next) {
+  if (kind === MAP) {
+    if (isArrayLike(next[VALUE]) === false || next[VALUE].length < 2) {
+      throw new TypeError("Iterator value ".concat(isArrayLike(next[VALUE]), " is not an entry object"));
+    }
+  }
 };
 
 var parseIterable = function parseIterable(args) {
@@ -135,12 +155,7 @@ var parseIterable = function parseIterable(args) {
 
   var iterator = iterable[symbolIterator]();
   var next = iterator[NEXT]();
-
-  if (kind === MAP) {
-    if (isArrayLike(next[VALUE]) === false || next[VALUE].length < 2) {
-      throw new TypeError("Iterator value ".concat(isArrayLike(next[VALUE]), " is not an entry object"));
-    }
-  }
+  assertIterableEntryObject(kind, next);
 
   while (next[DONE] === false) {
     var key = kind === MAP ? next[VALUE][0] : next[VALUE];
@@ -163,16 +178,19 @@ var parseIterable = function parseIterable(args) {
   }
 };
 
+var assertStringEntryObject = function assertStringEntryObject(kind, iterable) {
+  if (kind === MAP) {
+    throw new TypeError("Iterator value ".concat(charAt.call(iterable, 0), " is not an entry object"));
+  }
+};
+
 var parseString = function parseString(args) {
   var _args2 = _slicedToArray(args, 3),
       kind = _args2[0],
       iterable = _args2[1],
       context = _args2[2];
 
-  if (kind === MAP) {
-    throw new TypeError("Iterator value ".concat(charAt.call(iterable, 0), " is not an entry object"));
-  }
-
+  assertStringEntryObject(kind, iterable);
   var next = 0;
 
   while (next < iterable.length) {
@@ -1168,8 +1186,12 @@ if (hasRealSymbolIterator && ExportSet !== SetImplementation) {
   }
 }
 
+var hasImplementationProps = function hasImplementationProps(object) {
+  return isBoolean(object[PROP_CHANGED]) && isObjectLike(object[PROP_ID]) && isArray(object[PROP_KEY]) && isArray(object[PROP_ORDER]) && typeof object[SIZE] === 'number';
+};
+
 var hasCommon = function hasCommon(object) {
-  return isObjectLike(object) && isFunction(object[symIt]) && isBoolean(object[PROP_CHANGED]) && isObjectLike(object[PROP_ID]) && isArray(object[PROP_KEY]) && isArray(object[PROP_ORDER]) && typeof object[SIZE] === 'number';
+  return isObjectLike(object) && isFunction(object[symIt]) && hasImplementationProps(object);
 };
 
 export var isMapImplementation = function isMapImplementation(object) {
