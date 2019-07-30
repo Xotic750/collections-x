@@ -126,6 +126,25 @@ const assertIterableEntryObject = function assertIterableEntryObject(kind, next)
   }
 };
 
+const setPropsIterable = function setPropsIterable(args) {
+  const [kind, context, next] = args;
+  const key = kind === MAP ? next[VALUE][0] : next[VALUE];
+  const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
+
+  if (indexof < 0) {
+    if (kind === MAP) {
+      push.call(context[PROP_VALUE], next[VALUE][1]);
+    }
+
+    push.call(context[PROP_KEY], key);
+    push.call(context[PROP_ORDER], context[PROP_ID].get());
+    context[PROP_ID][NEXT]();
+  } else if (kind === MAP) {
+    /* eslint-disable-next-line prefer-destructuring */
+    context[PROP_VALUE][indexof] = next[VALUE][1];
+  }
+};
+
 const parseIterable = function parseIterable(args) {
   const [kind, iterable, context, symbolIterator] = args;
   const iterator = iterable[symbolIterator]();
@@ -134,22 +153,7 @@ const parseIterable = function parseIterable(args) {
   assertIterableEntryObject(kind, next);
 
   while (next[DONE] === false) {
-    const key = kind === MAP ? next[VALUE][0] : next[VALUE];
-    const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
-
-    if (indexof < 0) {
-      if (kind === MAP) {
-        push.call(context[PROP_VALUE], next[VALUE][1]);
-      }
-
-      push.call(context[PROP_KEY], key);
-      push.call(context[PROP_ORDER], context[PROP_ID].get());
-      context[PROP_ID][NEXT]();
-    } else if (kind === MAP) {
-      /* eslint-disable-next-line prefer-destructuring */
-      context[PROP_VALUE][indexof] = next[VALUE][1];
-    }
-
+    setPropsIterable([kind, context, next]);
     next = iterator[NEXT]();
   }
 };
@@ -160,6 +164,39 @@ const assertStringEntryObject = function assertStringEntryObject(kind, iterable)
   }
 };
 
+const getCharsString = function getCharsString(iterable, next) {
+  return {
+    char1: charAt.call(iterable, next),
+    char2: charAt.call(iterable, next + 1),
+  };
+};
+
+const setContextString = function setContextString(context, key) {
+  const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
+
+  if (indexof < 0) {
+    push.call(context[PROP_KEY], key);
+    push.call(context[PROP_ORDER], context[PROP_ID].get());
+    context[PROP_ID][NEXT]();
+  }
+};
+
+const getNextKey = function getNextKey(iterable, next) {
+  const {char1, char2} = getCharsString(iterable, next);
+
+  if (isSurrogatePair(char1, char2)) {
+    return {
+      key: char1 + char2,
+      nxt: next + 1,
+    };
+  }
+
+  return {
+    key: char1,
+    nxt: next,
+  };
+};
+
 const parseString = function parseString(args) {
   const [kind, iterable, context] = args;
 
@@ -167,26 +204,35 @@ const parseString = function parseString(args) {
 
   let next = 0;
   while (next < iterable.length) {
-    const char1 = charAt.call(iterable, next);
-    const char2 = charAt.call(iterable, next + 1);
-    let key;
+    const nextKey = getNextKey(iterable, next);
+    next = nextKey.nxt;
 
-    if (isSurrogatePair(char1, char2)) {
-      key = char1 + char2;
-      next += 1;
-    } else {
-      key = char1;
-    }
-
-    const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
-
-    if (indexof < 0) {
-      push.call(context[PROP_KEY], key);
-      push.call(context[PROP_ORDER], context[PROP_ID].get());
-      context[PROP_ID][NEXT]();
-    }
-
+    setContextString(context, nextKey.key);
     next += 1;
+  }
+};
+
+const assertArrayLikeIterable = function assertArrayLikeIterable(iterable, next) {
+  if (isPrimitive(iterable[next])) {
+    throw new TypeError(`Iterator value ${isArrayLike(next[VALUE])} is not an entry object`);
+  }
+};
+
+const setContextArrayLike = function setContextArrayLike(args) {
+  const [kind, context, key, iterable, next] = args;
+  const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
+
+  if (indexof < 0) {
+    if (kind === MAP) {
+      push.call(context[PROP_VALUE], iterable[next][1]);
+    }
+
+    push.call(context[PROP_KEY], key);
+    push.call(context[PROP_ORDER], context[PROP_ID].get());
+    context[PROP_ID][NEXT]();
+  } else if (kind === MAP) {
+    /* eslint-disable-next-line prefer-destructuring */
+    context[PROP_VALUE][indexof] = iterable[next][1];
   }
 };
 
@@ -197,9 +243,7 @@ const parseArrayLike = function parseArrayLike(args) {
     let key;
 
     if (kind === MAP) {
-      if (isPrimitive(iterable[next])) {
-        throw new TypeError(`Iterator value ${isArrayLike(next[VALUE])} is not an entry object`);
-      }
+      assertArrayLikeIterable(iterable, next);
 
       /* eslint-disable-next-line prefer-destructuring */
       key = iterable[next][0];
@@ -207,21 +251,7 @@ const parseArrayLike = function parseArrayLike(args) {
       key = iterable[next];
     }
 
-    const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
-
-    if (indexof < 0) {
-      if (kind === MAP) {
-        push.call(context[PROP_VALUE], iterable[next][1]);
-      }
-
-      push.call(context[PROP_KEY], key);
-      push.call(context[PROP_ORDER], context[PROP_ID].get());
-      context[PROP_ID][NEXT]();
-    } else if (kind === MAP) {
-      /* eslint-disable-next-line prefer-destructuring */
-      context[PROP_VALUE][indexof] = iterable[next][1];
-    }
-
+    setContextArrayLike([kind, context, key, iterable, next]);
     next += 1;
   }
 };

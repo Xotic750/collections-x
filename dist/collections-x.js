@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-30T13:30:56.139Z",
+  "date": "2019-07-30T14:03:14.453Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
-  "hash": "e52a21586d1755f96ee8",
+  "hash": "239df744918fc114333c",
   "license": "MIT",
   "version": "3.0.12"
 }
@@ -4794,34 +4794,42 @@ var collections_x_esm_assertIterableEntryObject = function assertIterableEntryOb
   }
 };
 
-var collections_x_esm_parseIterable = function parseIterable(args) {
-  var _args = _slicedToArray(args, 4),
+var collections_x_esm_setPropsIterable = function setPropsIterable(args) {
+  var _args = _slicedToArray(args, 3),
       kind = _args[0],
-      iterable = _args[1],
-      context = _args[2],
-      symbolIterator = _args[3];
+      context = _args[1],
+      next = _args[2];
+
+  var key = kind === MAP ? next[VALUE][0] : next[VALUE];
+  var indexof = index_of_x_esm(assert_is_object_x_esm(context)[PROP_KEY], key, SAMEVALUEZERO);
+
+  if (indexof < 0) {
+    if (kind === MAP) {
+      push.call(context[PROP_VALUE], next[VALUE][1]);
+    }
+
+    push.call(context[PROP_KEY], key);
+    push.call(context[PROP_ORDER], context[PROP_ID].get());
+    context[PROP_ID][NEXT]();
+  } else if (kind === MAP) {
+    /* eslint-disable-next-line prefer-destructuring */
+    context[PROP_VALUE][indexof] = next[VALUE][1];
+  }
+};
+
+var parseIterable = function parseIterable(args) {
+  var _args2 = _slicedToArray(args, 4),
+      kind = _args2[0],
+      iterable = _args2[1],
+      context = _args2[2],
+      symbolIterator = _args2[3];
 
   var iterator = iterable[symbolIterator]();
   var next = iterator[NEXT]();
   collections_x_esm_assertIterableEntryObject(kind, next);
 
   while (next[DONE] === false) {
-    var key = kind === MAP ? next[VALUE][0] : next[VALUE];
-    var indexof = index_of_x_esm(assert_is_object_x_esm(context)[PROP_KEY], key, SAMEVALUEZERO);
-
-    if (indexof < 0) {
-      if (kind === MAP) {
-        push.call(context[PROP_VALUE], next[VALUE][1]);
-      }
-
-      push.call(context[PROP_KEY], key);
-      push.call(context[PROP_ORDER], context[PROP_ID].get());
-      context[PROP_ID][NEXT]();
-    } else if (kind === MAP) {
-      /* eslint-disable-next-line prefer-destructuring */
-      context[PROP_VALUE][indexof] = next[VALUE][1];
-    }
-
+    collections_x_esm_setPropsIterable([kind, context, next]);
     next = iterator[NEXT]();
   }
 };
@@ -4832,44 +4840,93 @@ var assertStringEntryObject = function assertStringEntryObject(kind, iterable) {
   }
 };
 
-var collections_x_esm_parseString = function parseString(args) {
-  var _args2 = _slicedToArray(args, 3),
-      kind = _args2[0],
-      iterable = _args2[1],
-      context = _args2[2];
+var getCharsString = function getCharsString(iterable, next) {
+  return {
+    char1: collections_x_esm_charAt.call(iterable, next),
+    char2: collections_x_esm_charAt.call(iterable, next + 1)
+  };
+};
+
+var collections_x_esm_setContextString = function setContextString(context, key) {
+  var indexof = index_of_x_esm(assert_is_object_x_esm(context)[PROP_KEY], key, SAMEVALUEZERO);
+
+  if (indexof < 0) {
+    push.call(context[PROP_KEY], key);
+    push.call(context[PROP_ORDER], context[PROP_ID].get());
+    context[PROP_ID][NEXT]();
+  }
+};
+
+var collections_x_esm_getNextKey = function getNextKey(iterable, next) {
+  var _getCharsString = getCharsString(iterable, next),
+      char1 = _getCharsString.char1,
+      char2 = _getCharsString.char2;
+
+  if (is_surrogate_pair_x_esm(char1, char2)) {
+    return {
+      key: char1 + char2,
+      nxt: next + 1
+    };
+  }
+
+  return {
+    key: char1,
+    nxt: next
+  };
+};
+
+var parseString = function parseString(args) {
+  var _args3 = _slicedToArray(args, 3),
+      kind = _args3[0],
+      iterable = _args3[1],
+      context = _args3[2];
 
   assertStringEntryObject(kind, iterable);
   var next = 0;
 
   while (next < iterable.length) {
-    var char1 = collections_x_esm_charAt.call(iterable, next);
-    var char2 = collections_x_esm_charAt.call(iterable, next + 1);
-    var key = void 0;
-
-    if (is_surrogate_pair_x_esm(char1, char2)) {
-      key = char1 + char2;
-      next += 1;
-    } else {
-      key = char1;
-    }
-
-    var indexof = index_of_x_esm(assert_is_object_x_esm(context)[PROP_KEY], key, SAMEVALUEZERO);
-
-    if (indexof < 0) {
-      push.call(context[PROP_KEY], key);
-      push.call(context[PROP_ORDER], context[PROP_ID].get());
-      context[PROP_ID][NEXT]();
-    }
-
+    var nextKey = collections_x_esm_getNextKey(iterable, next);
+    next = nextKey.nxt;
+    collections_x_esm_setContextString(context, nextKey.key);
     next += 1;
   }
 };
 
-var collections_x_esm_parseArrayLike = function parseArrayLike(args) {
-  var _args3 = _slicedToArray(args, 3),
-      kind = _args3[0],
-      iterable = _args3[1],
-      context = _args3[2];
+var collections_x_esm_assertArrayLikeIterable = function assertArrayLikeIterable(iterable, next) {
+  if (is_primitive_default()(iterable[next])) {
+    throw new TypeError("Iterator value ".concat(is_array_like_x_esm(next[VALUE]), " is not an entry object"));
+  }
+};
+
+var collections_x_esm_setContextArrayLike = function setContextArrayLike(args) {
+  var _args4 = _slicedToArray(args, 5),
+      kind = _args4[0],
+      context = _args4[1],
+      key = _args4[2],
+      iterable = _args4[3],
+      next = _args4[4];
+
+  var indexof = index_of_x_esm(assert_is_object_x_esm(context)[PROP_KEY], key, SAMEVALUEZERO);
+
+  if (indexof < 0) {
+    if (kind === MAP) {
+      push.call(context[PROP_VALUE], iterable[next][1]);
+    }
+
+    push.call(context[PROP_KEY], key);
+    push.call(context[PROP_ORDER], context[PROP_ID].get());
+    context[PROP_ID][NEXT]();
+  } else if (kind === MAP) {
+    /* eslint-disable-next-line prefer-destructuring */
+    context[PROP_VALUE][indexof] = iterable[next][1];
+  }
+};
+
+var parseArrayLike = function parseArrayLike(args) {
+  var _args5 = _slicedToArray(args, 3),
+      kind = _args5[0],
+      iterable = _args5[1],
+      context = _args5[2];
 
   var next = 0;
 
@@ -4877,32 +4934,15 @@ var collections_x_esm_parseArrayLike = function parseArrayLike(args) {
     var key = void 0;
 
     if (kind === MAP) {
-      if (is_primitive_default()(iterable[next])) {
-        throw new TypeError("Iterator value ".concat(is_array_like_x_esm(next[VALUE]), " is not an entry object"));
-      }
+      collections_x_esm_assertArrayLikeIterable(iterable, next);
       /* eslint-disable-next-line prefer-destructuring */
-
 
       key = iterable[next][0];
     } else {
       key = iterable[next];
     }
 
-    var indexof = index_of_x_esm(assert_is_object_x_esm(context)[PROP_KEY], key, SAMEVALUEZERO);
-
-    if (indexof < 0) {
-      if (kind === MAP) {
-        push.call(context[PROP_VALUE], iterable[next][1]);
-      }
-
-      push.call(context[PROP_KEY], key);
-      push.call(context[PROP_ORDER], context[PROP_ID].get());
-      context[PROP_ID][NEXT]();
-    } else if (kind === MAP) {
-      /* eslint-disable-next-line prefer-destructuring */
-      context[PROP_VALUE][indexof] = iterable[next][1];
-    }
-
+    collections_x_esm_setContextArrayLike([kind, context, key, iterable, next]);
     next += 1;
   }
 };
@@ -4914,16 +4954,16 @@ var collections_x_esm_defineDefaultProps = function defineDefaultProps(context) 
 };
 
 var collections_x_esm_performParsing = function performParsing(args) {
-  var _args4 = _slicedToArray(args, 4),
-      iterable = _args4[1],
-      symbolIterator = _args4[3];
+  var _args6 = _slicedToArray(args, 4),
+      iterable = _args6[1],
+      symbolIterator = _args6[3];
 
   if (iterable && is_function_x_esm(iterable[symbolIterator])) {
-    collections_x_esm_parseIterable(args);
+    parseIterable(args);
   } else if (is_string_default()(iterable)) {
-    collections_x_esm_parseString(args);
+    parseString(args);
   } else if (is_array_like_x_esm(iterable)) {
-    collections_x_esm_parseArrayLike(args);
+    parseArrayLike(args);
   }
 }; // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
@@ -4943,10 +4983,10 @@ var collections_x_esm_performParsing = function performParsing(args) {
 var collections_x_esm_parse = function parse(args) {
   var _defineProperty3;
 
-  var _args5 = _slicedToArray(args, 3),
-      kind = _args5[0],
-      context = _args5[1],
-      iterable = _args5[2];
+  var _args7 = _slicedToArray(args, 3),
+      kind = _args7[0],
+      context = _args7[1],
+      iterable = _args7[2];
 
   var symbolIterator = collections_x_esm_getSymbolIterator(iterable);
 
@@ -4975,11 +5015,11 @@ var collections_x_esm_parse = function parse(args) {
 
 
 var collections_x_esm_baseForEach = function baseForEach(args) {
-  var _args6 = _slicedToArray(args, 4),
-      kind = _args6[0],
-      context = _args6[1],
-      callback = _args6[2],
-      thisArg = _args6[3];
+  var _args8 = _slicedToArray(args, 4),
+      kind = _args8[0],
+      context = _args8[1],
+      callback = _args8[2],
+      thisArg = _args8[3];
 
   assert_is_object_x_esm(context);
   assert_is_function_x_esm(callback);
@@ -5068,10 +5108,10 @@ var collections_x_esm_baseClear = function baseClear(kind, context) {
 
 
 var collections_x_esm_baseDelete = function baseDelete(args) {
-  var _args7 = _slicedToArray(args, 3),
-      kind = _args7[0],
-      context = _args7[1],
-      key = _args7[2];
+  var _args9 = _slicedToArray(args, 3),
+      kind = _args9[0],
+      context = _args9[1],
+      key = _args9[2];
 
   var indexof = index_of_x_esm(assert_is_object_x_esm(context)[PROP_KEY], key, SAMEVALUEZERO);
   var result = false;
@@ -5106,11 +5146,11 @@ var collections_x_esm_baseDelete = function baseDelete(args) {
 
 
 var collections_x_esm_baseAddSet = function baseAddSet(args) {
-  var _args8 = _slicedToArray(args, 4),
-      kind = _args8[0],
-      context = _args8[1],
-      key = _args8[2],
-      value = _args8[3];
+  var _args10 = _slicedToArray(args, 4),
+      kind = _args10[0],
+      context = _args10[1],
+      key = _args10[2],
+      value = _args10[3];
 
   var index = index_of_x_esm(assert_is_object_x_esm(context)[PROP_KEY], key, SAMEVALUEZERO);
 
