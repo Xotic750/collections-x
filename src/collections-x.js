@@ -489,69 +489,63 @@ const thisIteratorDescriptor = {
   },
 };
 
-const createSetIterator = function createSetIterator() {
-  /**
-   * An object is an iterator when it knows how to access items from a
-   * collection one at a time, while keeping track of its current position
-   * within that sequence. In JavaScript an iterator is an object that provides
-   * a next() method which returns the next item in the sequence. This method
-   * returns an object with two properties: done and value. Once created,
-   * an iterator object can be used explicitly by repeatedly calling next().
-   *
-   * @private
-   * @class
-   * @param {object} context - The Set object.
-   * @param {string} [iteratorKind] - Values are `value`, `key` or `key+value`.
-   */
-  const SetIterator = function SetIterator(context, iteratorKind) {
-    defineProperties(this, {
-      [PROP_ITERATORHASMORE]: {[VALUE]: true, [WRITABLE]: true},
-      [PROP_SET]: {[VALUE]: assertIsObject(context)},
-      [PROP_SETITERATIONKIND]: {[VALUE]: iteratorKind || KIND_VALUE},
-      [PROP_SETNEXTINDEX]: {[VALUE]: 0, [WRITABLE]: true},
-    });
-  };
-
-  const getSetNextObject = function getSetNextObject(args) {
-    const [iteratorKind, context, index] = args;
-
-    return {
-      [DONE]: false,
-      [VALUE]: iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index],
-    };
-  };
-
-  /**
-   * Once initialized, the next() method can be called to access key-value
-   * pairs from the object in turn.
-   *
-   * @private
-   * @function next
-   * @returns {object} Returns an object with two properties: done and value.
-   */
-  defineProperty(SetIterator.prototype, NEXT, {
-    [VALUE]: function next() {
-      const context = assertIsObject(this[PROP_SET]);
-      const index = this[PROP_SETNEXTINDEX];
-      const iteratorKind = this[PROP_SETITERATIONKIND];
-      const more = this[PROP_ITERATORHASMORE];
-
-      if (index < context[PROP_KEY].length && more) {
-        this[PROP_SETNEXTINDEX] += 1;
-
-        return getSetNextObject([iteratorKind, context, index]);
-      }
-
-      this[PROP_ITERATORHASMORE] = false;
-
-      return {[DONE]: true, [VALUE]: UNDEFINED};
-    },
+/**
+ * An object is an iterator when it knows how to access items from a
+ * collection one at a time, while keeping track of its current position
+ * within that sequence. In JavaScript an iterator is an object that provides
+ * a next() method which returns the next item in the sequence. This method
+ * returns an object with two properties: done and value. Once created,
+ * an iterator object can be used explicitly by repeatedly calling next().
+ *
+ * @private
+ * @class
+ * @param {object} context - The Set object.
+ * @param {string} [iteratorKind] - Values are `value`, `key` or `key+value`.
+ */
+const SetIt = function SetIterator(context, iteratorKind) {
+  defineProperties(this, {
+    [PROP_ITERATORHASMORE]: {[VALUE]: true, [WRITABLE]: true},
+    [PROP_SET]: {[VALUE]: assertIsObject(context)},
+    [PROP_SETITERATIONKIND]: {[VALUE]: iteratorKind || KIND_VALUE},
+    [PROP_SETNEXTINDEX]: {[VALUE]: 0, [WRITABLE]: true},
   });
-
-  return SetIterator;
 };
 
-const SetIt = createSetIterator();
+const getSetNextObject = function getSetNextObject(args) {
+  const [iteratorKind, context, index] = args;
+
+  return {
+    [DONE]: false,
+    [VALUE]: iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index],
+  };
+};
+
+/**
+ * Once initialized, the next() method can be called to access key-value
+ * pairs from the object in turn.
+ *
+ * @private
+ * @function next
+ * @returns {object} Returns an object with two properties: done and value.
+ */
+defineProperty(SetIt.prototype, NEXT, {
+  [VALUE]: function next() {
+    const context = assertIsObject(this[PROP_SET]);
+    const index = this[PROP_SETNEXTINDEX];
+    const iteratorKind = this[PROP_SETITERATIONKIND];
+    const more = this[PROP_ITERATORHASMORE];
+
+    if (index < context[PROP_KEY].length && more) {
+      this[PROP_SETNEXTINDEX] += 1;
+
+      return getSetNextObject([iteratorKind, context, index]);
+    }
+
+    this[PROP_ITERATORHASMORE] = false;
+
+    return {[DONE]: true, [VALUE]: UNDEFINED};
+  },
+});
 
 /**
  * The @@iterator property is the same Iterator object.
