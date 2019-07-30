@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-30T19:26:51.681Z",
+  "date": "2019-07-30T20:11:52.908Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
-  "hash": "8812f940630048f43c9c",
+  "hash": "824989790ea60842dde3",
   "license": "MIT",
   "version": "3.0.12"
 }
@@ -4715,7 +4715,9 @@ var KIND_KEY_VALUE = "".concat(KIND_KEY, "+").concat(KIND_VALUE);
 var SAMEVALUEZERO = 'SameValueZero';
 var ES6_SHIM_ITERATOR = '_es6-shim iterator_';
 var AT_AT_ITERATOR = '@@iterator';
-var push = [].push;
+var collections_x_esm_ref = [],
+    push = collections_x_esm_ref.push,
+    splice = collections_x_esm_ref.splice;
 var collections_x_esm_charAt = KEY.charAt;
 var setPrototypeOf = {}.constructor.setPrototypeOf;
 /* eslint-disable-next-line compat/compat */
@@ -4995,6 +4997,48 @@ var collections_x_esm_parse = function parse(args) {
   collections_x_esm_defineDefaultProps(context);
   collections_x_esm_performParsing([kind, iterable, context, symbolIterator]);
   object_define_property_x_esm(context, SIZE, (_defineProperty3 = {}, _defineProperty(_defineProperty3, VALUE, context[PROP_KEY].length), _defineProperty(_defineProperty3, WRITABLE, true), _defineProperty3));
+};
+
+var collections_x_esm_updatePointerIndexes = function updatePointerIndexes(context, pointers) {
+  array_some_x_esm(context[PROP_ORDER], function predicate(id, count) {
+    pointers.index = count;
+    return id > pointers.order;
+  });
+};
+
+var updateBaseForEach = function updateBaseForEach(args) {
+  var _args8 = _slicedToArray(args, 3),
+      context = _args8[0],
+      pointers = _args8[1],
+      length = _args8[2];
+
+  var len = length;
+
+  if (context[PROP_CHANGE]) {
+    collections_x_esm_updatePointerIndexes(context, pointers);
+    context[PROP_CHANGE] = false;
+    len = context[PROP_KEY].length;
+  } else {
+    pointers.index += 1;
+  }
+
+  pointers.order = context[PROP_ORDER][pointers.index];
+  return len;
+};
+
+var collections_x_esm_doCallback = function doCallback(args) {
+  var _args9 = _slicedToArray(args, 5),
+      kind = _args9[0],
+      context = _args9[1],
+      pointers = _args9[2],
+      callback = _args9[3],
+      thisArg = _args9[4];
+
+  if (has_own_property_x_esm(context[PROP_KEY], pointers.index)) {
+    var key = context[PROP_KEY][pointers.index];
+    var value = kind === MAP ? context[PROP_VALUE][pointers.index] : key;
+    callback.call(thisArg, value, key, context);
+  }
 }; // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
 
@@ -5013,41 +5057,24 @@ var collections_x_esm_parse = function parse(args) {
 
 
 var collections_x_esm_baseForEach = function baseForEach(args) {
-  var _args8 = _slicedToArray(args, 4),
-      kind = _args8[0],
-      context = _args8[1],
-      callback = _args8[2],
-      thisArg = _args8[3];
+  var _args10 = _slicedToArray(args, 4),
+      kind = _args10[0],
+      context = _args10[1],
+      callback = _args10[2],
+      thisArg = _args10[3];
 
   assert_is_object_x_esm(context);
   assert_is_function_x_esm(callback);
+  context[PROP_CHANGE] = false;
   var pointers = {
     index: 0,
     order: context[PROP_ORDER][0]
   };
-  context[PROP_CHANGE] = false;
   var length = context[PROP_KEY].length;
 
   while (pointers.index < length) {
-    if (has_own_property_x_esm(context[PROP_KEY], pointers.index)) {
-      var key = context[PROP_KEY][pointers.index];
-      var value = kind === MAP ? context[PROP_VALUE][pointers.index] : key;
-      callback.call(thisArg, value, key, context);
-    }
-
-    if (context[PROP_CHANGE]) {
-      /* eslint-disable-next-line prefer-destructuring */
-      length = context[PROP_KEY].length;
-      array_some_x_esm(context[PROP_ORDER], function predicate(id, count) {
-        pointers.index = count;
-        return id > pointers.order;
-      });
-      context[PROP_CHANGE] = false;
-    } else {
-      pointers.index += 1;
-    }
-
-    pointers.order = context[PROP_ORDER][pointers.index];
+    collections_x_esm_doCallback([kind, context, pointers, callback, thisArg]);
+    length = updateBaseForEach([context, pointers, length]);
   }
 
   return context;
@@ -5090,6 +5117,23 @@ var collections_x_esm_baseClear = function baseClear(kind, context) {
   }
 
   return context;
+};
+
+var setContextFoundBaseDelete = function setContextFoundBaseDelete(args) {
+  var _args11 = _slicedToArray(args, 3),
+      kind = _args11[0],
+      context = _args11[1],
+      indexof = _args11[2];
+
+  if (kind === MAP) {
+    splice.call(context[PROP_VALUE], indexof, 1);
+  }
+
+  splice.call(context[PROP_KEY], indexof, 1);
+  splice.call(context[PROP_ORDER], indexof, 1);
+  context[PROP_CHANGE] = true;
+  context[SIZE] = context[PROP_KEY].length;
+  return true;
 }; // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
 
@@ -5106,27 +5150,31 @@ var collections_x_esm_baseClear = function baseClear(kind, context) {
 
 
 var collections_x_esm_baseDelete = function baseDelete(args) {
-  var _args9 = _slicedToArray(args, 3),
-      kind = _args9[0],
-      context = _args9[1],
-      key = _args9[2];
+  var _args12 = _slicedToArray(args, 3),
+      kind = _args12[0],
+      context = _args12[1],
+      key = _args12[2];
 
   var indexof = index_of_x_esm(assert_is_object_x_esm(context)[PROP_KEY], key, SAMEVALUEZERO);
-  var result = false;
+  return indexof > -1 && setContextFoundBaseDelete([kind, context, indexof]);
+};
 
-  if (indexof > -1) {
-    if (kind === MAP) {
-      context[PROP_VALUE].splice(indexof, 1);
-    }
+var setContextFoundBaseAddSet = function setContextFoundBaseAddSet(args) {
+  var _args13 = _slicedToArray(args, 4),
+      kind = _args13[0],
+      context = _args13[1],
+      key = _args13[2],
+      value = _args13[3];
 
-    context[PROP_KEY].splice(indexof, 1);
-    context[PROP_ORDER].splice(indexof, 1);
-    context[PROP_CHANGE] = true;
-    context[SIZE] = context[PROP_KEY].length;
-    result = true;
+  if (kind === MAP) {
+    push.call(context[PROP_VALUE], value);
   }
 
-  return result;
+  push.call(context[PROP_KEY], key);
+  push.call(context[PROP_ORDER], context[PROP_ID].get());
+  context[PROP_ID][NEXT]();
+  context[PROP_CHANGE] = true;
+  context[SIZE] = context[PROP_KEY].length;
 }; // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
 
@@ -5144,11 +5192,11 @@ var collections_x_esm_baseDelete = function baseDelete(args) {
 
 
 var collections_x_esm_baseAddSet = function baseAddSet(args) {
-  var _args10 = _slicedToArray(args, 4),
-      kind = _args10[0],
-      context = _args10[1],
-      key = _args10[2],
-      value = _args10[3];
+  var _args14 = _slicedToArray(args, 4),
+      kind = _args14[0],
+      context = _args14[1],
+      key = _args14[2],
+      value = _args14[3];
 
   var index = index_of_x_esm(assert_is_object_x_esm(context)[PROP_KEY], key, SAMEVALUEZERO);
 
@@ -5157,15 +5205,7 @@ var collections_x_esm_baseAddSet = function baseAddSet(args) {
       context[PROP_VALUE][index] = value;
     }
   } else {
-    if (kind === MAP) {
-      push.call(context[PROP_VALUE], value);
-    }
-
-    push.call(context[PROP_KEY], key);
-    push.call(context[PROP_ORDER], context[PROP_ID].get());
-    context[PROP_ID][NEXT]();
-    context[PROP_CHANGE] = true;
-    context[SIZE] = context[PROP_KEY].length;
+    setContextFoundBaseAddSet([kind, context, key, value]);
   }
 
   return context;
@@ -5196,14 +5236,14 @@ var SetIt = function SetIterator(context, iteratorKind) {
 };
 
 var getSetNextObject = function getSetNextObject(args) {
-  var _ref;
+  var _ref2;
 
-  var _args11 = _slicedToArray(args, 3),
-      iteratorKind = _args11[0],
-      context = _args11[1],
-      index = _args11[2];
+  var _args15 = _slicedToArray(args, 3),
+      iteratorKind = _args15[0],
+      context = _args15[1],
+      index = _args15[2];
 
-  return _ref = {}, _defineProperty(_ref, DONE, false), _defineProperty(_ref, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index]), _ref;
+  return _ref2 = {}, _defineProperty(_ref2, DONE, false), _defineProperty(_ref2, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index]), _ref2;
 };
 /**
  * Once initialized, the next() method can be called to access key-value
@@ -5216,7 +5256,7 @@ var getSetNextObject = function getSetNextObject(args) {
 
 
 object_define_property_x_esm(SetIt.prototype, NEXT, _defineProperty({}, VALUE, function next() {
-  var _ref2;
+  var _ref3;
 
   var context = assert_is_object_x_esm(this[PROP_SET]);
   var index = this[PROP_SETNEXTINDEX];
@@ -5229,7 +5269,7 @@ object_define_property_x_esm(SetIt.prototype, NEXT, _defineProperty({}, VALUE, f
   }
 
   this[PROP_ITERATORHASMORE] = false;
-  return _ref2 = {}, _defineProperty(_ref2, DONE, true), _defineProperty(_ref2, VALUE, collections_x_esm_UNDEFINED), _ref2;
+  return _ref3 = {}, _defineProperty(_ref3, DONE, true), _defineProperty(_ref3, VALUE, collections_x_esm_UNDEFINED), _ref3;
 }));
 /**
  * The @@iterator property is the same Iterator object.
@@ -5414,14 +5454,14 @@ var MapIt = function MapIterator(context, iteratorKind) {
 };
 
 var getMapNextObject = function getMapNextObject(args) {
-  var _ref3;
+  var _ref4;
 
-  var _args12 = _slicedToArray(args, 3),
-      iteratorKind = _args12[0],
-      context = _args12[1],
-      index = _args12[2];
+  var _args16 = _slicedToArray(args, 3),
+      iteratorKind = _args16[0],
+      context = _args16[1],
+      index = _args16[2];
 
-  return _ref3 = {}, _defineProperty(_ref3, DONE, false), _defineProperty(_ref3, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_VALUE][index]] : context["[[".concat(iteratorKind, "]]")][index]), _ref3;
+  return _ref4 = {}, _defineProperty(_ref4, DONE, false), _defineProperty(_ref4, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_VALUE][index]] : context["[[".concat(iteratorKind, "]]")][index]), _ref4;
 };
 /**
  * Once initialized, the next() method can be called to access key-value
@@ -5434,7 +5474,7 @@ var getMapNextObject = function getMapNextObject(args) {
 
 
 object_define_property_x_esm(MapIt.prototype, NEXT, _defineProperty({}, VALUE, function next() {
-  var _ref4;
+  var _ref5;
 
   var context = assert_is_object_x_esm(this[PROP_MAP]);
   var index = this[PROP_MAPNEXTINDEX];
@@ -5447,7 +5487,7 @@ object_define_property_x_esm(MapIt.prototype, NEXT, _defineProperty({}, VALUE, f
   }
 
   this[PROP_ITERATORHASMORE] = false;
-  return _ref4 = {}, _defineProperty(_ref4, DONE, true), _defineProperty(_ref4, VALUE, collections_x_esm_UNDEFINED), _ref4;
+  return _ref5 = {}, _defineProperty(_ref5, DONE, true), _defineProperty(_ref5, VALUE, collections_x_esm_UNDEFINED), _ref5;
 }));
 /**
  * The @@iterator property is the same Iterator object.

@@ -54,7 +54,7 @@ const SAMEVALUEZERO = 'SameValueZero';
 const ES6_SHIM_ITERATOR = '_es6-shim iterator_';
 const AT_AT_ITERATOR = '@@iterator';
 
-const {push} = [];
+const {push, splice} = [];
 const {charAt} = KEY;
 const {setPrototypeOf} = {}.constructor;
 /* eslint-disable-next-line compat/compat */
@@ -305,6 +305,41 @@ const parse = function parse(args) {
   defineProperty(context, SIZE, {[VALUE]: context[PROP_KEY].length, [WRITABLE]: true});
 };
 
+const updatePointerIndexes = function updatePointerIndexes(context, pointers) {
+  some(context[PROP_ORDER], function predicate(id, count) {
+    pointers.index = count;
+
+    return id > pointers.order;
+  });
+};
+
+const updateBaseForEach = function updateBaseForEach(args) {
+  const [context, pointers, length] = args;
+  let len = length;
+
+  if (context[PROP_CHANGE]) {
+    updatePointerIndexes(context, pointers);
+    context[PROP_CHANGE] = false;
+    len = context[PROP_KEY].length;
+  } else {
+    pointers.index += 1;
+  }
+
+  pointers.order = context[PROP_ORDER][pointers.index];
+
+  return len;
+};
+
+const doCallback = function doCallback(args) {
+  const [kind, context, pointers, callback, thisArg] = args;
+
+  if (hasOwn(context[PROP_KEY], pointers.index)) {
+    const key = context[PROP_KEY][pointers.index];
+    const value = kind === MAP ? context[PROP_VALUE][pointers.index] : key;
+    callback.call(thisArg, value, key, context);
+  }
+};
+
 // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
 /**
@@ -323,32 +358,13 @@ const baseForEach = function baseForEach(args) {
   const [kind, context, callback, thisArg] = args;
   assertIsObject(context);
   assertIsFunction(callback);
-  const pointers = {index: 0, order: context[PROP_ORDER][0]};
-
   context[PROP_CHANGE] = false;
+
+  const pointers = {index: 0, order: context[PROP_ORDER][0]};
   let {length} = context[PROP_KEY];
   while (pointers.index < length) {
-    if (hasOwn(context[PROP_KEY], pointers.index)) {
-      const key = context[PROP_KEY][pointers.index];
-      const value = kind === MAP ? context[PROP_VALUE][pointers.index] : key;
-      callback.call(thisArg, value, key, context);
-    }
-
-    if (context[PROP_CHANGE]) {
-      /* eslint-disable-next-line prefer-destructuring */
-      length = context[PROP_KEY].length;
-      some(context[PROP_ORDER], function predicate(id, count) {
-        pointers.index = count;
-
-        return id > pointers.order;
-      });
-
-      context[PROP_CHANGE] = false;
-    } else {
-      pointers.index += 1;
-    }
-
-    pointers.order = context[PROP_ORDER][pointers.index];
+    doCallback([kind, context, pointers, callback, thisArg]);
+    length = updateBaseForEach([context, pointers, length]);
   }
 
   return context;
@@ -391,6 +407,21 @@ const baseClear = function baseClear(kind, context) {
   return context;
 };
 
+const setContextFoundBaseDelete = function setContextFoundBaseDelete(args) {
+  const [kind, context, indexof] = args;
+
+  if (kind === MAP) {
+    splice.call(context[PROP_VALUE], indexof, 1);
+  }
+
+  splice.call(context[PROP_KEY], indexof, 1);
+  splice.call(context[PROP_ORDER], indexof, 1);
+  context[PROP_CHANGE] = true;
+  context[SIZE] = context[PROP_KEY].length;
+
+  return true;
+};
+
 // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
 /**
@@ -406,21 +437,22 @@ const baseClear = function baseClear(kind, context) {
 const baseDelete = function baseDelete(args) {
   const [kind, context, key] = args;
   const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
-  let result = false;
 
-  if (indexof > -1) {
-    if (kind === MAP) {
-      context[PROP_VALUE].splice(indexof, 1);
-    }
+  return indexof > -1 && setContextFoundBaseDelete([kind, context, indexof]);
+};
 
-    context[PROP_KEY].splice(indexof, 1);
-    context[PROP_ORDER].splice(indexof, 1);
-    context[PROP_CHANGE] = true;
-    context[SIZE] = context[PROP_KEY].length;
-    result = true;
+const setContextFoundBaseAddSet = function setContextFoundBaseAddSet(args) {
+  const [kind, context, key, value] = args;
+
+  if (kind === MAP) {
+    push.call(context[PROP_VALUE], value);
   }
 
-  return result;
+  push.call(context[PROP_KEY], key);
+  push.call(context[PROP_ORDER], context[PROP_ID].get());
+  context[PROP_ID][NEXT]();
+  context[PROP_CHANGE] = true;
+  context[SIZE] = context[PROP_KEY].length;
 };
 
 // eslint-disable jsdoc/check-param-names
@@ -445,15 +477,7 @@ const baseAddSet = function baseAddSet(args) {
       context[PROP_VALUE][index] = value;
     }
   } else {
-    if (kind === MAP) {
-      push.call(context[PROP_VALUE], value);
-    }
-
-    push.call(context[PROP_KEY], key);
-    push.call(context[PROP_ORDER], context[PROP_ID].get());
-    context[PROP_ID][NEXT]();
-    context[PROP_CHANGE] = true;
-    context[SIZE] = context[PROP_KEY].length;
+    setContextFoundBaseAddSet([kind, context, key, value]);
   }
 
   return context;
