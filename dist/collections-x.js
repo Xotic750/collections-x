@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-30T20:11:52.908Z",
+  "date": "2019-07-31T16:33:55.237Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
-  "hash": "824989790ea60842dde3",
+  "hash": "fb791611a064c7615733",
   "license": "MIT",
   "version": "3.0.12"
 }
@@ -4767,7 +4767,7 @@ var symIt = collections_x_esm_getSymIt();
  *
  * @private
  * @param {*} iterable - Value to detect iterator function.
- * @returns {Symbol|string|undefined} The iterator property identifier.
+ * @returns {symbol|string|undefined} The iterator property identifier.
  */
 
 var collections_x_esm_getSymbolIterator = function getSymbolIterator(iterable) {

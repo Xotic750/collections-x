@@ -102,7 +102,7 @@ export const symIt = getSymIt();
  *
  * @private
  * @param {*} iterable - Value to detect iterator function.
- * @returns {Symbol|string|undefined} The iterator property identifier.
+ * @returns {symbol|string|undefined} The iterator property identifier.
  */
 const getSymbolIterator = function getSymbolIterator(iterable) {
   if (isNil(iterable) === false) {
