@@ -24,7 +24,6 @@ import indexOf from 'index-of-x';
 import assertIsFunction from 'assert-is-function-x';
 import assertIsObject from 'assert-is-object-x';
 import IdGenerator from 'big-counter-x';
-import isNil from 'is-nil-x';
 import $isMap from 'is-map-x';
 import $isSet from 'is-set-x';
 import isObjectLike from 'is-object-like-x';
@@ -32,12 +31,13 @@ import isArray from 'is-array-x';
 import isBoolean from 'is-boolean-object';
 import some from 'array-some-x';
 import getPrototypeOf from 'get-prototype-of-x';
-import hasSymbolSupport from 'has-symbol-support-x';
+import $iterator$, { getSymbolIterator } from 'symbol-iterator-x';
+import $species$ from 'symbol-species-x';
 import create from 'object-create-x';
 import toBoolean from 'to-boolean-x';
 import attempt from 'attempt-x';
 import arrayForEach from 'array-for-each-x';
-import getOwnPropertyDescriptor from 'object-get-own-property-descriptor-x';
+import renameFunction from 'rename-function-x';
 /* eslint-disable-next-line no-void */
 
 var UNDEFINED = void 0;
@@ -67,110 +67,19 @@ var KIND_VALUE = VALUE;
 var KIND_KEY = KEY;
 var KIND_KEY_VALUE = "".concat(KIND_KEY, "+").concat(KIND_VALUE);
 var SAMEVALUEZERO = 'SameValueZero';
-var ES6_SHIM_ITERATOR = '_es6-shim iterator_';
-var AT_AT_ITERATOR = '@@iterator';
 var _ref = [],
     push = _ref.push,
     splice = _ref.splice;
 var charAt = KEY.charAt;
 var setPrototypeOf = {}.constructor.setPrototypeOf;
-/* eslint-disable-next-line compat/compat */
-
-var symbolSpecies = hasSymbolSupport && Symbol.species || '@@species';
-/* eslint-disable-next-line compat/compat */
-
-var hasRealSymbolIterator = hasSymbolSupport && _typeof(Symbol.iterator) === 'symbol';
-/* eslint-disable-next-line compat/compat */
-
-var hasFakeSymbolIterator = (typeof Symbol === "undefined" ? "undefined" : _typeof(Symbol)) === 'object' && typeof Symbol.iterator === 'string';
-var hasSymbolIterator = hasRealSymbolIterator || hasFakeSymbolIterator;
-
-var getOtherSymbolIterator = function getOtherSymbolIterator(iterable) {
-  if (iterable[ES6_SHIM_ITERATOR]) {
-    return ES6_SHIM_ITERATOR;
-  }
-
-  if (iterable[AT_AT_ITERATOR]) {
-    return AT_AT_ITERATOR;
-  }
-
-  return null;
-};
-
-var getSymIt = function getSymIt() {
-  if (hasSymbolIterator) {
-    /* eslint-disable-next-line compat/compat */
-    return Symbol.iterator;
-  }
-
-  var result = getOtherSymbolIterator([]);
-
-  if (typeof result === 'string' && isFunction([][result])) {
-    return result;
-  }
-
-  return AT_AT_ITERATOR;
-};
+var hasRealSymbolIterator = _typeof($iterator$) === 'symbol';
 /**
  * The iterator identifier that is in use.
  *
  * Type {Symbol|string}.
  */
 
-
-export var symIt = getSymIt();
-/**
- * Detect an iterator function.
- *
- * @private
- * @param {*} iterable - Value to detect iterator function.
- * @returns {symbol|string|undefined} The iterator property identifier.
- */
-
-var getSymbolIterator = function getSymbolIterator(iterable) {
-  if (isNil(iterable) === false) {
-    if (hasSymbolIterator && iterable[symIt]) {
-      return symIt;
-    }
-
-    var result = getOtherSymbolIterator(iterable);
-
-    if (typeof result === 'string') {
-      return result;
-    }
-  }
-
-  return UNDEFINED;
-};
-
-var supportsFunctionRenaming = attempt(function attemptee() {
-  /* eslint-disable-next-line lodash/prefer-noop */
-  var fn = function test1() {};
-
-  var descriptor = getOwnPropertyDescriptor(fn, 'name');
-
-  if (descriptor && descriptor.configurable) {
-    defineProperty(fn, 'name', {
-      configurable: true,
-      value: 'test2'
-    });
-  }
-
-  return fn.name;
-}).value === 'test2';
-
-var renameFunction = function renameFunction(object, prop) {
-  if (supportsFunctionRenaming) {
-    var descriptor = getOwnPropertyDescriptor(object[prop], 'name');
-
-    if (descriptor && descriptor.configurable) {
-      defineProperty(object[prop], 'name', {
-        configurable: true,
-        value: prop
-      });
-    }
-  }
-};
+export var symIt = $iterator$;
 
 var assertIterableEntryObject = function assertIterableEntryObject(kind, next) {
   if (kind === MAP) {
@@ -738,7 +647,7 @@ defineProperties(SetImplementation.prototype, (_defineProperties3 = {
   return new SetIt(this, KIND_KEY_VALUE);
 })), _defineProperty(_defineProperties3, "forEach", _defineProperty({}, VALUE, function forEach(callback, thisArg) {
   return baseForEach([SET, this, callback, thisArg]);
-})), _defineProperty(_defineProperties3, "has", hasDescriptor), _defineProperty(_defineProperties3, "keys", _defineProperty({}, VALUE, setValuesIterator)), _defineProperty(_defineProperties3, "size", sizeDescriptor), _defineProperty(_defineProperties3, "values", _defineProperty({}, VALUE, setValuesIterator)), _defineProperty(_defineProperties3, symbolSpecies, thisSpeciesDescriptor), _defineProperties3));
+})), _defineProperty(_defineProperties3, "has", hasDescriptor), _defineProperty(_defineProperties3, "keys", _defineProperty({}, VALUE, setValuesIterator)), _defineProperty(_defineProperties3, "size", sizeDescriptor), _defineProperty(_defineProperties3, "values", _defineProperty({}, VALUE, setValuesIterator)), _defineProperty(_defineProperties3, $species$, thisSpeciesDescriptor), _defineProperties3));
 /**
  * The initial value of the @@iterator property is the same function object
  * as the initial value of the values property.
@@ -749,7 +658,7 @@ defineProperties(SetImplementation.prototype, (_defineProperties3 = {
  */
 
 defineProperty(SetImplementation.prototype, symIt, _defineProperty({}, VALUE, setValuesIterator));
-renameFunction(SetImplementation.prototype, DELETE);
+renameFunction(SetImplementation.prototype.delete, DELETE, true);
 /**
  * An object is an iterator when it knows how to access items from a
  * collection one at a time, while keeping track of its current position
@@ -863,7 +772,7 @@ defineProperties(MapImplementation.prototype, (_defineProperties5 = {
   return baseAddSet([MAP, this, key, value]);
 })), _defineProperty(_defineProperties5, "size", sizeDescriptor), _defineProperty(_defineProperties5, "values", _defineProperty({}, VALUE, function values() {
   return new MapIt(this, KIND_VALUE);
-})), _defineProperty(_defineProperties5, symbolSpecies, thisSpeciesDescriptor), _defineProperties5));
+})), _defineProperty(_defineProperties5, $species$, thisSpeciesDescriptor), _defineProperties5));
 /**
  * The initial value of the @@iterator property is the same function object
  * as the initial value of the entries property.
@@ -874,7 +783,7 @@ defineProperties(MapImplementation.prototype, (_defineProperties5 = {
  */
 
 defineProperty(MapImplementation.prototype, symIt, _defineProperty({}, VALUE, MapImplementation.prototype.entries));
-renameFunction(MapImplementation.prototype, DELETE);
+renameFunction(MapImplementation.prototype.delete, DELETE, true);
 /*
  * Determine whether to use shim or native.
  */

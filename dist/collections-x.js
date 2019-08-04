@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-08-04T15:35:44.348Z",
+  "date": "2019-08-04T23:24:31.471Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
-  "hash": "1089c995937fd4e6ea2c",
+  "hash": "9398cfeb6542335d4856",
   "license": "MIT",
   "version": "3.0.13"
 }
@@ -4486,6 +4486,110 @@ var gpo = get_prototype_of_x_esm_isWorking ? get_prototype_of_x_esm_patchedGetPr
 /* harmony default export */ var get_prototype_of_x_esm = (gpo);
 
 
+// CONCATENATED MODULE: ./node_modules/symbol-iterator-x/dist/symbol-iterator-x.esm.js
+function symbol_iterator_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { symbol_iterator_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { symbol_iterator_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return symbol_iterator_x_esm_typeof(obj); }
+
+
+
+var ES6_SHIM_ITERATOR = '_es6-shim iterator_';
+var AT_AT_ITERATOR = '@@iterator';
+/* eslint-disable-next-line compat/compat */
+
+var hasRealSymbolIterator = has_symbol_support_x_esm && symbol_iterator_x_esm_typeof(Symbol.iterator) === 'symbol';
+/* eslint-disable-next-line compat/compat */
+
+var hasFakeSymbolIterator = (typeof Symbol === "undefined" ? "undefined" : symbol_iterator_x_esm_typeof(Symbol)) === 'object' && Symbol !== null && typeof Symbol.iterator === 'string';
+var hasSymbolIterator = hasRealSymbolIterator || hasFakeSymbolIterator;
+
+var getOtherSymbolIterator = function getOtherSymbolIterator(iterable) {
+  if (iterable[ES6_SHIM_ITERATOR]) {
+    return ES6_SHIM_ITERATOR;
+  }
+
+  if (iterable[AT_AT_ITERATOR]) {
+    return AT_AT_ITERATOR;
+  }
+
+  return null;
+};
+
+var getSymIt = function getSymIt() {
+  if (hasSymbolIterator) {
+    /* eslint-disable-next-line compat/compat */
+    return Symbol.iterator;
+  }
+
+  var result = getOtherSymbolIterator([]);
+
+  if (typeof result === 'string' && typeof [][result] === 'function') {
+    return result;
+  }
+
+  return AT_AT_ITERATOR;
+};
+/**
+ * Whenever an object needs to be iterated (such as at the beginning of a for..of loop),
+ * its @@iterator method is called with no arguments, and the returned iterator is used
+ * to obtain the values to be iterated.
+ *
+ * Possible values are.
+ *
+ * Symbol.iterator
+ * '_es6-shim iterator_'
+ * '@@iterator'.
+ *
+ * @type {symbol|string}
+ */
+
+
+var $iterator$ = getSymIt();
+/**
+ * Detect an iterator function.
+ *
+ * @private
+ * @param {*} iterable - Value to detect iterator function.
+ * @returns {symbol|string|undefined} The iterator property identifier.
+ */
+
+var symbol_iterator_x_esm_getSymbolIterator = function getSymbolIterator(iterable) {
+  if (is_nil_x_esm(iterable) === false) {
+    if (hasSymbolIterator && iterable[$iterator$]) {
+      return $iterator$;
+    }
+
+    var result = getOtherSymbolIterator(iterable);
+
+    if (typeof result === 'string') {
+      return result;
+    }
+  }
+  /* eslint-disable-next-line no-void */
+
+
+  return void 0;
+};
+/* harmony default export */ var symbol_iterator_x_esm = ($iterator$);
+
+
+// CONCATENATED MODULE: ./node_modules/symbol-species-x/dist/symbol-species-x.esm.js
+
+/**
+ * The species accessor property allows subclasses to override the default constructor for objects.
+ *
+ * Possible values are.
+ *
+ * Symbol.species
+ * '@@species'.
+ *
+ * @type {symbol|string}
+ */
+
+var symbolSpecies = has_symbol_support_x_esm && Symbol.species || '@@species';
+/* eslint-disable-line compat/compat */
+
+/* harmony default export */ var symbol_species_x_esm = (symbolSpecies);
+
+
 // CONCATENATED MODULE: ./node_modules/object-create-x/dist/object-create-x.esm.js
 function object_create_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { object_create_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { object_create_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return object_create_x_esm_typeof(obj); }
 
@@ -4718,6 +4822,84 @@ var object_create_x_esm_create = $create;
 /* harmony default export */ var object_create_x_esm = (object_create_x_esm_create);
 
 
+// CONCATENATED MODULE: ./node_modules/is-var-name/index.mjs
+/*!
+ * is-var-name | ISC (c) Shinnosuke Watanabe
+ * https://github.com/shinnn/is-var-name
+*/
+function isVarName(str) {
+	if (typeof str !== 'string') {
+		return false;
+	}
+
+	if (str.trim() !== str) {
+		return false;
+	}
+
+	try {
+		new Function(str, 'var ' + str);
+	} catch (e) {
+		return false;
+	}
+
+	return true;
+}
+
+// CONCATENATED MODULE: ./node_modules/rename-function-x/dist/rename-function-x.esm.js
+
+
+
+
+
+
+
+
+var rename_function_x_esm_rename = function rename(fn, name) {
+  var descriptor = object_get_own_property_descriptor_x_esm(fn, 'name');
+
+  if (descriptor && descriptor.configurable) {
+    object_define_property_x_esm(fn, 'name', {
+      configurable: true,
+      value: name
+    });
+  }
+
+  return fn.name;
+};
+
+var supportsFunctionRenaming = attempt_x_esm(function attemptee() {
+  /* eslint-disable-next-line lodash/prefer-noop */
+  return rename_function_x_esm_rename(function test1() {}, 'test2');
+}).value === 'test2'; // eslint-disable jsdoc/check-param-names
+// noinspection JSCommentMatchesSignature
+
+/**
+ * Renames a function.
+ *
+ * @param {Function} fn - The function to be renamed.
+ * @param {string} name - The new name for the function.
+ * @param {boolean} [force=false] - Rename even if reported as not valid.
+ * @returns {boolean} - Returns true if renaming was a success; otherwise false.
+ */
+// eslint-enable jsdoc/check-param-names
+
+var rename_function_x_esm_renameFunction = function renameFunction(fn, name) {
+  assert_is_function_x_esm(fn);
+  var string = to_string_x_esm(name);
+  /* eslint-disable-next-line prefer-rest-params */
+
+  var force = arguments.length > 2 && to_boolean_x_esm(arguments[2]);
+
+  if (force === false && isVarName(string) === false) {
+    throw new Error("Not a valid function name \"".concat(string, "\""));
+  }
+
+  return supportsFunctionRenaming && rename_function_x_esm_rename(fn, name) === string;
+};
+
+/* harmony default export */ var rename_function_x_esm = (rename_function_x_esm_renameFunction);
+
+
 // CONCATENATED MODULE: ./dist/collections-x.esm.js
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "symIt", function() { return symIt; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SetImplementation", function() { return SetImplementation; });
@@ -4797,110 +4979,19 @@ var KIND_VALUE = VALUE;
 var KIND_KEY = KEY;
 var KIND_KEY_VALUE = "".concat(KIND_KEY, "+").concat(KIND_VALUE);
 var SAMEVALUEZERO = 'SameValueZero';
-var ES6_SHIM_ITERATOR = '_es6-shim iterator_';
-var AT_AT_ITERATOR = '@@iterator';
 var collections_x_esm_ref = [],
     push = collections_x_esm_ref.push,
     splice = collections_x_esm_ref.splice;
 var collections_x_esm_charAt = KEY.charAt;
 var setPrototypeOf = {}.constructor.setPrototypeOf;
-/* eslint-disable-next-line compat/compat */
-
-var symbolSpecies = has_symbol_support_x_esm && Symbol.species || '@@species';
-/* eslint-disable-next-line compat/compat */
-
-var hasRealSymbolIterator = has_symbol_support_x_esm && collections_x_esm_typeof(Symbol.iterator) === 'symbol';
-/* eslint-disable-next-line compat/compat */
-
-var hasFakeSymbolIterator = (typeof Symbol === "undefined" ? "undefined" : collections_x_esm_typeof(Symbol)) === 'object' && typeof Symbol.iterator === 'string';
-var hasSymbolIterator = hasRealSymbolIterator || hasFakeSymbolIterator;
-
-var getOtherSymbolIterator = function getOtherSymbolIterator(iterable) {
-  if (iterable[ES6_SHIM_ITERATOR]) {
-    return ES6_SHIM_ITERATOR;
-  }
-
-  if (iterable[AT_AT_ITERATOR]) {
-    return AT_AT_ITERATOR;
-  }
-
-  return null;
-};
-
-var collections_x_esm_getSymIt = function getSymIt() {
-  if (hasSymbolIterator) {
-    /* eslint-disable-next-line compat/compat */
-    return Symbol.iterator;
-  }
-
-  var result = getOtherSymbolIterator([]);
-
-  if (typeof result === 'string' && is_function_x_esm([][result])) {
-    return result;
-  }
-
-  return AT_AT_ITERATOR;
-};
+var collections_x_esm_hasRealSymbolIterator = collections_x_esm_typeof(symbol_iterator_x_esm) === 'symbol';
 /**
  * The iterator identifier that is in use.
  *
  * Type {Symbol|string}.
  */
 
-
-var symIt = collections_x_esm_getSymIt();
-/**
- * Detect an iterator function.
- *
- * @private
- * @param {*} iterable - Value to detect iterator function.
- * @returns {symbol|string|undefined} The iterator property identifier.
- */
-
-var collections_x_esm_getSymbolIterator = function getSymbolIterator(iterable) {
-  if (is_nil_x_esm(iterable) === false) {
-    if (hasSymbolIterator && iterable[symIt]) {
-      return symIt;
-    }
-
-    var result = getOtherSymbolIterator(iterable);
-
-    if (typeof result === 'string') {
-      return result;
-    }
-  }
-
-  return collections_x_esm_UNDEFINED;
-};
-
-var supportsFunctionRenaming = attempt_x_esm(function attemptee() {
-  /* eslint-disable-next-line lodash/prefer-noop */
-  var fn = function test1() {};
-
-  var descriptor = object_get_own_property_descriptor_x_esm(fn, 'name');
-
-  if (descriptor && descriptor.configurable) {
-    object_define_property_x_esm(fn, 'name', {
-      configurable: true,
-      value: 'test2'
-    });
-  }
-
-  return fn.name;
-}).value === 'test2';
-
-var collections_x_esm_renameFunction = function renameFunction(object, prop) {
-  if (supportsFunctionRenaming) {
-    var descriptor = object_get_own_property_descriptor_x_esm(object[prop], 'name');
-
-    if (descriptor && descriptor.configurable) {
-      object_define_property_x_esm(object[prop], 'name', {
-        configurable: true,
-        value: prop
-      });
-    }
-  }
-};
+var symIt = symbol_iterator_x_esm;
 
 var collections_x_esm_assertIterableEntryObject = function assertIterableEntryObject(kind, next) {
   if (kind === MAP) {
@@ -5104,7 +5195,7 @@ var collections_x_esm_parse = function parse(args) {
       context = _args7[1],
       iterable = _args7[2];
 
-  var symbolIterator = collections_x_esm_getSymbolIterator(iterable);
+  var symbolIterator = symbol_iterator_x_esm_getSymbolIterator(iterable);
 
   if (kind === MAP) {
     object_define_property_x_esm(context, PROP_VALUE, _defineProperty({}, VALUE, []));
@@ -5468,7 +5559,7 @@ object_define_properties_x_esm(SetImplementation.prototype, (_defineProperties3 
   return new SetIt(this, KIND_KEY_VALUE);
 })), _defineProperty(_defineProperties3, "forEach", _defineProperty({}, VALUE, function forEach(callback, thisArg) {
   return collections_x_esm_baseForEach([SET, this, callback, thisArg]);
-})), _defineProperty(_defineProperties3, "has", hasDescriptor), _defineProperty(_defineProperties3, "keys", _defineProperty({}, VALUE, setValuesIterator)), _defineProperty(_defineProperties3, "size", sizeDescriptor), _defineProperty(_defineProperties3, "values", _defineProperty({}, VALUE, setValuesIterator)), _defineProperty(_defineProperties3, symbolSpecies, thisSpeciesDescriptor), _defineProperties3));
+})), _defineProperty(_defineProperties3, "has", hasDescriptor), _defineProperty(_defineProperties3, "keys", _defineProperty({}, VALUE, setValuesIterator)), _defineProperty(_defineProperties3, "size", sizeDescriptor), _defineProperty(_defineProperties3, "values", _defineProperty({}, VALUE, setValuesIterator)), _defineProperty(_defineProperties3, symbol_species_x_esm, thisSpeciesDescriptor), _defineProperties3));
 /**
  * The initial value of the @@iterator property is the same function object
  * as the initial value of the values property.
@@ -5479,7 +5570,7 @@ object_define_properties_x_esm(SetImplementation.prototype, (_defineProperties3 
  */
 
 object_define_property_x_esm(SetImplementation.prototype, symIt, _defineProperty({}, VALUE, setValuesIterator));
-collections_x_esm_renameFunction(SetImplementation.prototype, DELETE);
+rename_function_x_esm(SetImplementation.prototype.delete, DELETE, true);
 /**
  * An object is an iterator when it knows how to access items from a
  * collection one at a time, while keeping track of its current position
@@ -5593,7 +5684,7 @@ object_define_properties_x_esm(MapImplementation.prototype, (_defineProperties5 
   return collections_x_esm_baseAddSet([MAP, this, key, value]);
 })), _defineProperty(_defineProperties5, "size", sizeDescriptor), _defineProperty(_defineProperties5, "values", _defineProperty({}, VALUE, function values() {
   return new MapIt(this, KIND_VALUE);
-})), _defineProperty(_defineProperties5, symbolSpecies, thisSpeciesDescriptor), _defineProperties5));
+})), _defineProperty(_defineProperties5, symbol_species_x_esm, thisSpeciesDescriptor), _defineProperties5));
 /**
  * The initial value of the @@iterator property is the same function object
  * as the initial value of the entries property.
@@ -5604,7 +5695,7 @@ object_define_properties_x_esm(MapImplementation.prototype, (_defineProperties5 
  */
 
 object_define_property_x_esm(MapImplementation.prototype, symIt, _defineProperty({}, VALUE, MapImplementation.prototype.entries));
-collections_x_esm_renameFunction(MapImplementation.prototype, DELETE);
+rename_function_x_esm(MapImplementation.prototype.delete, DELETE, true);
 /*
  * Determine whether to use shim or native.
  */
@@ -5700,7 +5791,7 @@ var collections_x_esm_performMapFixes = function performMapFixes() {
     });
     return res.threw || res.value;
   }, collections_x_esm_badDoneFixee, collections_x_esm_badNextFunction, function fixee(Subject) {
-    var testMapProto = hasRealSymbolIterator && get_prototype_of_x_esm(new Subject().keys());
+    var testMapProto = collections_x_esm_hasRealSymbolIterator && get_prototype_of_x_esm(new Subject().keys());
     return to_boolean_x_esm(testMapProto) && is_function_x_esm(testMapProto[symIt]) === false;
   }];
   array_for_each_x_esm(fixees, function iteratee(fixee) {
@@ -5757,7 +5848,7 @@ var collections_x_esm_performSetFixes = function performSetFixes() {
     });
     return res.threw || res.value;
   }, collections_x_esm_badDoneFixee, collections_x_esm_badNextFunction, function fixee(Subject) {
-    var testSetProto = hasRealSymbolIterator && get_prototype_of_x_esm(new Subject().keys());
+    var testSetProto = collections_x_esm_hasRealSymbolIterator && get_prototype_of_x_esm(new Subject().keys());
     return to_boolean_x_esm(testSetProto) && is_function_x_esm(testSetProto[symIt]) === false;
   }];
   array_for_each_x_esm(fixees, function iteratee(fixee) {
