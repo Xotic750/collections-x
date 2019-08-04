@@ -23,6 +23,7 @@ import create from 'object-create-x';
 import toBoolean from 'to-boolean-x';
 import attempt from 'attempt-x';
 import arrayForEach from 'array-for-each-x';
+import getOwnPropertyDescriptor from 'object-get-own-property-descriptor-x';
 
 /* eslint-disable-next-line no-void */
 const UNDEFINED = void 0;
@@ -32,6 +33,7 @@ const KEY = 'key';
 const VALUE = 'value';
 const DONE = 'done';
 const WRITABLE = 'writable';
+const DELETE = 'delete';
 const MAP = 'map';
 const SET = 'set';
 const PROP_CHANGED = '[[changed]]';
@@ -57,6 +59,8 @@ const AT_AT_ITERATOR = '@@iterator';
 const {push, splice} = [];
 const {charAt} = KEY;
 const {setPrototypeOf} = {}.constructor;
+/* eslint-disable-next-line compat/compat */
+const symbolSpecies = (hasSymbolSupport && Symbol.species) || '@@species';
 /* eslint-disable-next-line compat/compat */
 const hasRealSymbolIterator = hasSymbolSupport && typeof Symbol.iterator === 'symbol';
 /* eslint-disable-next-line compat/compat */
@@ -118,6 +122,30 @@ const getSymbolIterator = function getSymbolIterator(iterable) {
   }
 
   return UNDEFINED;
+};
+
+const supportsFunctionRenaming =
+  attempt(function attemptee() {
+    /* eslint-disable-next-line lodash/prefer-noop */
+    const fn = function test1() {};
+
+    const descriptor = getOwnPropertyDescriptor(fn, 'name');
+
+    if (descriptor && descriptor.configurable) {
+      defineProperty(fn, 'name', {configurable: true, value: 'test2'});
+    }
+
+    return fn.name;
+  }).value === 'test2';
+
+const renameFunction = function renameFunction(object, prop) {
+  if (supportsFunctionRenaming) {
+    const descriptor = getOwnPropertyDescriptor(object[prop], 'name');
+
+    if (descriptor && descriptor.configurable) {
+      defineProperty(object[prop], 'name', {configurable: true, value: prop});
+    }
+  }
 };
 
 const assertIterableEntryObject = function assertIterableEntryObject(kind, next) {
@@ -489,6 +517,12 @@ const thisIteratorDescriptor = {
   },
 };
 
+const thisSpeciesDescriptor = {
+  get: function species() {
+    return this;
+  },
+};
+
 /**
  * An object is an iterator when it knows how to access items from a
  * collection one at a time, while keeping track of its current position
@@ -579,7 +613,6 @@ const setValuesIterator = function values() {
  * values or object references.
  *
  * @class Set
- * @private
  * @param {*} [iterable] - If an iterable object is passed, all of its elements
  * will be added to the new Set. A null is treated as undefined.
  */
@@ -627,8 +660,8 @@ defineProperties(
      * @returns {boolean} Returns true if an element in the Set object has been
      *  removed successfully; otherwise false.
      */
-    delete: {
-      [VALUE]: function de1ete(value) {
+    [DELETE]: {
+      [VALUE]: function $delete(value) {
         return baseDelete([SET, this, value]);
       },
     },
@@ -701,6 +734,8 @@ defineProperties(
     values: {
       [VALUE]: setValuesIterator,
     },
+
+    [symbolSpecies]: thisSpeciesDescriptor,
   },
 );
 
@@ -715,6 +750,8 @@ defineProperties(
 defineProperty(SetImplementation.prototype, symIt, {
   [VALUE]: setValuesIterator,
 });
+
+renameFunction(SetImplementation.prototype, DELETE);
 
 /**
  * An object is an iterator when it knows how to access items from a
@@ -794,7 +831,6 @@ defineProperty(MapIt.prototype, symIt, thisIteratorDescriptor);
  * primitive values) may be used as either a key or a value.
  *
  * @class Map
- * @private
  * @param {*} [iterable] - Iterable is an Array or other iterable object whose
  *  elements are key-value pairs (2-element Arrays). Each key-value pair is
  *  added to the new Map. A null is treated as undefined.
@@ -830,8 +866,8 @@ defineProperties(
      * @returns {boolean} Returns true if an element in the Map object has been
      *  removed successfully.
      */
-    delete: {
-      [VALUE]: function de1ete(key) {
+    [DELETE]: {
+      [VALUE]: function $delete(key) {
         return baseDelete([MAP, this, key]);
       },
     },
@@ -928,6 +964,8 @@ defineProperties(
         return new MapIt(this, KIND_VALUE);
       },
     },
+
+    [symbolSpecies]: thisSpeciesDescriptor,
   },
 );
 
@@ -936,12 +974,14 @@ defineProperties(
  * as the initial value of the entries property.
  *
  * @function symIt
- * @memberof module:collections-x.Map.prototype
+ * @memberof $MapObject.prototype
  * @returns {object} A new Iterator object.
  */
 defineProperty(MapImplementation.prototype, symIt, {
   [VALUE]: MapImplementation.prototype.entries,
 });
+
+renameFunction(MapImplementation.prototype, DELETE);
 
 /*
  * Determine whether to use shim or native.
@@ -1152,7 +1192,25 @@ const performSetFixes = function performSetFixes() {
   return Export;
 };
 
+/**
+ * The Map object is a simple key/value map. Any value (both objects and
+ * primitive values) may be used as either a key or a value.
+ *
+ * @class Map
+ * @param {*} [iterable] - Iterable is an Array or other iterable object whose
+ *  elements are key-value pairs (2-element Arrays). Each key-value pair is
+ *  added to the new Map. A null is treated as undefined.
+ */
 export const MapConstructor = performMapFixes();
+
+/**
+ * The Set object lets you store unique values of any type, whether primitive
+ * values or object references.
+ *
+ * @class Set
+ * @param {*} [iterable] - If an iterable object is passed, all of its elements
+ * will be added to the new Set. A null is treated as undefined.
+ */
 export const SetConstructor = performSetFixes();
 
 const hasImplementationProps = function hasImplementationProps(object) {
