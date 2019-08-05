@@ -2,13 +2,13 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-08-05T21:25:57.230Z",
+  "date": "2019-08-05T21:43:03.620Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
-  "hash": "414ccb6523299a586e36",
+  "hash": "ebb4cbf58471825dcb74",
   "license": "MIT",
-  "version": "3.0.17"
+  "version": "3.0.18"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -2270,7 +2270,7 @@ var array_for_each_x_esm_test2 = function test2() {
   var _this2 = this;
 
   var spy = '';
-  var res = attempt_x_esm.call(to_boolean_x_esm('abc'), nativeForEach, function (item) {
+  var res = attempt_x_esm.call(to_object_x_esm('abc'), nativeForEach, function (item) {
     array_for_each_x_esm_newArrowCheck(this, _this2);
 
     spy += item;
