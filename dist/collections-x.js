@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-08-14T15:52:20.625Z",
+  "date": "2019-08-15T20:40:28.201Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
-  "hash": "ff434855a1f03d236750",
+  "hash": "4eb891857849c03ba224",
   "license": "MIT",
   "version": "3.1.0"
 }
@@ -3415,6 +3415,22 @@ var is_array_like_x_esm_isArrayLike = function isArrayLike(value) {
 /* harmony default export */ var is_array_like_x_esm = (is_array_like_x_esm_isArrayLike);
 
 
+// CONCATENATED MODULE: ./node_modules/is-primitive-x/dist/is-primitive-x.esm.js
+function is_primitive_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { is_primitive_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { is_primitive_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return is_primitive_x_esm_typeof(obj); }
+
+/**
+ * Returns true if the value is a primitive.
+ *
+ * @param {*} [val] - The value to test.
+ * @returns {boolean} True if a primitive, otherwise false..
+ */
+var isPrimitive = function isPrimitive(val) {
+  return is_primitive_x_esm_typeof(val) === 'object' ? val === null : typeof val !== 'function';
+};
+
+/* harmony default export */ var is_primitive_x_esm = (isPrimitive);
+
+
 // CONCATENATED MODULE: ./node_modules/is-surrogate-pair-x/dist/is-surrogate-pair-x.esm.js
 
 var is_surrogate_pair_x_esm_ref = '',
@@ -5270,7 +5286,7 @@ var collections_x_esm_parseString = function parseString(args) {
 };
 
 var collections_x_esm_assertArrayLikeIterable = function assertArrayLikeIterable(iterable, next) {
-  if (is_primitive_default()(iterable[next])) {
+  if (is_primitive_x_esm(iterable[next])) {
     throw new TypeError("Iterator value ".concat(is_array_like_x_esm(next[VALUE]), " is not an entry object"));
   }
 };

@@ -18,7 +18,7 @@ import defineProperty from 'object-define-property-x';
 import defineProperties from 'object-define-properties-x';
 import isString from 'is-string';
 import isArrayLike from 'is-array-like-x';
-import isPrimitive from 'is-primitive';
+import isPrimitive from 'is-primitive-x';
 import isSurrogatePair from 'is-surrogate-pair-x';
 import indexOf from 'index-of-x';
 import assertIsFunction from 'assert-is-function-x';
