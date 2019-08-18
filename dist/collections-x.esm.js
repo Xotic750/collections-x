@@ -38,6 +38,8 @@ import toBoolean from 'to-boolean-x';
 import attempt from 'attempt-x';
 import arrayForEach from 'array-for-each-x';
 import renameFunction from 'rename-function-x';
+import methodize from 'simple-methodize-x';
+import call from 'simple-call-x';
 /* eslint-disable-next-line no-void */
 
 var UNDEFINED = void 0;
@@ -67,11 +69,11 @@ var KIND_VALUE = VALUE;
 var KIND_KEY = KEY;
 var KIND_KEY_VALUE = "".concat(KIND_KEY, "+").concat(KIND_VALUE);
 var SAMEVALUEZERO = 'SameValueZero';
-var _ref = [],
-    push = _ref.push,
-    splice = _ref.splice;
-var charAt = KEY.charAt;
-var setPrototypeOf = {}.constructor.setPrototypeOf;
+var tempArray = [];
+var push = methodize(tempArray.push);
+var splice = methodize(tempArray.splice);
+var charAt = methodize(KEY.charAt);
+var setPrototypeOf = methodize({}.constructor.setPrototypeOf);
 var hasRealSymbolIterator = _typeof($iterator$) === 'symbol';
 /**
  * The iterator identifier that is in use.
@@ -100,11 +102,11 @@ var setPropsIterable = function setPropsIterable(args) {
 
   if (indexof < 0) {
     if (kind === MAP) {
-      push.call(context[PROP_VALUE], next[VALUE][1]);
+      push(context[PROP_VALUE], next[VALUE][1]);
     }
 
-    push.call(context[PROP_KEY], key);
-    push.call(context[PROP_ORDER], context[PROP_ID].get());
+    push(context[PROP_KEY], key);
+    push(context[PROP_ORDER], context[PROP_ID].get());
     context[PROP_ID][NEXT]();
   } else if (kind === MAP) {
     /* eslint-disable-next-line prefer-destructuring */
@@ -131,14 +133,14 @@ var parseIterable = function parseIterable(args) {
 
 var assertStringEntryObject = function assertStringEntryObject(kind, iterable) {
   if (kind === MAP) {
-    throw new TypeError("Iterator value ".concat(charAt.call(iterable, 0), " is not an entry object"));
+    throw new TypeError("Iterator value ".concat(charAt(iterable, 0), " is not an entry object"));
   }
 };
 
 var getCharsString = function getCharsString(iterable, next) {
   return {
-    char1: charAt.call(iterable, next),
-    char2: charAt.call(iterable, next + 1)
+    char1: charAt(iterable, next),
+    char2: charAt(iterable, next + 1)
   };
 };
 
@@ -146,8 +148,8 @@ var setContextString = function setContextString(context, key) {
   var indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
 
   if (indexof < 0) {
-    push.call(context[PROP_KEY], key);
-    push.call(context[PROP_ORDER], context[PROP_ID].get());
+    push(context[PROP_KEY], key);
+    push(context[PROP_ORDER], context[PROP_ID].get());
     context[PROP_ID][NEXT]();
   }
 };
@@ -205,11 +207,11 @@ var setContextArrayLike = function setContextArrayLike(args) {
 
   if (indexof < 0) {
     if (kind === MAP) {
-      push.call(context[PROP_VALUE], iterable[next][1]);
+      push(context[PROP_VALUE], iterable[next][1]);
     }
 
-    push.call(context[PROP_KEY], key);
-    push.call(context[PROP_ORDER], context[PROP_ID].get());
+    push(context[PROP_KEY], key);
+    push(context[PROP_ORDER], context[PROP_ID].get());
     context[PROP_ID][NEXT]();
   } else if (kind === MAP) {
     /* eslint-disable-next-line prefer-destructuring */
@@ -332,7 +334,7 @@ var doCallback = function doCallback(args) {
   if (hasOwn(context[PROP_KEY], pointers.index)) {
     var key = context[PROP_KEY][pointers.index];
     var value = kind === MAP ? context[PROP_VALUE][pointers.index] : key;
-    callback.call(thisArg, value, key, context);
+    call(callback, thisArg, [value, key, context]);
   }
 }; // eslint-disable jsdoc/check-param-names
 // noinspection JSCommentMatchesSignature
@@ -421,11 +423,11 @@ var setContextFoundBaseDelete = function setContextFoundBaseDelete(args) {
       indexof = _args11[2];
 
   if (kind === MAP) {
-    splice.call(context[PROP_VALUE], indexof, 1);
+    splice(context[PROP_VALUE], indexof, 1);
   }
 
-  splice.call(context[PROP_KEY], indexof, 1);
-  splice.call(context[PROP_ORDER], indexof, 1);
+  splice(context[PROP_KEY], indexof, 1);
+  splice(context[PROP_ORDER], indexof, 1);
   context[PROP_CHANGE] = true;
   context[SIZE] = context[PROP_KEY].length;
   return true;
@@ -462,11 +464,11 @@ var setContextFoundBaseAddSet = function setContextFoundBaseAddSet(args) {
       value = _args13[3];
 
   if (kind === MAP) {
-    push.call(context[PROP_VALUE], value);
+    push(context[PROP_VALUE], value);
   }
 
-  push.call(context[PROP_KEY], key);
-  push.call(context[PROP_ORDER], context[PROP_ID].get());
+  push(context[PROP_KEY], key);
+  push(context[PROP_ORDER], context[PROP_ID].get());
   context[PROP_ID][NEXT]();
   context[PROP_CHANGE] = true;
   context[SIZE] = context[PROP_KEY].length;
@@ -536,14 +538,14 @@ var SetIt = function SetIterator(context, iteratorKind) {
 };
 
 var getSetNextObject = function getSetNextObject(args) {
-  var _ref2;
+  var _ref;
 
   var _args15 = _slicedToArray(args, 3),
       iteratorKind = _args15[0],
       context = _args15[1],
       index = _args15[2];
 
-  return _ref2 = {}, _defineProperty(_ref2, DONE, false), _defineProperty(_ref2, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index]), _ref2;
+  return _ref = {}, _defineProperty(_ref, DONE, false), _defineProperty(_ref, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_KEY][index]] : context[PROP_KEY][index]), _ref;
 };
 /**
  * Once initialized, the next() method can be called to access key-value
@@ -556,7 +558,7 @@ var getSetNextObject = function getSetNextObject(args) {
 
 
 defineProperty(SetIt.prototype, NEXT, _defineProperty({}, VALUE, function next() {
-  var _ref3;
+  var _ref2;
 
   var context = assertIsObject(this[PROP_SET]);
   var index = this[PROP_SETNEXTINDEX];
@@ -569,7 +571,7 @@ defineProperty(SetIt.prototype, NEXT, _defineProperty({}, VALUE, function next()
   }
 
   this[PROP_ITERATORHASMORE] = false;
-  return _ref3 = {}, _defineProperty(_ref3, DONE, true), _defineProperty(_ref3, VALUE, UNDEFINED), _ref3;
+  return _ref2 = {}, _defineProperty(_ref2, DONE, true), _defineProperty(_ref2, VALUE, UNDEFINED), _ref2;
 }));
 /**
  * The @@iterator property is the same Iterator object.
@@ -680,14 +682,14 @@ var MapIt = function MapIterator(context, iteratorKind) {
 };
 
 var getMapNextObject = function getMapNextObject(args) {
-  var _ref4;
+  var _ref3;
 
   var _args16 = _slicedToArray(args, 3),
       iteratorKind = _args16[0],
       context = _args16[1],
       index = _args16[2];
 
-  return _ref4 = {}, _defineProperty(_ref4, DONE, false), _defineProperty(_ref4, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_VALUE][index]] : context["[[".concat(iteratorKind, "]]")][index]), _ref4;
+  return _ref3 = {}, _defineProperty(_ref3, DONE, false), _defineProperty(_ref3, VALUE, iteratorKind === KIND_KEY_VALUE ? [context[PROP_KEY][index], context[PROP_VALUE][index]] : context["[[".concat(iteratorKind, "]]")][index]), _ref3;
 };
 /**
  * Once initialized, the next() method can be called to access key-value
@@ -700,7 +702,7 @@ var getMapNextObject = function getMapNextObject(args) {
 
 
 defineProperty(MapIt.prototype, NEXT, _defineProperty({}, VALUE, function next() {
-  var _ref5;
+  var _ref4;
 
   var context = assertIsObject(this[PROP_MAP]);
   var index = this[PROP_MAPNEXTINDEX];
@@ -713,7 +715,7 @@ defineProperty(MapIt.prototype, NEXT, _defineProperty({}, VALUE, function next()
   }
 
   this[PROP_ITERATORHASMORE] = false;
-  return _ref5 = {}, _defineProperty(_ref5, DONE, true), _defineProperty(_ref5, VALUE, UNDEFINED), _ref5;
+  return _ref4 = {}, _defineProperty(_ref4, DONE, true), _defineProperty(_ref4, VALUE, UNDEFINED), _ref4;
 }));
 /**
  * The @@iterator property is the same Iterator object.

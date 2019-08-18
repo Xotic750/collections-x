@@ -24,6 +24,8 @@ import toBoolean from 'to-boolean-x';
 import attempt from 'attempt-x';
 import arrayForEach from 'array-for-each-x';
 import renameFunction from 'rename-function-x';
+import methodize from 'simple-methodize-x';
+import call from 'simple-call-x';
 
 /* eslint-disable-next-line no-void */
 const UNDEFINED = void 0;
@@ -54,9 +56,11 @@ const KIND_KEY = KEY;
 const KIND_KEY_VALUE = `${KIND_KEY}+${KIND_VALUE}`;
 const SAMEVALUEZERO = 'SameValueZero';
 
-const {push, splice} = [];
-const {charAt} = KEY;
-const {setPrototypeOf} = {}.constructor;
+const tempArray = [];
+const push = methodize(tempArray.push);
+const splice = methodize(tempArray.splice);
+const charAt = methodize(KEY.charAt);
+const setPrototypeOf = methodize({}.constructor.setPrototypeOf);
 const hasRealSymbolIterator = typeof $iterator$ === 'symbol';
 
 /**
@@ -81,11 +85,11 @@ const setPropsIterable = function setPropsIterable(args) {
 
   if (indexof < 0) {
     if (kind === MAP) {
-      push.call(context[PROP_VALUE], next[VALUE][1]);
+      push(context[PROP_VALUE], next[VALUE][1]);
     }
 
-    push.call(context[PROP_KEY], key);
-    push.call(context[PROP_ORDER], context[PROP_ID].get());
+    push(context[PROP_KEY], key);
+    push(context[PROP_ORDER], context[PROP_ID].get());
     context[PROP_ID][NEXT]();
   } else if (kind === MAP) {
     /* eslint-disable-next-line prefer-destructuring */
@@ -108,14 +112,14 @@ const parseIterable = function parseIterable(args) {
 
 const assertStringEntryObject = function assertStringEntryObject(kind, iterable) {
   if (kind === MAP) {
-    throw new TypeError(`Iterator value ${charAt.call(iterable, 0)} is not an entry object`);
+    throw new TypeError(`Iterator value ${charAt(iterable, 0)} is not an entry object`);
   }
 };
 
 const getCharsString = function getCharsString(iterable, next) {
   return {
-    char1: charAt.call(iterable, next),
-    char2: charAt.call(iterable, next + 1),
+    char1: charAt(iterable, next),
+    char2: charAt(iterable, next + 1),
   };
 };
 
@@ -123,8 +127,8 @@ const setContextString = function setContextString(context, key) {
   const indexof = indexOf(assertIsObject(context)[PROP_KEY], key, SAMEVALUEZERO);
 
   if (indexof < 0) {
-    push.call(context[PROP_KEY], key);
-    push.call(context[PROP_ORDER], context[PROP_ID].get());
+    push(context[PROP_KEY], key);
+    push(context[PROP_ORDER], context[PROP_ID].get());
     context[PROP_ID][NEXT]();
   }
 };
@@ -172,11 +176,11 @@ const setContextArrayLike = function setContextArrayLike(args) {
 
   if (indexof < 0) {
     if (kind === MAP) {
-      push.call(context[PROP_VALUE], iterable[next][1]);
+      push(context[PROP_VALUE], iterable[next][1]);
     }
 
-    push.call(context[PROP_KEY], key);
-    push.call(context[PROP_ORDER], context[PROP_ID].get());
+    push(context[PROP_KEY], key);
+    push(context[PROP_ORDER], context[PROP_ID].get());
     context[PROP_ID][NEXT]();
   } else if (kind === MAP) {
     /* eslint-disable-next-line prefer-destructuring */
@@ -282,7 +286,7 @@ const doCallback = function doCallback(args) {
   if (hasOwn(context[PROP_KEY], pointers.index)) {
     const key = context[PROP_KEY][pointers.index];
     const value = kind === MAP ? context[PROP_VALUE][pointers.index] : key;
-    callback.call(thisArg, value, key, context);
+    call(callback, thisArg, [value, key, context]);
   }
 };
 
@@ -357,11 +361,11 @@ const setContextFoundBaseDelete = function setContextFoundBaseDelete(args) {
   const [kind, context, indexof] = args;
 
   if (kind === MAP) {
-    splice.call(context[PROP_VALUE], indexof, 1);
+    splice(context[PROP_VALUE], indexof, 1);
   }
 
-  splice.call(context[PROP_KEY], indexof, 1);
-  splice.call(context[PROP_ORDER], indexof, 1);
+  splice(context[PROP_KEY], indexof, 1);
+  splice(context[PROP_ORDER], indexof, 1);
   context[PROP_CHANGE] = true;
   context[SIZE] = context[PROP_KEY].length;
 
@@ -391,11 +395,11 @@ const setContextFoundBaseAddSet = function setContextFoundBaseAddSet(args) {
   const [kind, context, key, value] = args;
 
   if (kind === MAP) {
-    push.call(context[PROP_VALUE], value);
+    push(context[PROP_VALUE], value);
   }
 
-  push.call(context[PROP_KEY], key);
-  push.call(context[PROP_ORDER], context[PROP_ID].get());
+  push(context[PROP_KEY], key);
+  push(context[PROP_ORDER], context[PROP_ID].get());
   context[PROP_ID][NEXT]();
   context[PROP_CHANGE] = true;
   context[SIZE] = context[PROP_KEY].length;

@@ -75,6 +75,8 @@
     "object-define-properties-x": "^5.1.0",
     "object-define-property-x": "^5.1.0",
     "rename-function-x": "^1.1.0",
+    "simple-call-x": "^1.0.1",
+    "simple-methodize-x": "^1.0.2",
     "symbol-iterator-x": "^1.1.0",
     "symbol-species-x": "^1.1.0",
     "to-boolean-x": "^2.1.0"
