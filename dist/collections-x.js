@@ -2,7 +2,7 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-08-18T19:10:35.858Z",
+  "date": "2019-08-19T12:39:20.808Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
