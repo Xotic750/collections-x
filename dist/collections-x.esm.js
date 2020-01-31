@@ -6,11 +6,11 @@ function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArra
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
 
-function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 import hasOwn from 'has-own-property-x';
 import isFunction from 'is-function-x';
@@ -272,6 +272,7 @@ var performParsing = function performParsing(args) {
  * @private
  * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
+ * @param args
  * @param {*} iterable - Value to parsed.
  */
 // eslint-enable jsdoc/check-param-names
@@ -347,6 +348,7 @@ var doCallback = function doCallback(args) {
  * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
  * @param {Function} callback - Function to execute for each element.
+ * @param args
  * @param {*} [thisArg] - Value to use as this when executing callback.
  * @returns {object} The Map/Set object.
  */
@@ -440,6 +442,7 @@ var setContextFoundBaseDelete = function setContextFoundBaseDelete(args) {
  * @private
  * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
+ * @param args
  * @param {*} key - The key/value of the element to remove from Map/Set object.
  * @returns {object} The Map/Set object.
  */
@@ -482,6 +485,7 @@ var setContextFoundBaseAddSet = function setContextFoundBaseAddSet(args) {
  * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
  * @param {*} key - The key or value of the element to add/set on the object.
+ * @param args
  * @param {*} [value] - The value of the element to add to the Map object.
  * @returns {object} The Map/Set object.
  */

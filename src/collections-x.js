@@ -238,6 +238,7 @@ const performParsing = function performParsing(args) {
  * @private
  * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
+ * @param args
  * @param {*} iterable - Value to parsed.
  */
 // eslint-enable jsdoc/check-param-names
@@ -300,6 +301,7 @@ const doCallback = function doCallback(args) {
  * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
  * @param {Function} callback - Function to execute for each element.
+ * @param args
  * @param {*} [thisArg] - Value to use as this when executing callback.
  * @returns {object} The Map/Set object.
  */
@@ -380,6 +382,7 @@ const setContextFoundBaseDelete = function setContextFoundBaseDelete(args) {
  * @private
  * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
+ * @param args
  * @param {*} key - The key/value of the element to remove from Map/Set object.
  * @returns {object} The Map/Set object.
  */
@@ -414,6 +417,7 @@ const setContextFoundBaseAddSet = function setContextFoundBaseAddSet(args) {
  * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
  * @param {*} key - The key or value of the element to add/set on the object.
+ * @param args
  * @param {*} [value] - The value of the element to add to the Map object.
  * @returns {object} The Map/Set object.
  */
@@ -996,7 +1000,12 @@ const performMapFixes = function performMapFixes() {
 
     function fixee(Subject) {
       // Chrome 38-42, node 0.11/0.12, iojs 1/2 also have a bug when the Map has a size > 4
-      const testMap = new Subject([[1, 0], [2, 0], [3, 0], [4, 0]]);
+      const testMap = new Subject([
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+      ]);
       testMap.set(-0, testMap);
       const gets = testMap.get(0) === testMap && testMap.get(-0) === testMap;
       const mapUsesSameValueZero = gets && testMap.has(0) && testMap.has(-0);

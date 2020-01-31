@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-09-05T20:20:11.751Z",
+  "date": "2020-01-31T00:26:08.066Z",
   "describe": "",
   "description": "ES6 collections fallback library: Map and Set.",
   "file": "collections-x.js",
-  "hash": "b5eec3758441347757eb",
+  "hash": "147d7c1c55d0e12d34ba",
   "license": "MIT",
   "version": "3.1.2"
 }
@@ -5465,11 +5465,11 @@ function collections_x_esm_slicedToArray(arr, i) { return collections_x_esm_arra
 
 function collections_x_esm_nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
 
-function collections_x_esm_iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+function collections_x_esm_iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function collections_x_esm_arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function collections_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { collections_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { collections_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return collections_x_esm_typeof(obj); }
+function collections_x_esm_typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { collections_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { collections_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return collections_x_esm_typeof(obj); }
 
 
 
@@ -5731,6 +5731,7 @@ var collections_x_esm_performParsing = function performParsing(args) {
  * @private
  * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
+ * @param args
  * @param {*} iterable - Value to parsed.
  */
 // eslint-enable jsdoc/check-param-names
@@ -5806,6 +5807,7 @@ var collections_x_esm_doCallback = function doCallback(args) {
  * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
  * @param {Function} callback - Function to execute for each element.
+ * @param args
  * @param {*} [thisArg] - Value to use as this when executing callback.
  * @returns {object} The Map/Set object.
  */
@@ -5899,6 +5901,7 @@ var setContextFoundBaseDelete = function setContextFoundBaseDelete(args) {
  * @private
  * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
+ * @param args
  * @param {*} key - The key/value of the element to remove from Map/Set object.
  * @returns {object} The Map/Set object.
  */
@@ -5941,6 +5944,7 @@ var setContextFoundBaseAddSet = function setContextFoundBaseAddSet(args) {
  * @param {string} kind - Either MAP or SET.
  * @param {object} context - The Map/Set object.
  * @param {*} key - The key or value of the element to add/set on the object.
+ * @param args
  * @param {*} [value] - The value of the element to add to the Map object.
  * @returns {object} The Map/Set object.
  */

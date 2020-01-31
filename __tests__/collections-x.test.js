@@ -81,7 +81,11 @@ methods.forEach((meth, methodNum) => {
         const a = 1;
         const b = {};
         const c = new $Map();
-        const m = new $Map([[a, 1], [b, 2], [c, 3]]);
+        const m = new $Map([
+          [a, 1],
+          [b, 2],
+          [c, 3],
+        ]);
         expect(new $Map()).toStrictEqual(expect.any($Map));
         expect(m.has(a)).toBe(true);
         expect(m.has(b)).toBe(true);
@@ -99,7 +103,11 @@ methods.forEach((meth, methodNum) => {
         const a = 1;
         const b = {};
         const c = new $Map();
-        const m = new $Map([[a, 1], [b, 2], [c, 3]]);
+        const m = new $Map([
+          [a, 1],
+          [b, 2],
+          [c, 3],
+        ]);
         const d = new $Map(m);
         expect(d.has(a)).toBe(true);
         expect(d.has(b)).toBe(true);
@@ -256,7 +264,11 @@ methods.forEach((meth, methodNum) => {
 
       it('keys, values, entries behavior', function() {
         expect.assertions(12); // test that things get returned in insertion order as per the specs
-        const o = new $Map([['1', 1], ['2', 2], ['3', 3]]);
+        const o = new $Map([
+          ['1', 1],
+          ['2', 2],
+          ['3', 3],
+        ]);
         const keys = o.keys();
         const values = o.values();
         let k = keys.next();
@@ -310,7 +322,11 @@ methods.forEach((meth, methodNum) => {
 
       it('forEach with mutations', function() {
         expect.assertions(9);
-        const o = new $Map([['0', 0], ['1', 1], ['2', 2]]);
+        const o = new $Map([
+          ['0', 0],
+          ['1', 1],
+          ['2', 2],
+        ]);
         const seen = [];
         o.forEach(function(value, key, obj) {
           seen.push(value);
@@ -382,14 +398,22 @@ methods.forEach((meth, methodNum) => {
         expect(MyMap).not.toBe($Map);
         expect(myMap).toBeInstanceOf(MyMap);
         expect(myMap).toBeInstanceOf($Map);
-        expect(arr).toStrictEqual([['a', 'b'], ['c', 'd']]);
+        expect(arr).toStrictEqual([
+          ['a', 'b'],
+          ['c', 'd'],
+        ]);
         expect(myMap.mine).toBe('Yeah');
       });
 
       it('uses SameValueZero even on a Map of size > 4', function() {
         expect.assertions(5); // Chrome 38-42, node 0.11/0.12, iojs 1/2 have a bug when the Map
         // has a size > 4
-        const firstFour = [[1, 0], [2, 0], [3, 0], [4, 0]];
+        const firstFour = [
+          [1, 0],
+          [2, 0],
+          [3, 0],
+          [4, 0],
+        ];
         const fourMap = new $Map(firstFour);
         expect(fourMap.size).toBe(4);
         expect(fourMap.has(-0)).toBe(false);
@@ -639,7 +663,11 @@ methods.forEach((meth, methodNum) => {
         mySet.forEach(function(value, key) {
           arr.push([key, value]);
         });
-        expect(arr).toStrictEqual([['a', 'a'], ['b', 'b'], ['c', 'c']]);
+        expect(arr).toStrictEqual([
+          ['a', 'a'],
+          ['b', 'b'],
+          ['c', 'c'],
+        ]);
         expect(MySet).not.toBe($Set);
         expect(mySet).toBeInstanceOf(MySet);
         expect(mySet).toBeInstanceOf($Set);
